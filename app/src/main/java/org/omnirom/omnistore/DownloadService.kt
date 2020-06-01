@@ -7,7 +7,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
-import org.json.JSONArray
 import org.json.JSONObject
 
 class DownloadService : Service() {
@@ -85,6 +84,10 @@ class DownloadService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
+
+        val prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.edit().remove("CURRENT_DOWNLOADS").commit()
+
         if (mDownloadReceiver != null) {
             unregisterReceiver(mDownloadReceiver)
             stopForeground(true)
