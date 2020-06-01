@@ -8,6 +8,11 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import org.json.JSONObject
+import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
+import org.omnirom.omnistore.Constants.ACTION_CANCEL_DOWNLOAD
+import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_ID
+import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_PKG
+import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 
 class DownloadService : Service() {
     private val TAG = "OmniStore:DownloadService"
@@ -27,20 +32,20 @@ class DownloadService : Service() {
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-                val downloadId = intent!!.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+                val downloadId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
                 if (downloadId != -1L) {
                     Log.d(
                         TAG,
                         "ACTION_DOWNLOAD_COMPLETE DOWNLOAD_ID = " + downloadId + " " + mDownloadList
                     )
-                    handleDownloadComplete(downloadId)
+                    handleDownloadComplete(downloadId as Long)
                     mDownloadList.remove(downloadId)
 
                     val prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-                    val stats:String? = prefs.getString("CURRENT_DOWNLOADS", JSONObject().toString())
+                    val stats:String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
                     val downloads = JSONObject(stats)
                     downloads.remove(downloadId.toString())
-                    prefs.edit().putString("CURRENT_DOWNLOADS", downloads.toString()).commit()
+                    prefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString()).commit()
                     Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                     if (mDownloadList.isEmpty()) {
                         Log.d(TAG, "kill me")
@@ -52,10 +57,10 @@ class DownloadService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action.equals("ADD_DOWNLOAD")) {
+        if (intent?.action.equals(ACTION_ADD_DOWNLOAD)) {
             startForeground(NOTIFICATION_ID, showDummyNotification(this))
-            val id = intent?.getLongExtra("DOWNLOAD_ID", -1)
-            val pkg = intent?.getStringExtra("DOWNLOAD_PKG")
+            val id = intent?.getLongExtra(EXTRA_DOWNLOAD_ID, -1)
+            val pkg = intent?.getStringExtra(EXTRA_DOWNLOAD_PKG)
 
             Log.d(TAG, "ADD_DOWNLOAD DOWNLOAD_ID = " + id + " DOWNLOAD_PKG = " + pkg)
 
@@ -66,15 +71,15 @@ class DownloadService : Service() {
                     registerReceiver(mDownloadReceiver, downloadFilter)
                 }
                 val prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-                val stats:String? = prefs.getString("CURRENT_DOWNLOADS", JSONObject().toString())
-                val downloads:JSONObject = JSONObject(stats)
+                val stats:String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
+                val downloads = JSONObject(stats)
                 downloads.put(id.toString(), pkg)
-                prefs.edit().putString("CURRENT_DOWNLOADS", downloads.toString()).commit()
+                prefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString()).commit()
                 Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
-                mDownloadList.add(id!!)
+                mDownloadList.add(id as Long)
             }
         }
-        if (intent?.action.equals("CANCEL_DOWNLOAD")) {
+        if (intent?.action.equals(ACTION_CANCEL_DOWNLOAD)) {
             Log.d(TAG, "CANCEL_DOWNLOAD")
             cancelAllDownloads()
         }
@@ -86,7 +91,7 @@ class DownloadService : Service() {
         Log.d(TAG, "onDestroy")
 
         val prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        prefs.edit().remove("CURRENT_DOWNLOADS").commit()
+        prefs.edit().remove(PREF_CURRENT_DOWNLOADS).commit()
 
         if (mDownloadReceiver != null) {
             unregisterReceiver(mDownloadReceiver)
@@ -112,7 +117,7 @@ class DownloadService : Service() {
             .setOngoing(true)
 
         val cancelIntent = Intent(this, DownloadService::class.java)
-        cancelIntent.action = "CANCEL_DOWNLOAD"
+        cancelIntent.action = ACTION_CANCEL_DOWNLOAD
         val cancelPendingIntent: PendingIntent = PendingIntent.getService(
             context,
             cancelIntent.hashCode(), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT
@@ -140,7 +145,7 @@ class DownloadService : Service() {
     }
 
     fun handleDownloadComplete(downloadId: Long) {
-        var uri: Uri? = mDownloadManager!!.getUriForDownloadedFile(downloadId)
+        var uri: Uri? = mDownloadManager?.getUriForDownloadedFile(downloadId)
         if (uri == null) {
             // includes also cancel
             return
@@ -160,6 +165,6 @@ class DownloadService : Service() {
     }
 
     fun cancelDownloadApp(downloadId: Long) {
-        mDownloadManager!!.remove(downloadId)
+        mDownloadManager?.remove(downloadId)
     }
 }

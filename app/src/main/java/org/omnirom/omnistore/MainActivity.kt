@@ -6,6 +6,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -15,10 +16,14 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
+import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
+import org.omnirom.omnistore.Constants.APPS_BASE_URI
+import org.omnirom.omnistore.Constants.APPS_LIST_URI
+import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.lang.reflect.Method
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
@@ -30,8 +35,6 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "OmniStore:MainActivity"
     private val HTTP_READ_TIMEOUT = 30000
     private val HTTP_CONNECTION_TIMEOUT = 30000
-    val APPS_BASE_URI = "https://dl.omnirom.org/store/"
-    private val APPS_LIST_URI = APPS_BASE_URI + "apps.json"
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val REQUEST_ERMISSION = 0
@@ -54,7 +57,6 @@ class MainActivity : AppCompatActivity() {
                     val appData = AppItem(app)
                     if (appData.isValied()) {
                         newAppsList.add(appData)
-                        appData.updateStatus()
                     } else {
                         Log.i(TAG, "ignore app " + app.toString())
                     }
@@ -67,18 +69,9 @@ class MainActivity : AppCompatActivity() {
         override fun onPostExecute(result: Int?) {
             super.onPostExecute(result)
             synchronized(this@MainActivity) {
-                /*val downloads = mAppsList.filter { it.mDownloadId != -1L }
-                downloads.forEach {
-                    val id = it.mDownloadId
-                    val pkg = it.pkg()
-                    val dl = newAppsList.filter { it.pkg().equals(pkg) }
-                    if (dl.size == 1) {
-                        dl.first().mDownloadId = id
-                    }
-                }*/
-
                 mAppsList.clear()
                 mAppsList.addAll(newAppsList)
+                updateAllAppStatus()
                 syncRunningDownloads()
                 this@MainActivity.runOnUiThread(java.lang.Runnable {
                     (app_list.adapter as AppAdapter).notifyDataSetChanged()
@@ -92,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive " + intent?.action)
             if (intent?.action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-                val downloadId = intent!!.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                val downloadId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (downloadId == -1L) {
                     return
                 }
@@ -112,68 +105,6 @@ class MainActivity : AppCompatActivity() {
             ) {
                 val fetchApps = FetchAppsTask()
                 fetchApps.execute()
-            }
-        }
-    }
-
-    inner class AppItem(val appData: JSONObject) {
-        var mInstalled = false
-        var mDownloadId: Long = -1
-
-        fun isValied(): Boolean {
-            try {
-                appData.get("file").toString()
-                appData.get("title").toString()
-                appData.get("package").toString()
-                appData.get("icon").toString()
-                return true
-            } catch (e: JSONException) {
-                return false
-            }
-        }
-
-        fun file(): String {
-            try {
-                return appData.get("file").toString()
-            } catch (e: JSONException) {
-                return "unknown"
-            }
-        }
-
-        fun title(): String {
-            try {
-                return appData.get("title").toString()
-            } catch (e: JSONException) {
-                return "unknown"
-            }
-        }
-
-        fun iconUrl(): String? {
-            try {
-                return APPS_BASE_URI + appData.get("icon").toString()
-            } catch (e: JSONException) {
-                return null
-            }
-        }
-
-        fun pkg(): String? {
-            try {
-                return appData.get("package").toString()
-            } catch (e: JSONException) {
-                return "unknown"
-            }
-        }
-
-        fun updateStatus() {
-            try {
-                val pkg = appData.get("package").toString()
-                this@MainActivity.packageManager.getPackageInfo(pkg, PackageManager.GET_ACTIVITIES)
-                val enabled: Int =
-                    this@MainActivity.packageManager.getApplicationEnabledSetting(pkg)
-                mInstalled = enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
-                        enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
-            } catch (e: Exception) {
-                mInstalled = false
             }
         }
     }
@@ -286,32 +217,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun downloadApp(app: AppItem) {
+    fun downloadApp(app: AppItem?) {
         if (!mInstallEnabled) {
             return
         }
-        val url: String = APPS_BASE_URI + app.file()
+        val url: String = APPS_BASE_URI + app?.file()
         val request: DownloadManager.Request = DownloadManager.Request(Uri.parse(url))
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, app.file())
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, app?.file())
         //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         //request.setNotificationVisibility()
-        val id = mDownloadManager!!.enqueue(request)
-        app.mDownloadId = id
+        app?.mDownloadId = mDownloadManager?.enqueue(request)
         (app_list.adapter as AppAdapter).notifyDataSetChanged()
 
         val serviceIndent = Intent(this, DownloadService::class.java)
-        serviceIndent.action = "ADD_DOWNLOAD"
-        serviceIndent.putExtra("DOWNLOAD_ID", id)
-        serviceIndent.putExtra("DOWNLOAD_PKG", app.pkg())
+        serviceIndent.action = ACTION_ADD_DOWNLOAD
+        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app?.mDownloadId)
+        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app?.pkg())
         startForegroundService(serviceIndent)
     }
 
-    fun cancelDownloadApp(app: AppItem) {
-        if (app.mDownloadId == -1L) {
+    fun cancelDownloadApp(app: AppItem?) {
+        if (app?.mDownloadId == -1L) {
             return
         }
-        mDownloadManager!!.remove(app.mDownloadId)
-        app.mDownloadId = -1L
+        mDownloadManager?.remove(app?.mDownloadId as Long)
+        app?.mDownloadId = -1L
         (app_list.adapter as AppAdapter).notifyDataSetChanged()
     }
 
@@ -335,7 +265,7 @@ class MainActivity : AppCompatActivity() {
         progress.visibility = View.GONE
     }
 
-    fun handleDownloadComplete(downloadId: Long) {
+    fun handleDownloadComplete(downloadId: Long?) {
         val list = mAppsList.filter { it.mDownloadId == downloadId }
         if (list.size == 1) {
             list.first().mDownloadId = -1
@@ -346,7 +276,7 @@ class MainActivity : AppCompatActivity() {
     private fun syncRunningDownloads() {
         val prefs: SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(this)
-        val stats: String? = prefs.getString("CURRENT_DOWNLOADS", JSONObject().toString())
+        val stats: String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
         val downloads = JSONObject(stats)
         Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
         for (id in downloads.keys()) {
@@ -356,6 +286,25 @@ class MainActivity : AppCompatActivity() {
                 dl.first().mDownloadId = id.toLong()
                 Log.d(TAG, "set downloadId = " + id + " to " + dl.first())
             }
+        }
+    }
+
+    private fun updateAllAppStatus() {
+        mAppsList.forEach { updateAppStatus(it) }
+    }
+
+    private fun updateAppStatus(app: AppItem) {
+        try {
+            val pkg = app.pkg()
+            packageManager.getPackageInfo(pkg,
+                PackageManager.GET_ACTIVITIES
+            )
+            val enabled: Int =
+                packageManager.getApplicationEnabledSetting(pkg)
+            app.mInstalled = enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
+                    enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
+        } catch (e: Exception) {
+            app.mInstalled = false
         }
     }
 }
