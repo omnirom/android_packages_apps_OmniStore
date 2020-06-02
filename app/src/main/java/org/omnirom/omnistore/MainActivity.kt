@@ -6,7 +6,6 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -23,7 +22,6 @@ import org.omnirom.omnistore.Constants.APPS_LIST_URI
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.lang.reflect.Method
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
@@ -170,10 +168,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupHttpsRequest(urlStr: String): HttpsURLConnection? {
         val url: URL
-        var urlConnection: HttpsURLConnection? = null
-        return try {
+        try {
             url = URL(urlStr)
-            urlConnection = url.openConnection() as HttpsURLConnection
+            val urlConnection = url.openConnection() as HttpsURLConnection
             urlConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
             urlConnection.setReadTimeout(HTTP_READ_TIMEOUT)
             urlConnection.setRequestMethod("GET")
@@ -277,7 +274,7 @@ class MainActivity : AppCompatActivity() {
         val prefs: SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(this)
         val stats: String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-        val downloads = JSONObject(stats)
+        val downloads = JSONObject(stats!!)
         Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
         for (id in downloads.keys()) {
             val pkg = downloads.get(id).toString()
@@ -296,15 +293,24 @@ class MainActivity : AppCompatActivity() {
     private fun updateAppStatus(app: AppItem) {
         try {
             val pkg = app.pkg()
-            packageManager.getPackageInfo(pkg,
-                PackageManager.GET_ACTIVITIES
+            val pkgInfo = packageManager.getPackageInfo(
+                pkg!!,
+                0
             )
+            app.mVersionCode = pkgInfo.versionCode
+            app.mVersionName = pkgInfo.versionName
             val enabled: Int =
                 packageManager.getApplicationEnabledSetting(pkg)
-            app.mInstalled = enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
-                    enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
+            if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
+                    enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
+                app.mInstalled = 0
+            } else {
+                app.mInstalled = 1
+            }
         } catch (e: Exception) {
-            app.mInstalled = false
+            app.mInstalled = -1
+            app.mVersionCode = -1
+            app.mVersionName = "unknown"
         }
     }
 }

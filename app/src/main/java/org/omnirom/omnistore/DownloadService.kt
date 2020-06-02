@@ -43,7 +43,7 @@ class DownloadService : Service() {
 
                     val prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
                     val stats:String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-                    val downloads = JSONObject(stats)
+                    val downloads = JSONObject(stats!!)
                     downloads.remove(downloadId.toString())
                     prefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString()).commit()
                     Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
@@ -72,7 +72,7 @@ class DownloadService : Service() {
                 }
                 val prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
                 val stats:String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-                val downloads = JSONObject(stats)
+                val downloads = JSONObject(stats!!)
                 downloads.put(id.toString(), pkg)
                 prefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString()).commit()
                 Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)

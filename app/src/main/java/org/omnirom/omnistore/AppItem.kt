@@ -9,8 +9,10 @@ import org.json.JSONObject
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
 
 class AppItem(val appData: JSONObject) {
-    var mInstalled = false
+    var mInstalled:Int = -1
     var mDownloadId: Long? = -1
+    var mVersionCode: Int? = -1
+    var mVersionName:String = ""
     private val TAG = "OmniStore:AppItem"
 
     fun isValied(): Boolean {
@@ -19,6 +21,8 @@ class AppItem(val appData: JSONObject) {
             appData.get("title").toString()
             appData.get("package").toString()
             appData.get("icon").toString()
+            appData.get("versionCode").toString()
+            appData.get("versionName").toString()
 
             if (appData.has("devices")) {
                 val devices:JSONArray = appData.getJSONArray("devices")
@@ -67,4 +71,21 @@ class AppItem(val appData: JSONObject) {
             return "unknown"
         }
     }
+
+    fun versionName(): String? {
+        try {
+            return appData.get("versionName").toString()
+        } catch (e: JSONException) {
+            return "unknown"
+        }
+    }
+
+    fun versionCode(): Int? {
+        try {
+            return appData.get("versionCode").toString().toInt()
+        } catch (e: JSONException) {
+            return 0
+        }
+    }
+
 }

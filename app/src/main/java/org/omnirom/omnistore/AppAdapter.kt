@@ -38,17 +38,17 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             progress = view.app_progress
 
             view.setOnClickListener(View.OnClickListener {
-                if (app?.mInstalled == true) {
+                if (app?.mInstalled != -1) {
                     val intent =
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:" + app?.pkg())
                     it?.context?.startActivity(intent)
                 } else {
-                    val builder = AlertDialog.Builder(it?.context)
+                    /*val builder = AlertDialog.Builder(it?.context)
                     builder.setTitle("Title")
                     builder.setMessage("Selected " + title.text);
                     builder.setPositiveButton(android.R.string.ok, null)
-                    builder.create().show()
+                    builder.create().show()*/
                 }
             })
             if (mActivity?.mInstallEnabled == true) {
@@ -95,10 +95,12 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
         } else {
             holder.image.setImageResource(R.drawable.ic_download)
             holder.progress.visibility = View.GONE
-            if (app.mInstalled) {
-                holder.status.text = "Installed"
-            } else {
-                holder.status.text = "Not installed"
+            if (app.mInstalled == 1) {
+                holder.status.text = "Installed - " + app.mVersionName + "/" + app.mVersionCode
+            } else if (app.mInstalled == -1){
+                holder.status.text = "Not installed - " + app.versionName() + "/" + app.versionCode()
+            } else if (app.mInstalled == 0){
+                holder.status.text = "Disabled - " + app.mVersionName + "/" + app.mVersionCode
             }
         }
     }
