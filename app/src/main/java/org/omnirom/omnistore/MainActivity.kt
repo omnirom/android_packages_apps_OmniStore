@@ -6,6 +6,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -22,6 +23,7 @@ import org.omnirom.omnistore.Constants.APPS_LIST_URI
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.lang.reflect.Method
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
@@ -53,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                 for (i in 0 until apps.length()) {
                     val app = apps.getJSONObject(i);
                     val appData = AppItem(app)
-                    if (appData.isValied()) {
+                    if (appData.isValied(getProperty(this@MainActivity, "ro.omni.device"))) {
                         newAppsList.add(appData)
                     } else {
                         Log.i(TAG, "ignore app " + app.toString())
@@ -109,6 +111,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "device = " + getProperty(this, "ro.omni.device"));
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         setContentView(R.layout.activity_main)
 
@@ -312,5 +315,25 @@ class MainActivity : AppCompatActivity() {
             app.mVersionCode = -1
             app.mVersionName = "unknown"
         }
+    }
+
+    private fun getProperty(
+        context: Context,
+        key: String
+    ): String {
+        try {
+            val systemProperties = context.classLoader.loadClass(
+                "android.os.SystemProperties"
+            )
+            val get: Method = systemProperties.getMethod(
+                "get", *arrayOf<Class<*>>(
+                    String::class.java, String::class.java
+                )
+            )
+            return get.invoke(null, key, "") as String
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "getProperty", e)
+        }
+        return ""
     }
 }

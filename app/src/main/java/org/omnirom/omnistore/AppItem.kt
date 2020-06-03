@@ -15,7 +15,7 @@ class AppItem(val appData: JSONObject) {
     var mVersionName:String = ""
     private val TAG = "OmniStore:AppItem"
 
-    fun isValied(): Boolean {
+    fun isValied(device: String): Boolean {
         try {
             appData.get("file").toString()
             appData.get("title").toString()
@@ -27,7 +27,7 @@ class AppItem(val appData: JSONObject) {
             if (appData.has("devices")) {
                 val devices:JSONArray = appData.getJSONArray("devices")
                 for (i in 0 until devices.length()) {
-                    if (devices.get(i).toString().equals(Build.DEVICE)) {
+                    if (devices.get(i).toString().equals(device)) {
                         return true;
                     }
                 }

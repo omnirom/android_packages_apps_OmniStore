@@ -89,12 +89,13 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
 
         if (app.mDownloadId != -1L) {
             holder.image.setImageResource(R.drawable.ic_cancel)
+            holder.image.visibility = View.VISIBLE
             holder.status.text = "Installing..."
             holder.progress.visibility = View.VISIBLE
         } else {
             if (app.insatllEnabled()) {
-                holder.image.visibility = View.VISIBLE
                 holder.image.setImageResource(R.drawable.ic_download)
+                holder.image.visibility = View.VISIBLE
             } else {
                 holder.image.visibility = View.GONE
             }
