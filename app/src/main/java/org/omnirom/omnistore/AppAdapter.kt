@@ -1,6 +1,5 @@
 package org.omnirom.omnistore
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -38,7 +37,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             progress = view.app_progress
 
             view.setOnClickListener(View.OnClickListener {
-                if (app?.mInstalled != -1) {
+                if (app?.appSettingsEnabled()!!) {
                     val intent =
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:" + app?.pkg())
@@ -93,13 +92,18 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             holder.status.text = "Installing..."
             holder.progress.visibility = View.VISIBLE
         } else {
-            holder.image.setImageResource(R.drawable.ic_download)
+            if (app.insatllEnabled()) {
+                holder.image.visibility = View.VISIBLE
+                holder.image.setImageResource(R.drawable.ic_download)
+            } else {
+                holder.image.visibility = View.GONE
+            }
             holder.progress.visibility = View.GONE
-            if (app.mInstalled == 1) {
+            if (app.appInstaleed()) {
                 holder.status.text = "Installed - " + app.mVersionName + "/" + app.mVersionCode
-            } else if (app.mInstalled == -1){
+            } else if (app.appNotInstaleed()){
                 holder.status.text = "Not installed - " + app.versionName() + "/" + app.versionCode()
-            } else if (app.mInstalled == 0){
+            } else if (app.appDisabled()){
                 holder.status.text = "Disabled - " + app.mVersionName + "/" + app.mVersionCode
             }
         }

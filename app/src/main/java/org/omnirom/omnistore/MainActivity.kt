@@ -294,7 +294,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val pkg = app.pkg()
             val pkgInfo = packageManager.getPackageInfo(
-                pkg!!,
+                pkg,
                 0
             )
             app.mVersionCode = pkgInfo.versionCode
@@ -303,12 +303,12 @@ class MainActivity : AppCompatActivity() {
                 packageManager.getApplicationEnabledSetting(pkg)
             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
                     enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-                app.mInstalled = 0
+                app.setInstalledStatus(0)
             } else {
-                app.mInstalled = 1
+                app.setInstalledStatus(1)
             }
         } catch (e: Exception) {
-            app.mInstalled = -1
+            app.setInstalledStatus(-1)
             app.mVersionCode = -1
             app.mVersionName = "unknown"
         }

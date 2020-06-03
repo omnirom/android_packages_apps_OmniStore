@@ -9,7 +9,7 @@ import org.json.JSONObject
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
 
 class AppItem(val appData: JSONObject) {
-    var mInstalled:Int = -1
+    private var mInstalled:Int = -1
     var mDownloadId: Long? = -1
     var mVersionCode: Int? = -1
     var mVersionName:String = ""
@@ -64,7 +64,7 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
-    fun pkg(): String? {
+    fun pkg(): String {
         try {
             return appData.get("package").toString()
         } catch (e: JSONException) {
@@ -72,7 +72,7 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
-    fun versionName(): String? {
+    fun versionName(): String {
         try {
             return appData.get("versionName").toString()
         } catch (e: JSONException) {
@@ -80,7 +80,7 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
-    fun versionCode(): Int? {
+    fun versionCode(): Int {
         try {
             return appData.get("versionCode").toString().toInt()
         } catch (e: JSONException) {
@@ -88,4 +88,27 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
+    fun insatllEnabled() : Boolean {
+        return appNotInstaleed() || (appInstaleed()  && (versionCode() > mVersionCode!!))
+    }
+
+    fun appSettingsEnabled() : Boolean {
+        return mInstalled != -1
+    }
+
+    fun appDisabled() : Boolean {
+        return mInstalled == 0
+    }
+
+    fun appInstaleed() : Boolean {
+        return mInstalled == 1
+    }
+
+    fun appNotInstaleed() : Boolean {
+        return mInstalled == -1
+    }
+
+    fun setInstalledStatus(status: Int) {
+        mInstalled = status
+    }
 }

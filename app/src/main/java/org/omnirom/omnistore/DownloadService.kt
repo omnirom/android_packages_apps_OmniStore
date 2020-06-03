@@ -110,7 +110,7 @@ class DownloadService : Service() {
         )
             .setContentTitle(resources.getString(R.string.app_name))
             .setContentText("Downloading...")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_download)
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
