@@ -17,10 +17,9 @@ import kotlinx.android.synthetic.main.app_list_item.view.*
 
 class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
     RecyclerView.Adapter<AppAdapter.ViewHolder>() {
-    var mActivity: MainActivity? = null
 
     inner class ViewHolder : RecyclerView.ViewHolder {
-        var app: AppItem? = null
+        lateinit var app: AppItem
         var title: TextView
         var logo: ImageView
         var status: TextView
@@ -36,28 +35,28 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             pkg = view.app_pkg
             progress = view.app_progress
 
-            view.setOnClickListener(View.OnClickListener {
-                if (app?.appSettingsEnabled()!!) {
+            view.setOnClickListener {
+                if (app.appSettingsEnabled()) {
                     val intent =
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.parse("package:" + app?.pkg())
+                    intent.data = Uri.parse("package:" + app.pkg())
                     it?.context?.startActivity(intent)
                 } else {
                     /*val builder = AlertDialog.Builder(it?.context)
-                    builder.setTitle("Title")
-                    builder.setMessage("Selected " + title.text);
-                    builder.setPositiveButton(android.R.string.ok, null)
-                    builder.create().show()*/
+                            builder.setTitle("Title")
+                            builder.setMessage("Selected " + title.text);
+                            builder.setPositiveButton(android.R.string.ok, null)
+                            builder.create().show()*/
                 }
-            })
-            if (mActivity?.mInstallEnabled == true) {
+            }
+            if ((context as MainActivity).mInstallEnabled == true) {
                 view.app_image.visibility = View.VISIBLE
                 view.app_image.setOnClickListener(View.OnClickListener {
-                    if (app?.mDownloadId == -1L) {
-                        mActivity?.downloadApp(app)
+                    if (app.mDownloadId == -1L) {
+                        context.downloadApp(app)
                     }
                     else {
-                        mActivity?.cancelDownloadApp(app)
+                        context.cancelDownloadApp(app)
                     }
                 })
             } else {
@@ -93,14 +92,16 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             holder.status.text = "Installing..."
             holder.progress.visibility = View.VISIBLE
         } else {
-            if (app.insatllEnabled()) {
+            if (app.installEnabled()) {
                 holder.image.setImageResource(R.drawable.ic_download)
                 holder.image.visibility = View.VISIBLE
             } else {
                 holder.image.visibility = View.GONE
             }
             holder.progress.visibility = View.GONE
-            if (app.appInstaleed()) {
+            if (app.updateAvailable()) {
+                holder.status.text = "Update available - " + app.versionName() + "/" + app.versionCode()
+            } else if (app.appInstalled()) {
                 holder.status.text = "Installed - " + app.mVersionName + "/" + app.mVersionCode
             } else if (app.appNotInstaleed()){
                 holder.status.text = "Not installed - " + app.versionName() + "/" + app.versionCode()

@@ -5,81 +5,33 @@ import android.app.DownloadManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Switch
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
-import org.json.JSONArray
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
-import org.omnirom.omnistore.Constants.APPS_LIST_URI
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.lang.reflect.Method
-import java.net.URL
-import java.nio.charset.StandardCharsets
-import javax.net.ssl.HttpsURLConnection
 
 
 class MainActivity : AppCompatActivity() {
-
     private val mAppsList: ArrayList<AppItem> = ArrayList()
     private val TAG = "OmniStore:MainActivity"
-    private val HTTP_READ_TIMEOUT = 30000
-    private val HTTP_CONNECTION_TIMEOUT = 30000
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val REQUEST_ERMISSION = 0
     var mInstallEnabled = false
-    private var mDownloadManager: DownloadManager? = null
-
-    inner class FetchAppsTask : AsyncTask<String, Int, Int>() {
-        val newAppsList: ArrayList<AppItem> = ArrayList()
-        override fun onPreExecute() {
-            super.onPreExecute()
-            startProgress()
-        }
-
-        override fun doInBackground(vararg params: String?): Int {
-            val appListData: String? = downloadUrlMemoryAsString(APPS_LIST_URI)
-            if (appListData != null) {
-                val apps = JSONArray(appListData)
-                for (i in 0 until apps.length()) {
-                    val app = apps.getJSONObject(i);
-                    val appData = AppItem(app)
-                    if (appData.isValied(getProperty(this@MainActivity, "ro.omni.device"))) {
-                        newAppsList.add(appData)
-                    } else {
-                        Log.i(TAG, "ignore app " + app.toString())
-                    }
-                }
-            }
-            newAppsList.sortBy { it -> it.title() }
-            return 0
-        }
-
-        override fun onPostExecute(result: Int?) {
-            super.onPostExecute(result)
-            synchronized(this@MainActivity) {
-                mAppsList.clear()
-                mAppsList.addAll(newAppsList)
-                updateAllAppStatus()
-                syncRunningDownloads()
-                this@MainActivity.runOnUiThread(java.lang.Runnable {
-                    (app_list.adapter as AppAdapter).notifyDataSetChanged()
-                    stopProgress()
-                })
-            }
-        }
-    }
+    private lateinit var mDownloadManager: DownloadManager
 
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -103,15 +55,14 @@ class MainActivity : AppCompatActivity() {
                     Intent.ACTION_PACKAGE_REMOVED
                 )
             ) {
-                val fetchApps = FetchAppsTask()
-                fetchApps.execute()
+                refresh()
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "device = " + getProperty(this, "ro.omni.device"));
+        Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"));
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         setContentView(R.layout.activity_main)
 
@@ -121,7 +72,6 @@ class MainActivity : AppCompatActivity() {
 
         app_list.layoutManager = LinearLayoutManager(this)
         app_list.adapter = AppAdapter(mAppsList, this)
-        (app_list.adapter as AppAdapter).mActivity = this
 
         val downloadFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         registerReceiver(mDownloadReceiver, downloadFilter)
@@ -137,8 +87,7 @@ class MainActivity : AppCompatActivity() {
                 // TODO alert
                 cancelAllDownloads()
             }
-            val fetchApps = FetchAppsTask()
-            fetchApps.execute()
+            refresh()
         }
         if (!mInstallEnabled) {
             requestPermissions(
@@ -147,9 +96,28 @@ class MainActivity : AppCompatActivity() {
                 ), REQUEST_ERMISSION
             )
         } else {
-            val fetchApps = FetchAppsTask()
-            fetchApps.execute()
+            refresh()
         }
+
+        DeviceUtils().setAlarm(this)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.main, menu)
+
+        val appBarSwitch = menu!!.findItem(R.id.app_bar_switch)
+        val switchItem = appBarSwitch.actionView.findViewById<Switch>(R.id.switch_item)
+
+        val prefs: SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(this)
+        switchItem.isChecked = prefs.getBoolean(Constants.PREF_ALARM_ACTIVE, false)
+
+        switchItem.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) DeviceUtils().setAlarm(this)
+            else DeviceUtils().cancelAlarm(this)
+        }
+        return true
     }
 
     override fun onRequestPermissionsResult(
@@ -158,8 +126,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         if (requestCode == REQUEST_ERMISSION && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
             mInstallEnabled = true;
-            val fetchApps = FetchAppsTask()
-            fetchApps.execute()
+            refresh()
         }
     }
 
@@ -169,79 +136,31 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(mPackageReceiver)
     }
 
-    private fun setupHttpsRequest(urlStr: String): HttpsURLConnection? {
-        val url: URL
-        try {
-            url = URL(urlStr)
-            val urlConnection = url.openConnection() as HttpsURLConnection
-            urlConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
-            urlConnection.setReadTimeout(HTTP_READ_TIMEOUT)
-            urlConnection.setRequestMethod("GET")
-            urlConnection.setDoInput(true)
-            urlConnection.connect()
-            val code: Int = urlConnection.getResponseCode()
-            if (code != HttpsURLConnection.HTTP_OK) {
-                Log.d(TAG, "response: " + code)
-                return null
-            }
-            return urlConnection
-        } catch (e: Exception) {
-            Log.e(TAG, "setupHttpsRequest", e)
-            return null
-        }
-    }
-
-    private fun downloadUrlMemoryAsString(url: String): String? {
-        Log.d(TAG, "download: " + url)
-        var urlConnection: HttpsURLConnection? = null
-        return try {
-            urlConnection = setupHttpsRequest(url)
-            if (urlConnection == null) {
-                return null
-            }
-            val input: InputStream = urlConnection.inputStream
-            val byteArray = ByteArrayOutputStream()
-            var byteInt: Int = 0
-            while (input.read().also({ byteInt = it }) >= 0) {
-                byteArray.write(byteInt)
-            }
-            val bytes: ByteArray = byteArray.toByteArray() ?: return null
-            String(bytes, StandardCharsets.UTF_8)
-        } catch (e: java.lang.Exception) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            Log.e(TAG, "downloadUrlMemoryAsString", e)
-            null
-        } finally {
-            urlConnection?.disconnect()
-        }
-    }
-
-    fun downloadApp(app: AppItem?) {
+    fun downloadApp(app: AppItem) {
         if (!mInstallEnabled) {
             return
         }
-        val url: String = APPS_BASE_URI + app?.file()
+        val url: String = APPS_BASE_URI + app.file()
         val request: DownloadManager.Request = DownloadManager.Request(Uri.parse(url))
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, app?.file())
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, app.file())
         //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         //request.setNotificationVisibility()
-        app?.mDownloadId = mDownloadManager?.enqueue(request)
+        app.mDownloadId = mDownloadManager.enqueue(request)
         (app_list.adapter as AppAdapter).notifyDataSetChanged()
 
         val serviceIndent = Intent(this, DownloadService::class.java)
         serviceIndent.action = ACTION_ADD_DOWNLOAD
-        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app?.mDownloadId)
-        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app?.pkg())
+        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app.mDownloadId)
+        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.pkg())
         startForegroundService(serviceIndent)
     }
 
-    fun cancelDownloadApp(app: AppItem?) {
-        if (app?.mDownloadId == -1L) {
+    fun cancelDownloadApp(app: AppItem) {
+        if (app.mDownloadId == -1L) {
             return
         }
-        mDownloadManager?.remove(app?.mDownloadId as Long)
-        app?.mDownloadId = -1L
+        mDownloadManager.remove(app.mDownloadId)
+        app.mDownloadId = -1L
         (app_list.adapter as AppAdapter).notifyDataSetChanged()
     }
 
@@ -290,50 +209,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAllAppStatus() {
-        mAppsList.forEach { updateAppStatus(it) }
+        mAppsList.forEach { it.updateAppStatus(packageManager) }
     }
 
-    private fun updateAppStatus(app: AppItem) {
-        try {
-            val pkg = app.pkg()
-            val pkgInfo = packageManager.getPackageInfo(
-                pkg,
-                0
-            )
-            app.mVersionCode = pkgInfo.versionCode
-            app.mVersionName = pkgInfo.versionName
-            val enabled: Int =
-                packageManager.getApplicationEnabledSetting(pkg)
-            if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
-                    enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
-                app.setInstalledStatus(0)
-            } else {
-                app.setInstalledStatus(1)
-            }
-        } catch (e: Exception) {
-            app.setInstalledStatus(-1)
-            app.mVersionCode = -1
-            app.mVersionName = "unknown"
-        }
-    }
-
-    private fun getProperty(
-        context: Context,
-        key: String
-    ): String {
-        try {
-            val systemProperties = context.classLoader.loadClass(
-                "android.os.SystemProperties"
-            )
-            val get: Method = systemProperties.getMethod(
-                "get", *arrayOf<Class<*>>(
-                    String::class.java, String::class.java
-                )
-            )
-            return get.invoke(null, key, "") as String
-        } catch (e: java.lang.Exception) {
-            Log.e(TAG, "getProperty", e)
-        }
-        return ""
+    private fun refresh() {
+        val newAppsList: ArrayList<AppItem> = ArrayList()
+        val fetchApps =
+            NetworkUtils().FetchAppsTask(this, Runnable { startProgress() }, Runnable {
+                synchronized(this@MainActivity) {
+                    mAppsList.clear()
+                    mAppsList.addAll(newAppsList)
+                    updateAllAppStatus()
+                    syncRunningDownloads()
+                    this@MainActivity.runOnUiThread(Runnable {
+                        (app_list.adapter as AppAdapter).notifyDataSetChanged()
+                        stopProgress()
+                    })
+                }
+            }, newAppsList)
+        fetchApps.execute()
     }
 }

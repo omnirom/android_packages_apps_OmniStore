@@ -1,7 +1,6 @@
 package org.omnirom.omnistore
 
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONException
@@ -9,11 +8,13 @@ import org.json.JSONObject
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
 
 class AppItem(val appData: JSONObject) {
-    private var mInstalled:Int = -1
-    var mDownloadId: Long? = -1
-    var mVersionCode: Int? = -1
-    var mVersionName:String = ""
+    private var mInstalled: InstallState = InstallState.UNINSTALLED
+    var mDownloadId: Long = -1
+    var mVersionCode: Int = -1
+    var mVersionName: String = ""
     private val TAG = "OmniStore:AppItem"
+
+    enum class InstallState { DISABLED, INSTALLED, UNINSTALLED}
 
     fun isValied(device: String): Boolean {
         try {
@@ -25,10 +26,12 @@ class AppItem(val appData: JSONObject) {
             appData.get("versionName").toString()
 
             if (appData.has("devices")) {
-                val devices:JSONArray = appData.getJSONArray("devices")
-                for (i in 0 until devices.length()) {
-                    if (devices.get(i).toString().equals(device)) {
-                        return true;
+                if (device.isNotEmpty()) {
+                    val devices: JSONArray = appData.getJSONArray("devices")
+                    for (i in 0 until devices.length()) {
+                        if (devices.get(i).toString() == device) {
+                            return true;
+                        }
                     }
                 }
             } else {
@@ -80,6 +83,10 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
+    override fun toString(): String {
+        return appData.toString()
+    }
+
     fun versionCode(): Int {
         try {
             return appData.get("versionCode").toString().toInt()
@@ -88,27 +95,55 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
-    fun insatllEnabled() : Boolean {
-        return appNotInstaleed() || (appInstaleed()  && (versionCode() > mVersionCode!!))
+    fun installEnabled(): Boolean {
+        return appNotInstaleed() || (appInstalled() && (versionCode() > mVersionCode))
     }
 
-    fun appSettingsEnabled() : Boolean {
-        return mInstalled != -1
+    fun updateAvailable(): Boolean {
+        return appInstalled() && (versionCode() > mVersionCode)
     }
 
-    fun appDisabled() : Boolean {
-        return mInstalled == 0
+    fun appSettingsEnabled(): Boolean {
+        return mInstalled != InstallState.UNINSTALLED
     }
 
-    fun appInstaleed() : Boolean {
-        return mInstalled == 1
+    fun appDisabled(): Boolean {
+        return mInstalled == InstallState.DISABLED
     }
 
-    fun appNotInstaleed() : Boolean {
-        return mInstalled == -1
+    fun appInstalled(): Boolean {
+        return mInstalled == InstallState.INSTALLED
     }
 
-    fun setInstalledStatus(status: Int) {
+    fun appNotInstaleed(): Boolean {
+        return mInstalled == InstallState.UNINSTALLED
+    }
+
+    fun setInstalledStatus(status: InstallState) {
         mInstalled = status
+    }
+
+    fun updateAppStatus(packageManager: PackageManager) {
+        try {
+            val pkgInfo = packageManager.getPackageInfo(
+                pkg(),
+                0
+            )
+            mVersionCode = pkgInfo.versionCode
+            mVersionName = pkgInfo.versionName
+            val enabled: Int =
+                packageManager.getApplicationEnabledSetting(pkg())
+            if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
+                enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
+            ) {
+                setInstalledStatus(AppItem.InstallState.DISABLED)
+            } else {
+                setInstalledStatus(AppItem.InstallState.INSTALLED)
+            }
+        } catch (e: Exception) {
+            setInstalledStatus(AppItem.InstallState.UNINSTALLED)
+            mVersionCode = -1
+            mVersionName = "unknown"
+        }
     }
 }
