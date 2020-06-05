@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         DeviceUtils().setAlarm(this)
+        //DownloadService().checkForUpdates(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -213,6 +214,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
+        if (!Constants.isNetworkConnected) {
+            Log.d(TAG, "refresh no network")
+            return
+        }
         val newAppsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
             NetworkUtils().FetchAppsTask(this, Runnable { startProgress() }, Runnable {

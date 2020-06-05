@@ -12,7 +12,7 @@ class BootReceiver : BroadcastReceiver() {
         if (intent?.action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             if (context != null) {
                 Log.d(TAG, "onReceive " + intent?.action)
-                //DeviceUtils().setAlarm(context)
+                DeviceUtils().setAlarm(context)
             }
         }
     }

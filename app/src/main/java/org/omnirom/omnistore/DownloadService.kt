@@ -15,14 +15,13 @@ import org.omnirom.omnistore.Constants.ACTION_CANCEL_DOWNLOAD
 import org.omnirom.omnistore.Constants.ACTION_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_ID
 import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_PKG
+import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
+import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 
 
 class DownloadService : Service() {
     private val TAG = "OmniStore:DownloadService"
-    private val NOTIFICATION_CHANNEL_OLD = "org.omnirom.omnistore.notification"
-    private val NOTIFICATION_CHANNEL_UPDATE = "org.omnirom.omnistore.notification.updates"
-    private val NOTIFICATION_CHANNEL_PROGRESS = "org.omnirom.omnistore.notification.progress"
 
     private val NOTIFICATION_PROGRESS_ID = Int.MAX_VALUE;
     private val NOTIFICATION_UPDATES_ID = Int.MAX_VALUE - 1;
@@ -37,7 +36,6 @@ class DownloadService : Service() {
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG)
-        createNotificationChannel()
     }
 
     inner class DownloadReceiver : BroadcastReceiver() {
@@ -104,8 +102,7 @@ class DownloadService : Service() {
 
             } else if (intent?.action.equals(ACTION_CHECK_UPDATES)) {
                 Log.d(TAG, "ACTION_CHECK_UPDATES")
-                checkForUpdates();
-
+                checkForUpdates(this);
             }
         } finally {
             mWakeLock.release()
@@ -135,15 +132,15 @@ class DownloadService : Service() {
             context,
             NOTIFICATION_CHANNEL_PROGRESS
         )
-            .setContentTitle(resources.getString(R.string.app_name))
-            .setContentText("Downloading...")
+            .setContentTitle("Download and install")
             .setSmallIcon(R.drawable.ic_notification)
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
             .setOngoing(true)
+            .setColor(context.resources.getColor(R.color.omni_logo_color))
 
-        val cancelIntent = Intent(this, DownloadService::class.java)
+        val cancelIntent = Intent(context, DownloadService::class.java)
         cancelIntent.action = ACTION_CANCEL_DOWNLOAD
         val cancelPendingIntent: PendingIntent = PendingIntent.getService(
             context,
@@ -158,45 +155,26 @@ class DownloadService : Service() {
         return notification.build()
     }
 
-    private fun showUpdatesNotification(context: Context): Notification? {
+    private fun showUpdatesNotification(context: Context, message: String): Notification? {
         val notification = NotificationCompat.Builder(
             context,
             NOTIFICATION_CHANNEL_UPDATE
         )
-            .setContentTitle(resources.getString(R.string.app_name))
-            .setContentText("Updates available")
+            .setContentTitle("Updates available")
+            .setContentText(message)
             .setSmallIcon(R.drawable.ic_notification)
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
+            .setColor(context.resources.getColor(R.color.omni_logo_color))
 
-        val showApp = Intent(this, MainActivity::class.java)
+        val showApp = Intent(context, MainActivity::class.java)
         val showAppIntent: PendingIntent = PendingIntent.getActivity(
             context,
             showApp.hashCode(), showApp, PendingIntent.FLAG_UPDATE_CURRENT
         )
         notification.setContentIntent(showAppIntent)
         return notification.build()
-    }
-
-    private fun createNotificationChannel() {
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.deleteNotificationChannel(NOTIFICATION_CHANNEL_OLD)
-
-        val importanceDownload = NotificationManager.IMPORTANCE_LOW
-        val channelProgress = NotificationChannel(
-            NOTIFICATION_CHANNEL_PROGRESS,
-            "Download",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationManager.createNotificationChannel(channelProgress)
-        val channelUpdate = NotificationChannel(
-            NOTIFICATION_CHANNEL_UPDATE,
-            "Updates",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationManager.createNotificationChannel(channelUpdate)
     }
 
     private fun handleDownloadComplete(downloadId: Long) {
@@ -222,17 +200,28 @@ class DownloadService : Service() {
         mDownloadManager.remove(downloadId)
     }
 
-    private fun checkForUpdates() {
+    fun checkForUpdates(context: Context) {
+        if (!Constants.isNetworkConnected) {
+            Log.d(TAG, "checkForUpdates no network")
+            return
+        }
         val newAppsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(this, Runnable { }, Runnable {
-                newAppsList.forEach { it.updateAppStatus(packageManager) }
+            NetworkUtils().FetchAppsTask(context, Runnable { }, Runnable {
+                newAppsList.forEach { it.updateAppStatus(context.packageManager) }
                 val updateApps = newAppsList.filter { it.updateAvailable() }
                 if (updateApps.isNotEmpty()) {
-                    Log.d(TAG, "updates available " + updateApps)
-                    val notification = showUpdatesNotification(this)
+                    Log.d(TAG, "checkForUpdates: updates available " + updateApps)
+                    var message = ""
+                    if (updateApps.size <= 3) {
+                        updateApps.forEach { message += it.title() + ", " }
+                        message = message.substring(0, message.length - 2)
+                    } else {
+                        message += updateApps.size.toString() + " new updates"
+                    }
+                    val notification = showUpdatesNotification(context, message)
                     val notificationManager =
-                        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.cancel(NOTIFICATION_UPDATES_ID)
                     notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
                 }

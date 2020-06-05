@@ -1,11 +1,6 @@
 package org.omnirom.omnistore
 
-import android.content.Context
-import android.util.Log
-import java.lang.reflect.Method
-
 object Constants {
-    private val TAG = "OmniStore:NetworkUtils"
     const val APPS_BASE_URI = "https://dl.omnirom.org/store/"
     const val APPS_LIST_URI = APPS_BASE_URI + "apps.json"
     const val PREF_CURRENT_DOWNLOADS = "current_downloads"
@@ -15,4 +10,9 @@ object Constants {
     const val ACTION_CHECK_UPDATES = "check_updates"
     const val EXTRA_DOWNLOAD_ID = "id"
     const val EXTRA_DOWNLOAD_PKG = "pkg"
+
+    const val NOTIFICATION_CHANNEL_UPDATE = "org.omnirom.omnistore.notification.updates"
+    const val NOTIFICATION_CHANNEL_PROGRESS = "org.omnirom.omnistore.notification.progress"
+
+    var isNetworkConnected: Boolean = false;
 }

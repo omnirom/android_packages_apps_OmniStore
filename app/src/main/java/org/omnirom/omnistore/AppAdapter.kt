@@ -1,5 +1,6 @@
 package org.omnirom.omnistore
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -26,6 +27,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
         var image: ImageView
         var pkg: TextView
         var progress: ProgressBar
+        var note: ImageView
 
         constructor(view: View) : super(view) {
             title = view.app_name
@@ -34,28 +36,29 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             image = view.app_image
             pkg = view.app_pkg
             progress = view.app_progress
-
+            note = view.app_note
             view.setOnClickListener {
                 if (app.appSettingsEnabled()) {
                     val intent =
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.parse("package:" + app.pkg())
                     it?.context?.startActivity(intent)
-                } else {
-                    /*val builder = AlertDialog.Builder(it?.context)
-                            builder.setTitle("Title")
-                            builder.setMessage("Selected " + title.text);
-                            builder.setPositiveButton(android.R.string.ok, null)
-                            builder.create().show()*/
                 }
             }
+            note.setOnClickListener {
+                val builder = AlertDialog.Builder(it?.context)
+                builder.setTitle(app.title())
+                builder.setMessage(app.note());
+                builder.setPositiveButton(android.R.string.ok, null)
+                builder.create().show()
+            }
+
             if ((context as MainActivity).mInstallEnabled == true) {
                 view.app_image.visibility = View.VISIBLE
                 view.app_image.setOnClickListener(View.OnClickListener {
                     if (app.mDownloadId == -1L) {
                         context.downloadApp(app)
-                    }
-                    else {
+                    } else {
                         context.cancelDownloadApp(app)
                     }
                 })
@@ -100,14 +103,22 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             }
             holder.progress.visibility = View.GONE
             if (app.updateAvailable()) {
-                holder.status.text = "Update available - " + app.versionName() + "/" + app.versionCode()
+                holder.status.text =
+                    "Update available - " + app.mVersionName + " -> " + app.versionName()
             } else if (app.appInstalled()) {
-                holder.status.text = "Installed - " + app.mVersionName + "/" + app.mVersionCode
-            } else if (app.appNotInstaleed()){
-                holder.status.text = "Not installed - " + app.versionName() + "/" + app.versionCode()
-            } else if (app.appDisabled()){
-                holder.status.text = "Disabled - " + app.mVersionName + "/" + app.mVersionCode
+                holder.status.text = "Installed - " + app.mVersionName
+            } else if (app.appNotInstaleed()) {
+                holder.status.text =
+                    "Not installed - " + app.versionName()
+            } else if (app.appDisabled()) {
+                holder.status.text = "Disabled - " + app.mVersionName
             }
+        }
+
+        if (app.note() != null) {
+            holder.note.visibility = View.VISIBLE
+        } else {
+            holder.note.visibility = View.GONE
         }
     }
 }

@@ -1,9 +1,10 @@
 package org.omnirom.omnistore
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.AsyncTask
 import android.util.Log
-import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import java.io.ByteArrayOutputStream
 import java.io.InputStream

@@ -75,6 +75,16 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
+    fun note(): String? {
+        if (appData.has("note")) {
+            try {
+                return appData.get("note").toString()
+            } catch (e: JSONException) {
+            }
+        }
+        return null
+    }
+
     fun versionName(): String {
         try {
             return appData.get("versionName").toString()

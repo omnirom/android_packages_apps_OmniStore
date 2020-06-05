@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
@@ -22,19 +23,34 @@
         android:gravity="center_vertical"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/app_name"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+
+            <ImageView
+                android:id="@+id/app_note"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:src="@drawable/ic_info" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/app_pkg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:gravity="center_vertical"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
@@ -42,9 +58,10 @@
             android:id="@+id/app_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:gravity="center_vertical"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
 
     </LinearLayout>
 
