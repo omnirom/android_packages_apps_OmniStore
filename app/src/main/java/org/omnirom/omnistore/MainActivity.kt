@@ -9,11 +9,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Switch
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +18,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
+import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 
 
@@ -99,8 +97,11 @@ class MainActivity : AppCompatActivity() {
             refresh()
         }
 
-        DeviceUtils().setAlarm(this)
-        //DownloadService().checkForUpdates(this)
+        val prefs: SharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(this)
+        if (prefs.getBoolean(PREF_CHECK_UPDATES, false)) {
+            JobUtils().scheduleCheckUpdates(this)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -112,11 +113,12 @@ class MainActivity : AppCompatActivity() {
 
         val prefs: SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(this)
-        switchItem.isChecked = prefs.getBoolean(Constants.PREF_ALARM_ACTIVE, false)
+        switchItem.isChecked =  prefs.getBoolean(PREF_CHECK_UPDATES, false)
 
         switchItem.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) DeviceUtils().setAlarm(this)
-            else DeviceUtils().cancelAlarm(this)
+            prefs.edit().putBoolean(PREF_CHECK_UPDATES, isChecked).commit()
+            if (isChecked) JobUtils().scheduleCheckUpdates(this)
+            else JobUtils().cancelCheckForUpdates(this)
         }
         return true
     }
@@ -139,6 +141,10 @@ class MainActivity : AppCompatActivity() {
 
     fun downloadApp(app: AppItem) {
         if (!mInstallEnabled) {
+            return
+        }
+        if (!Constants.isNetworkConnected) {
+            Log.d(TAG, "refresh no network")
             return
         }
         val url: String = APPS_BASE_URI + app.file()
