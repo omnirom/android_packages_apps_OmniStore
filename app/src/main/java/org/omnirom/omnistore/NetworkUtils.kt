@@ -74,7 +74,7 @@ class NetworkUtils {
             }
             return urlConnection
         } catch (e: Exception) {
-            Log.e(TAG, "setupHttpsRequest", e)
+            Log.e(TAG, "setupHttpsRequest " + e, e)
             return null
         }
     }
@@ -98,7 +98,7 @@ class NetworkUtils {
         } catch (e: java.lang.Exception) {
             // Download failed for any number of reasons, timeouts, connection
             // drops, etc. Just log it in debugging mode.
-            Log.e(TAG, "downloadUrlMemoryAsString", e)
+            Log.e(TAG, "downloadUrlMemoryAsString " + e, e)
             null
         } finally {
             urlConnection?.disconnect()

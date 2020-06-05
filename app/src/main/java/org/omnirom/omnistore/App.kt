@@ -7,6 +7,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.util.Log
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
@@ -23,12 +24,13 @@ class App : Application() {
         val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        connectivityManager.registerNetworkCallback(NetworkRequest.Builder().build(),
+        connectivityManager.registerDefaultNetworkCallback(
             object : NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     Log.d(TAG, "NetworkCallback onAvailable")
                     Constants.isNetworkConnected = true
                 }
+
                 override fun onLost(network: Network) {
                     Log.d(TAG, "NetworkCallback onLost")
                     Constants.isNetworkConnected = false
