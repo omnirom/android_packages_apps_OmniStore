@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
@@ -107,20 +108,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.main, menu)
-
-        val appBarSwitch = menu!!.findItem(R.id.app_bar_switch)
-        val switchItem = appBarSwitch.actionView.findViewById<Switch>(R.id.switch_item)
-
-        val prefs: SharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(this)
-        switchItem.isChecked =  prefs.getBoolean(PREF_CHECK_UPDATES, false)
-
-        switchItem.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean(PREF_CHECK_UPDATES, isChecked).commit()
-            if (isChecked) JobUtils().scheduleCheckUpdates(this)
-            else JobUtils().cancelCheckForUpdates(this)
-        }
         return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_item_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onRequestPermissionsResult(

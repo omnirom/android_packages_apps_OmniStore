@@ -83,7 +83,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
         holder.app = app
         holder.title.text = app.title()
         if (app.iconUrl() != null) {
-            Picasso.get().load(app.iconUrl()).error(R.mipmap.ic_launcher).into(holder.logo)
+            Picasso.with(context).load(app.iconUrl()).error(R.mipmap.ic_launcher).into(holder.logo)
         } else {
             holder.logo.setImageResource(R.mipmap.ic_launcher)
         }

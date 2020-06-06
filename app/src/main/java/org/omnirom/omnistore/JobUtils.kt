@@ -14,6 +14,7 @@ class JobUtils {
     fun scheduleCheckUpdates(context: Context) {
         cancelCheckForUpdates(context)
 
+        Log.d(TAG, "scheduleCheckUpdates")
         val serviceComponent = ComponentName(context, CheckUpdatesService::class.java)
         val builder = JobInfo.Builder(0, serviceComponent)
         builder.setPeriodic(TimeUnit.DAYS.toMillis(1), TimeUnit.HOURS.toMillis(2))
@@ -24,6 +25,7 @@ class JobUtils {
     }
 
     fun cancelCheckForUpdates(context: Context) {
+        Log.d(TAG, "cancelCheckForUpdates")
         val jobScheduler = context.getSystemService(JobScheduler::class.java)
         jobScheduler.cancelAll()
     }
