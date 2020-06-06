@@ -1,0 +1,33 @@
+android_app {
+  name: "OmniStore",
+  manifest: "app/src/main/AndroidManifest.xml",
+
+  srcs: [
+    "app/src/main/**/*.kt",
+    "app/src/main/**/*.java",
+  ],
+
+  resource_dirs: [
+    "app/src/main/res/",
+  ],
+
+  static_libs: [
+    "androidx.core_core",
+    "androidx.appcompat_appcompat",
+    "androidx.preference_preference",
+    "androidx.recyclerview_recyclerview",
+    "com.google.android.material_material",
+    "picasso-library",
+  ],
+
+  kotlincflags: ["-Xjvm-default=enable"],
+  
+  optimize: {
+    enabled: false,
+  },
+}
+
+java_import {
+    name: "picasso-library",
+    jars: ["app/src/main/libs/picasso-2.5.2.jar"],
+}

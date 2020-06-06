@@ -13,7 +13,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.app_list_item.view.*
 
 
 class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
@@ -30,13 +29,13 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
         var note: ImageView
 
         constructor(view: View) : super(view) {
-            title = view.app_name
-            logo = view.app_logo
-            status = view.app_status
-            image = view.app_image
-            pkg = view.app_pkg
-            progress = view.app_progress
-            note = view.app_note
+            title = view.findViewById(R.id.app_name)
+            logo = view.findViewById(R.id.app_logo)
+            status = view.findViewById(R.id.app_status)
+            image = view.findViewById(R.id.app_image)
+            pkg = view.findViewById(R.id.app_pkg)
+            progress = view.findViewById(R.id.app_progress)
+            note = view.findViewById(R.id.app_note)
             view.setOnClickListener {
                 if (app.appSettingsEnabled()) {
                     val intent =
@@ -54,8 +53,8 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             }
 
             if ((context as MainActivity).mInstallEnabled == true) {
-                view.app_image.visibility = View.VISIBLE
-                view.app_image.setOnClickListener(View.OnClickListener {
+                image.visibility = View.VISIBLE
+                image.setOnClickListener(View.OnClickListener {
                     if (app.mDownloadId == -1L) {
                         context.downloadApp(app)
                     } else {
@@ -63,7 +62,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
                     }
                 })
             } else {
-                view.app_image.visibility = View.GONE
+                image.visibility = View.GONE
             }
         }
     }

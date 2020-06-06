@@ -11,11 +11,13 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Switch
+import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.activity_main.*
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_ERMISSION = 0
     var mInstallEnabled = false
     private lateinit var mDownloadManager: DownloadManager
+    private lateinit var mRecyclerView: RecyclerView
 
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -69,8 +72,9 @@ class MainActivity : AppCompatActivity() {
             mInstallEnabled = true;
         }
 
-        app_list.layoutManager = LinearLayoutManager(this)
-        app_list.adapter = AppAdapter(mAppsList, this)
+        mRecyclerView = findViewById<RecyclerView>(R.id.app_list)
+        mRecyclerView.layoutManager = LinearLayoutManager(this)
+        mRecyclerView.adapter = AppAdapter(mAppsList, this)
 
         val downloadFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         registerReceiver(mDownloadReceiver, downloadFilter)
@@ -81,7 +85,7 @@ class MainActivity : AppCompatActivity() {
         packageFilter.addDataScheme("package")
         registerReceiver(mPackageReceiver, packageFilter)
 
-        floatingActionButton.setOnClickListener {
+        findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
             if (isDownloading()) {
                 // TODO alert
                 cancelAllDownloads()
@@ -151,7 +155,7 @@ class MainActivity : AppCompatActivity() {
         //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         //request.setNotificationVisibility()
         app.mDownloadId = mDownloadManager.enqueue(request)
-        (app_list.adapter as AppAdapter).notifyDataSetChanged()
+        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
 
         val serviceIndent = Intent(this, DownloadService::class.java)
         serviceIndent.action = ACTION_ADD_DOWNLOAD
@@ -166,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         }
         mDownloadManager.remove(app.mDownloadId)
         app.mDownloadId = -1L
-        (app_list.adapter as AppAdapter).notifyDataSetChanged()
+        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
     }
 
     fun cancelAllDownloads() {
@@ -182,11 +186,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startProgress() {
-        progress.visibility = View.VISIBLE
+        findViewById<FrameLayout>(R.id.progress).visibility = View.VISIBLE
     }
 
     fun stopProgress() {
-        progress.visibility = View.GONE
+        findViewById<FrameLayout>(R.id.progress).visibility = View.GONE
     }
 
     fun handleDownloadComplete(downloadId: Long?) {
@@ -194,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         if (list.size == 1) {
             list.first().mDownloadId = -1
         }
-        (app_list.adapter as AppAdapter).notifyDataSetChanged()
+        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
     }
 
     private fun syncRunningDownloads() {
@@ -231,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                     updateAllAppStatus()
                     syncRunningDownloads()
                     this@MainActivity.runOnUiThread(Runnable {
-                        (app_list.adapter as AppAdapter).notifyDataSetChanged()
+                        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
                         stopProgress()
                     })
                 }
