@@ -52,18 +52,14 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
                 builder.create().show()
             }
 
-            if ((context as MainActivity).mInstallEnabled == true) {
-                image.visibility = View.VISIBLE
-                image.setOnClickListener(View.OnClickListener {
-                    if (app.mDownloadId == -1L) {
-                        context.downloadApp(app)
-                    } else {
-                        context.cancelDownloadApp(app)
-                    }
-                })
-            } else {
-                image.visibility = View.GONE
-            }
+            image.visibility = View.VISIBLE
+            image.setOnClickListener(View.OnClickListener {
+                if (app.mDownloadId == -1L) {
+                    (context as MainActivity).downloadApp(app)
+                } else {
+                    (context as MainActivity).cancelDownloadApp(app)
+                }
+            })
         }
     }
 
@@ -103,7 +99,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             holder.progress.visibility = View.GONE
             if (app.updateAvailable()) {
                 holder.status.text =
-                    "Update available - " + app.mVersionName + " -> " + app.versionName()
+                    "Update available - " + app.versionName()
             } else if (app.appInstalled()) {
                 holder.status.text = "Installed - " + app.mVersionName
             } else if (app.appNotInstaleed()) {

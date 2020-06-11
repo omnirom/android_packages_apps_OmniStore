@@ -57,7 +57,7 @@ class NetworkUtils {
         }
     }
 
-    private fun setupHttpsRequest(urlStr: String): HttpsURLConnection? {
+    fun setupHttpsRequest(urlStr: String): HttpsURLConnection? {
         val url: URL
         try {
             url = URL(urlStr)

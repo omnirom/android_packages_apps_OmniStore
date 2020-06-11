@@ -25,17 +25,24 @@ class AppItem(val appData: JSONObject) {
             appData.get("versionCode").toString()
             appData.get("versionName").toString()
 
+            var matchFilter = false
             if (appData.has("devices")) {
                 if (device.isNotEmpty()) {
                     val devices: JSONArray = appData.getJSONArray("devices")
                     for (i in 0 until devices.length()) {
                         if (devices.get(i).toString() == device) {
-                            return true;
+                            matchFilter = true;
                         }
                     }
                 }
             } else {
-                return true
+                matchFilter = true
+            }
+            if (matchFilter) {
+                // TODO do we really need to check?
+                if (NetworkUtils().setupHttpsRequest(fileUrl()!!) != null) {
+                    return true
+                }
             }
         } catch (e: JSONException) {
             Log.e(TAG, "isValied", e)
@@ -48,6 +55,14 @@ class AppItem(val appData: JSONObject) {
             return appData.get("file").toString()
         } catch (e: JSONException) {
             return "unknown"
+        }
+    }
+
+    fun fileUrl(): String? {
+        try {
+            return APPS_BASE_URI + appData.get("file").toString()
+        } catch (e: JSONException) {
+            return null
         }
     }
 

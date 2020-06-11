@@ -12,6 +12,4 @@ object Constants {
 
     const val NOTIFICATION_CHANNEL_UPDATE = "org.omnirom.omnistore.notification.updates"
     const val NOTIFICATION_CHANNEL_PROGRESS = "org.omnirom.omnistore.notification.progress"
-
-    var isNetworkConnected: Boolean = false;
 }

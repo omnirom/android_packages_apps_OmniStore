@@ -18,24 +18,7 @@ class App : Application() {
     private val TAG = "OmniStore:App"
     override fun onCreate() {
         super.onCreate()
-
         createNotificationChannel()
-
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        connectivityManager.registerDefaultNetworkCallback(
-            object : NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    Log.d(TAG, "NetworkCallback onAvailable")
-                    Constants.isNetworkConnected = true
-                }
-
-                override fun onLost(network: Network) {
-                    Log.d(TAG, "NetworkCallback onLost")
-                    Constants.isNetworkConnected = false
-                }
-            })
     }
 
     private fun createNotificationChannel() {

@@ -9,7 +9,7 @@ import androidx.preference.PreferenceManager
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 
 class BootReceiver : BroadcastReceiver() {
-    private val TAG = "OmniStore:NetworkUtils"
+    private val TAG = "OmniStore:BootReceiver"
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action.equals(Intent.ACTION_BOOT_COMPLETED)) {

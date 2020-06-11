@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.DownloadManager
 import android.content.*
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -11,8 +13,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,10 +34,10 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "OmniStore:MainActivity"
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
-    private val REQUEST_ERMISSION = 0
-    var mInstallEnabled = false
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
+    private var mNetworkConnected = false;
+    private val mNetworkCallback = NetworkCallback()
 
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -62,15 +66,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    inner class NetworkCallback : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            Log.d(TAG, "NetworkCallback onAvailable")
+            mNetworkConnected = true
+        }
+
+        override fun onLost(network: Network) {
+            Log.d(TAG, "NetworkCallback onLost")
+            mNetworkConnected = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"));
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         setContentView(R.layout.activity_main)
-
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            mInstallEnabled = true;
-        }
 
         mRecyclerView = findViewById<RecyclerView>(R.id.app_list)
         mRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -92,21 +104,28 @@ class MainActivity : AppCompatActivity() {
             }
             refresh()
         }
-        if (!mInstallEnabled) {
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ), REQUEST_ERMISSION
-            )
-        } else {
-            refresh()
-        }
+        refresh()
 
         val prefs: SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(this)
         if (prefs.getBoolean(PREF_CHECK_UPDATES, false)) {
             JobUtils().scheduleCheckUpdates(this)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerDefaultNetworkCallback(mNetworkCallback)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.unregisterNetworkCallback(mNetworkCallback)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -125,16 +144,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
-        if (requestCode == REQUEST_ERMISSION && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
-            mInstallEnabled = true;
-            refresh()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(mDownloadReceiver)
@@ -142,14 +151,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun downloadApp(app: AppItem) {
-        if (!mInstallEnabled) {
+        if (app.fileUrl() == null) {
+            Log.d(TAG, "downloadApp no fileUrl")
             return
         }
-        if (!Constants.isNetworkConnected) {
-            Log.d(TAG, "refresh no network")
+        if (!mNetworkConnected) {
+            Log.d(TAG, "downloadApp no network")
             return
         }
-        val url: String = APPS_BASE_URI + app.file()
+        val url: String = app.fileUrl()!!
         val request: DownloadManager.Request = DownloadManager.Request(Uri.parse(url))
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, app.file())
         //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
@@ -222,7 +232,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
-        if (!Constants.isNetworkConnected) {
+        if (mNetworkConnected) {
             Log.d(TAG, "refresh no network")
             return
         }

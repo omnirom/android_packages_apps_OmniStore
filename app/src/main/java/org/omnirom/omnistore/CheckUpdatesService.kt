@@ -48,10 +48,6 @@ class CheckUpdatesService : JobService() {
     }
 
     private fun checkForUpdates(params: JobParameters?) {
-        if (!Constants.isNetworkConnected) {
-            Log.d(TAG, "checkForUpdates no network")
-            return
-        }
         val newAppsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
             NetworkUtils().FetchAppsTask(this, Runnable { }, Runnable {
@@ -72,7 +68,7 @@ class CheckUpdatesService : JobService() {
                     notificationManager.cancel(NOTIFICATION_UPDATES_ID)
                     notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
                 }
-                jobFinished(params, true);
+                jobFinished(params, false)
             }, newAppsList)
         fetchApps.execute()
     }
