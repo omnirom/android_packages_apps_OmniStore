@@ -50,25 +50,30 @@ class CheckUpdatesService : JobService() {
     private fun checkForUpdates(params: JobParameters?) {
         val newAppsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(this, Runnable { }, Runnable {
-                newAppsList.forEach { it.updateAppStatus(this.packageManager) }
-                val updateApps = newAppsList.filter { it.updateAvailable() }
-                if (updateApps.isNotEmpty()) {
-                    Log.d(TAG, "checkForUpdates: updates available " + updateApps)
-                    var message = ""
-                    if (updateApps.size <= 3) {
-                        updateApps.forEach { message += it.title() + ", " }
-                        message = message.substring(0, message.length - 2)
-                    } else {
-                        message += updateApps.size.toString() + " new updates"
+            NetworkUtils().FetchAppsTask(this, Runnable { }, object :
+                NetworkUtils.NetworkTaskCallback {
+                override fun postAction(networkError: Boolean) {
+                    if (!networkError) {
+                        newAppsList.forEach { it.updateAppStatus(this@CheckUpdatesService.packageManager) }
+                        val updateApps = newAppsList.filter { it.updateAvailable() }
+                        if (updateApps.isNotEmpty()) {
+                            Log.d(TAG, "checkForUpdates: updates available " + updateApps)
+                            var message = ""
+                            if (updateApps.size <= 3) {
+                                updateApps.forEach { message += it.title() + ", " }
+                                message = message.substring(0, message.length - 2)
+                            } else {
+                                message += updateApps.size.toString() + " new updates"
+                            }
+                            val notification = showUpdatesNotification(this@CheckUpdatesService, message)
+                            val notificationManager =
+                                this@CheckUpdatesService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                            notificationManager.cancel(NOTIFICATION_UPDATES_ID)
+                            notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
+                        }
                     }
-                    val notification = showUpdatesNotification(this, message)
-                    val notificationManager =
-                        this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    notificationManager.cancel(NOTIFICATION_UPDATES_ID)
-                    notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
+                    jobFinished(params, false)
                 }
-                jobFinished(params, false)
             }, newAppsList)
         fetchApps.execute()
     }

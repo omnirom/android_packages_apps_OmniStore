@@ -8,4 +8,12 @@
     <string name="notification_settings_title">Manage notifications</string>
     <string name="check_updates_summary"></string>
     <string name="check_updates_title">Check for updates</string>
+    <string name="status_update_available">Update available</string>
+    <string name="status_installed">Installed</string>
+    <string name="status_not_installed">Not installed"</string>
+    <string name="status_disabled">Disabled</string>
+    <string name="status_installing">Installing\u2026</string>
+    <string name="menu_item_updates">Updates</string>
+    <string name="dialog_title_network_error">Network Error</string>
+    <string name="dialog_message_network_error">Network connection not available.\nPlease make sure you are connected to a network.</string>
 </resources>

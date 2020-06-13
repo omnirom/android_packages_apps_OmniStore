@@ -1,11 +1,8 @@
 package org.omnirom.omnistore
 
-import android.Manifest
+import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.*
-import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.Network
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -13,10 +10,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,20 +18,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
-import org.omnirom.omnistore.Constants.APPS_BASE_URI
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 
 
 class MainActivity : AppCompatActivity() {
     private val mAppsList: ArrayList<AppItem> = ArrayList()
+    private val mAllAppsList: ArrayList<AppItem> = ArrayList()
     private val TAG = "OmniStore:MainActivity"
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
-    private var mNetworkConnected = false;
-    private val mNetworkCallback = NetworkCallback()
+    private var mShowAUpdates = false
+    private lateinit var mFilterMenu: MenuItem
+    private var mFetchRunning = false
 
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -61,20 +57,9 @@ class MainActivity : AppCompatActivity() {
                     Intent.ACTION_PACKAGE_REMOVED
                 )
             ) {
-                refresh()
+                updateAllAppStatus()
+                (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
             }
-        }
-    }
-
-    inner class NetworkCallback : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            Log.d(TAG, "NetworkCallback onAvailable")
-            mNetworkConnected = true
-        }
-
-        override fun onLost(network: Network) {
-            Log.d(TAG, "NetworkCallback onLost")
-            mNetworkConnected = false
         }
     }
 
@@ -113,31 +98,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connectivityManager.registerDefaultNetworkCallback(mNetworkCallback)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connectivityManager.unregisterNetworkCallback(mNetworkCallback)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.main, menu)
+        mFilterMenu = menu!!.findItem(R.id.menu_item_updates)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (mFetchRunning) {
+            return false
+        }
         return when (item.itemId) {
             R.id.menu_item_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.menu_item_updates -> {
+                if (mShowAUpdates) {
+                    showAll()
+                    mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
+                } else {
+                    showUpdates()
+                    mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -151,27 +135,43 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun downloadApp(app: AppItem) {
+        if (mFetchRunning) {
+            return
+        }
         if (app.fileUrl() == null) {
             Log.d(TAG, "downloadApp no fileUrl")
             return
         }
-        if (!mNetworkConnected) {
-            Log.d(TAG, "downloadApp no network")
-            return
-        }
-        val url: String = app.fileUrl()!!
-        val request: DownloadManager.Request = DownloadManager.Request(Uri.parse(url))
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, app.file())
-        //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        //request.setNotificationVisibility()
-        app.mDownloadId = mDownloadManager.enqueue(request)
-        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+        val url = app.fileUrl()!!
+        val checkApp =
+            NetworkUtils().CheckAppTask(
+                url,
+                object : NetworkTaskCallback {
+                    override fun postAction(networkError: Boolean) {
+                        if (networkError) {
+                            showNetworkError(url)
+                        } else {
+                            val request: DownloadManager.Request =
+                                DownloadManager.Request(Uri.parse(url))
+                            request.setDestinationInExternalPublicDir(
+                                Environment.DIRECTORY_DOWNLOADS,
+                                app.file()
+                            )
+                            //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+                            //request.setNotificationVisibility()
+                            app.mDownloadId = mDownloadManager.enqueue(request)
+                            (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
 
-        val serviceIndent = Intent(this, DownloadService::class.java)
-        serviceIndent.action = ACTION_ADD_DOWNLOAD
-        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app.mDownloadId)
-        serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.pkg())
-        startForegroundService(serviceIndent)
+                            val serviceIndent =
+                                Intent(this@MainActivity, DownloadService::class.java)
+                            serviceIndent.action = ACTION_ADD_DOWNLOAD
+                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app.mDownloadId)
+                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.pkg())
+                            startForegroundService(serviceIndent)
+                        }
+                    }
+                })
+        checkApp.execute()
     }
 
     fun cancelDownloadApp(app: AppItem) {
@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
         for (id in downloads.keys()) {
             val pkg = downloads.get(id).toString()
-            val dl = mAppsList.filter { it.pkg().equals(pkg) }
+            val dl = mAllAppsList.filter { it.pkg().equals(pkg) }
             if (dl.size == 1) {
                 dl.first().mDownloadId = id.toLong()
                 Log.d(TAG, "set downloadId = " + id + " to " + dl.first())
@@ -228,28 +228,79 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAllAppStatus() {
-        mAppsList.forEach { it.updateAppStatus(packageManager) }
+        mAllAppsList.forEach { it.updateAppStatus(packageManager) }
     }
 
     private fun refresh() {
-        if (mNetworkConnected) {
-            Log.d(TAG, "refresh no network")
+        if (mFetchRunning) {
             return
         }
+        Log.d(TAG, "refresh")
+
         val newAppsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(this, Runnable { startProgress() }, Runnable {
-                synchronized(this@MainActivity) {
-                    mAppsList.clear()
-                    mAppsList.addAll(newAppsList)
-                    updateAllAppStatus()
-                    syncRunningDownloads()
-                    this@MainActivity.runOnUiThread(Runnable {
-                        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+            NetworkUtils().FetchAppsTask(
+                this,
+                Runnable {
+                    mFetchRunning = true
+                    startProgress()
+                },
+                object : NetworkTaskCallback {
+                    override fun postAction(networkError: Boolean) {
+                        if (networkError) {
+                            showNetworkError(Constants.APPS_LIST_URI)
+                        } else {
+                            synchronized(this@MainActivity) {
+                                mAllAppsList.clear()
+                                mAllAppsList.addAll(newAppsList)
+                                updateAllAppStatus()
+                                syncRunningDownloads()
+
+                                mAppsList.clear()
+                                mAppsList.addAll(mAllAppsList)
+                                mAppsList.sortBy { it -> it.title() }
+
+                                (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+                            }
+                        }
                         stopProgress()
-                    })
-                }
-            }, newAppsList)
+                        mFetchRunning = false
+                    }
+                },
+                newAppsList
+            )
         fetchApps.execute()
+    }
+
+    private fun showUpdates() {
+        //val newAppsList: ArrayList<AppItem> = ArrayList()
+        //newAppsList.addAll(mAllAppsList.filter { it.updateAvailable() })
+
+        synchronized(this@MainActivity) {
+            mAppsList.clear()
+            mAppsList.addAll(mAllAppsList)
+            mAppsList.sortBy { it -> it.title() }
+            mAppsList.sortBy { it -> it.sortOrder() }
+            (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+        }
+        mShowAUpdates = true
+    }
+
+    private fun showAll() {
+        synchronized(this@MainActivity) {
+            mAppsList.clear()
+            mAppsList.addAll(mAllAppsList)
+            mAppsList.sortBy { it -> it.title() }
+            (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+        }
+        mShowAUpdates = false
+    }
+
+    private fun showNetworkError(url: String) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.dialog_title_network_error))
+        builder.setMessage(getString(R.string.dialog_message_network_error));
+        builder.setPositiveButton(android.R.string.ok, null)
+        builder.create().show()
     }
 }

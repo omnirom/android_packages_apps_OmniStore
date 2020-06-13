@@ -27,6 +27,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
         var pkg: TextView
         var progress: ProgressBar
         var note: ImageView
+        var indicator: ImageView
 
         constructor(view: View) : super(view) {
             title = view.findViewById(R.id.app_name)
@@ -36,6 +37,7 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             pkg = view.findViewById(R.id.app_pkg)
             progress = view.findViewById(R.id.app_progress)
             note = view.findViewById(R.id.app_note)
+            indicator = view.findViewById(R.id.app_indicator)
             view.setOnClickListener {
                 if (app.appSettingsEnabled()) {
                     val intent =
@@ -78,16 +80,19 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
         holder.app = app
         holder.title.text = app.title()
         if (app.iconUrl() != null) {
-            Picasso.with(context).load(app.iconUrl()).error(R.mipmap.ic_launcher).into(holder.logo)
+            Picasso.with(context).load(app.iconUrl())
+                .error(R.mipmap.ic_launcher).into(holder.logo)
         } else {
             holder.logo.setImageResource(R.mipmap.ic_launcher)
         }
         holder.pkg.text = app.pkg()
+        holder.indicator.visibility = View.GONE
+        holder.note.visibility = View.GONE
 
         if (app.mDownloadId != -1L) {
             holder.image.setImageResource(R.drawable.ic_cancel)
             holder.image.visibility = View.VISIBLE
-            holder.status.text = "Installing..."
+            holder.status.text = context.getString(R.string.status_installing)
             holder.progress.visibility = View.VISIBLE
         } else {
             if (app.installEnabled()) {
@@ -99,21 +104,22 @@ class AppAdapter(val items: ArrayList<AppItem>, val context: Context) :
             holder.progress.visibility = View.GONE
             if (app.updateAvailable()) {
                 holder.status.text =
-                    "Update available - " + app.versionName()
+                    context.getString(R.string.status_update_available) + " " + app.versionName()
+                holder.indicator.visibility = View.VISIBLE
             } else if (app.appInstalled()) {
-                holder.status.text = "Installed - " + app.mVersionName
-            } else if (app.appNotInstaleed()) {
                 holder.status.text =
-                    "Not installed - " + app.versionName()
+                    context.getString(R.string.status_installed) + " " + app.mVersionName
+            } else if (app.appNotInstaled()) {
+                holder.status.text =
+                    context.getString(R.string.status_not_installed) + " " + app.versionName()
             } else if (app.appDisabled()) {
-                holder.status.text = "Disabled - " + app.mVersionName
+                holder.status.text =
+                    context.getString(R.string.status_disabled) + " " + app.mVersionName
             }
         }
 
         if (app.note() != null) {
             holder.note.visibility = View.VISIBLE
-        } else {
-            holder.note.visibility = View.GONE
         }
     }
 }

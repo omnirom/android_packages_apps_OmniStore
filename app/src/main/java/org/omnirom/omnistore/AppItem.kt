@@ -14,7 +14,7 @@ class AppItem(val appData: JSONObject) {
     var mVersionName: String = ""
     private val TAG = "OmniStore:AppItem"
 
-    enum class InstallState { DISABLED, INSTALLED, UNINSTALLED}
+    enum class InstallState { DISABLED, INSTALLED, UNINSTALLED }
 
     fun isValied(device: String): Boolean {
         try {
@@ -38,12 +38,13 @@ class AppItem(val appData: JSONObject) {
             } else {
                 matchFilter = true
             }
-            if (matchFilter) {
+            return matchFilter
+            /*if (matchFilter) {
                 // TODO do we really need to check?
                 if (NetworkUtils().setupHttpsRequest(fileUrl()!!) != null) {
                     return true
                 }
-            }
+            }*/
         } catch (e: JSONException) {
             Log.e(TAG, "isValied", e)
         }
@@ -121,7 +122,7 @@ class AppItem(val appData: JSONObject) {
     }
 
     fun installEnabled(): Boolean {
-        return appNotInstaleed() || (appInstalled() && (versionCode() > mVersionCode))
+        return appNotInstaled() || (appInstalled() && (versionCode() > mVersionCode))
     }
 
     fun updateAvailable(): Boolean {
@@ -140,12 +141,22 @@ class AppItem(val appData: JSONObject) {
         return mInstalled == InstallState.INSTALLED
     }
 
-    fun appNotInstaleed(): Boolean {
+    fun appNotInstaled(): Boolean {
         return mInstalled == InstallState.UNINSTALLED
     }
 
     fun setInstalledStatus(status: InstallState) {
         mInstalled = status
+    }
+
+    fun sortOrder(): Int {
+        if (updateAvailable()) return 0
+        when (mInstalled) {
+            InstallState.INSTALLED -> return 1
+            InstallState.UNINSTALLED -> return 2
+            InstallState.DISABLED -> return 3
+        }
+        return 3
     }
 
     fun updateAppStatus(packageManager: PackageManager) {

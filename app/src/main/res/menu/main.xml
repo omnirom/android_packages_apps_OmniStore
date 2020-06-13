@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_item_updates"
+        android:icon="@drawable/ic_star_outline_white"
+        android:title="@string/menu_item_updates"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/menu_item_settings"
         android:title="@string/menu_item_settings"
         android:icon="@drawable/ic_settings"

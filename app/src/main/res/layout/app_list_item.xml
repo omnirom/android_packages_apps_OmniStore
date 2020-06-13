@@ -18,21 +18,22 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
         android:layout_marginStart="10dp"
         android:layout_weight="1"
-        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/app_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
@@ -41,10 +42,20 @@
                 android:id="@+id/app_note"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
                 android:src="@drawable/ic_info" />
+
+            <ImageView
+                android:id="@+id/app_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="5dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_star" />
+
         </LinearLayout>
 
         <TextView
@@ -76,8 +87,8 @@
 
     <ImageView
         android:id="@+id/app_image"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_gravity="center_vertical"
         android:scaleType="fitXY"
         android:src="@drawable/ic_download" />

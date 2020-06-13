@@ -4,12 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import android.util.Log
+
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
 
@@ -25,17 +20,21 @@ class App : Application() {
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val channelProgress = NotificationChannel(
-            NOTIFICATION_CHANNEL_PROGRESS,
-            "Download",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationManager.createNotificationChannel(channelProgress)
-        val channelUpdate = NotificationChannel(
-            NOTIFICATION_CHANNEL_UPDATE,
-            "Updates",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationManager.createNotificationChannel(channelUpdate)
+        if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_PROGRESS) == null) {
+            val channelProgress = NotificationChannel(
+                NOTIFICATION_CHANNEL_PROGRESS,
+                "Download",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            notificationManager.createNotificationChannel(channelProgress)
+        }
+        if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_UPDATE) == null) {
+            val channelUpdate = NotificationChannel(
+                NOTIFICATION_CHANNEL_UPDATE,
+                "Updates",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            notificationManager.createNotificationChannel(channelUpdate)
+        }
     }
 }
