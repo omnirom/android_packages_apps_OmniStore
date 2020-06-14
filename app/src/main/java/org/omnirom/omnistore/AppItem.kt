@@ -7,7 +7,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.APPS_BASE_URI
 
-class AppItem(val appData: JSONObject) {
+class AppItem(val appData: JSONObject) : ListItem {
     private var mInstalled: InstallState = InstallState.UNINSTALLED
     var mDownloadId: Long = -1
     var mVersionCode: Int = -1
@@ -67,7 +67,7 @@ class AppItem(val appData: JSONObject) {
         }
     }
 
-    fun title(): String {
+    override fun title(): String {
         try {
             return appData.get("title").toString()
         } catch (e: JSONException) {
@@ -149,14 +149,13 @@ class AppItem(val appData: JSONObject) {
         mInstalled = status
     }
 
-    fun sortOrder(): Int {
+    override fun sortOrder(): Int {
         if (updateAvailable()) return 0
         when (mInstalled) {
             InstallState.INSTALLED -> return 1
             InstallState.UNINSTALLED -> return 2
             InstallState.DISABLED -> return 3
         }
-        return 3
     }
 
     fun updateAppStatus(packageManager: PackageManager) {

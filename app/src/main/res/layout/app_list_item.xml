@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
+    android:background="?android:attr/selectableItemBackground"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
@@ -21,7 +22,6 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="10dp"
         android:layout_weight="1"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:orientation="vertical">
 
         <LinearLayout
@@ -54,7 +54,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="5dp"
-                android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/ic_star" />
 
         </LinearLayout>
@@ -91,7 +90,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_gravity="center_vertical"
-        android:scaleType="fitXY"
         android:background="?android:attr/selectableItemBackground"
+        android:scaleType="fitXY"
         android:src="@drawable/ic_download" />
 </LinearLayout>

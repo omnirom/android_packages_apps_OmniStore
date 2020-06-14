@@ -7,7 +7,6 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -22,12 +21,13 @@ import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.Constants.PREF_FILTER_ACTIVE
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
-    private val mAppsList: ArrayList<AppItem> = ArrayList()
+    private val mDisplayList: ArrayList<ListItem> = ArrayList()
     private val mAllAppsList: ArrayList<AppItem> = ArrayList()
     private val TAG = "OmniStore:MainActivity"
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
+    private lateinit var mPrefs: SharedPreferences
 
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                 )
             ) {
                 updateAllAppStatus()
-                (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+                applySortAndFilter()
             }
         }
     }
@@ -74,9 +75,11 @@ class MainActivity : AppCompatActivity() {
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         setContentView(R.layout.activity_main)
 
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+
         mRecyclerView = findViewById<RecyclerView>(R.id.app_list)
         mRecyclerView.layoutManager = LinearLayoutManager(this)
-        mRecyclerView.adapter = AppAdapter(mAppsList, this)
+        mRecyclerView.adapter = AppAdapter(mDisplayList, this)
 
         val downloadFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         registerReceiver(mDownloadReceiver, downloadFilter)
@@ -94,19 +97,24 @@ class MainActivity : AppCompatActivity() {
             }
             refresh()
         }
-        refresh()
 
-        val prefs: SharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(this)
-        if (prefs.getBoolean(PREF_CHECK_UPDATES, false)) {
+        if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
             JobUtils().scheduleCheckUpdates(this)
         }
+        mShowAUpdates = mPrefs.getBoolean(PREF_FILTER_ACTIVE, false)
+
+        refresh()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.main, menu)
         mFilterMenu = menu!!.findItem(R.id.menu_item_updates)
+        if (mShowAUpdates) {
+            mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
+        } else {
+            mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
+        }
         return true
     }
 
@@ -133,9 +141,10 @@ class MainActivity : AppCompatActivity() {
                     showAll()
                     mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
                 } else {
-                    showUpdates()
+                    showGrouped()
                     mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
                 }
+                mPrefs.edit().putBoolean(PREF_FILTER_ACTIVE, mShowAUpdates).commit()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -186,8 +195,9 @@ class MainActivity : AppCompatActivity() {
                                 null,
                                 app.file()
                             )
-                            val oldDownload = File(this@MainActivity.getExternalFilesDir(null), app.file())
-                            if(oldDownload.exists()) {
+                            val oldDownload =
+                                File(this@MainActivity.getExternalFilesDir(null), app.file())
+                            if (oldDownload.exists()) {
                                 oldDownload.delete()
                             }
                             //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
@@ -217,11 +227,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun cancelAllDownloads() {
-        mAppsList.filter { it.mDownloadId != -1L }.forEach { cancelDownloadApp(it) }
+        mDisplayList.filter { it is AppItem }.filter { (it as AppItem).mDownloadId != -1L }
+            .forEach { cancelDownloadApp((it as AppItem)) }
     }
 
     fun isDownloading(): Boolean {
-        return mAppsList.filter { it.mDownloadId != -1L }.isNotEmpty()
+        return mDisplayList.filter { it is AppItem }.filter { (it as AppItem).mDownloadId != -1L }
+            .isNotEmpty()
     }
 
     fun startProgress() {
@@ -233,17 +245,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun handleDownloadComplete(downloadId: Long?) {
-        val list = mAppsList.filter { it.mDownloadId == downloadId }
+        val list = mDisplayList.filter { it is AppItem }
+            .filter { (it as AppItem).mDownloadId == downloadId }
         if (list.size == 1) {
-            list.first().mDownloadId = -1
+            (list.first() as AppItem).mDownloadId = -1
         }
         (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
     }
 
     private fun syncRunningDownloads() {
-        val prefs: SharedPreferences =
-            PreferenceManager.getDefaultSharedPreferences(this)
-        val stats: String? = prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
+        val stats: String? = mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
         val downloads = JSONObject(stats!!)
         Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
         for (id in downloads.keys()) {
@@ -284,16 +295,11 @@ class MainActivity : AppCompatActivity() {
                                 mAllAppsList.addAll(newAppsList)
                                 updateAllAppStatus()
                                 syncRunningDownloads()
-
-                                mAppsList.clear()
-                                mAppsList.addAll(mAllAppsList)
-                                mAppsList.sortBy { it -> it.title() }
-
-                                (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
                             }
                         }
                         stopProgress()
                         mFetchRunning = false
+                        applySortAndFilter()
                     }
                 },
                 newAppsList
@@ -301,15 +307,36 @@ class MainActivity : AppCompatActivity() {
         fetchApps.execute()
     }
 
-    private fun showUpdates() {
-        //val newAppsList: ArrayList<AppItem> = ArrayList()
-        //newAppsList.addAll(mAllAppsList.filter { it.updateAvailable() })
-
+    private fun showGrouped() {
         synchronized(this@MainActivity) {
-            mAppsList.clear()
-            mAppsList.addAll(mAllAppsList)
-            mAppsList.sortBy { it -> it.title() }
-            mAppsList.sortBy { it -> it.sortOrder() }
+            mDisplayList.clear()
+            mDisplayList.addAll(mAllAppsList)
+
+            mDisplayList.sortBy { it.title() }
+            mDisplayList.sortBy { it.sortOrder() }
+
+            try {
+                var item = mDisplayList.first { it.sortOrder() == 0 }
+                val idx = mDisplayList.indexOf(item)
+                mDisplayList.add(idx, SeparatorItem(getString(R.string.separator_item_updates)))
+            } catch (e: NoSuchElementException) {
+            }
+            try {
+                var item = mDisplayList.first { it.sortOrder() == 1 }
+                val idx = mDisplayList.indexOf(item)
+                mDisplayList.add(idx, SeparatorItem(getString(R.string.separator_item_installed)))
+            } catch (e: NoSuchElementException) {
+            }
+            try {
+                var item = mDisplayList.first { it.sortOrder() == 2 }
+                val idx = mDisplayList.indexOf(item)
+                mDisplayList.add(
+                    idx,
+                    SeparatorItem(getString(R.string.separator_item_not_installed))
+                )
+            } catch (e: NoSuchElementException) {
+            }
+
             (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
         }
         mShowAUpdates = true
@@ -317,9 +344,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAll() {
         synchronized(this@MainActivity) {
-            mAppsList.clear()
-            mAppsList.addAll(mAllAppsList)
-            mAppsList.sortBy { it -> it.title() }
+            mDisplayList.clear()
+            mDisplayList.addAll(mAllAppsList)
+            mDisplayList.sortBy { it.title() }
             (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
         }
         mShowAUpdates = false
@@ -331,5 +358,13 @@ class MainActivity : AppCompatActivity() {
         builder.setMessage(getString(R.string.dialog_message_network_error));
         builder.setPositiveButton(android.R.string.ok, null)
         builder.create().show()
+    }
+
+    private fun applySortAndFilter() {
+        if (mShowAUpdates) {
+            showGrouped()
+        } else {
+            showAll()
+        }
     }
 }

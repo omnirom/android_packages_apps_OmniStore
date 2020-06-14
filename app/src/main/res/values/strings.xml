@@ -16,4 +16,7 @@
     <string name="menu_item_updates">Updates</string>
     <string name="dialog_title_network_error">Network Error</string>
     <string name="dialog_message_network_error">Network connection not available.\nPlease make sure you are connected to a network.</string>
+    <string name="separator_item_updates">Updates</string>
+    <string name="separator_item_installed">Installed</string>
+    <string name="separator_item_not_installed">Not Installed</string>
 </resources>

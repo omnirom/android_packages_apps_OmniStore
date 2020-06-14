@@ -24,10 +24,12 @@ class DownloadService : Service() {
     private var mDownloadReceiver: DownloadReceiver? = null
     private var mDownloadList: ArrayList<Long> = ArrayList()
     private lateinit var mDownloadManager: DownloadManager
+    private lateinit var mPrefs: SharedPreferences
 
     override fun onCreate() {
         super.onCreate()
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
     }
 
     inner class DownloadReceiver : BroadcastReceiver() {
@@ -42,13 +44,11 @@ class DownloadService : Service() {
                     handleDownloadComplete(downloadId as Long)
                     mDownloadList.remove(downloadId)
 
-                    val prefs: SharedPreferences =
-                        PreferenceManager.getDefaultSharedPreferences(context)
                     val stats: String? =
-                        prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
+                        mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
                     val downloads = JSONObject(stats!!)
                     downloads.remove(downloadId.toString())
-                    prefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
+                    mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
                         .commit()
                     Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                     if (mDownloadList.isEmpty()) {
@@ -75,13 +75,11 @@ class DownloadService : Service() {
                         IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
                     registerReceiver(mDownloadReceiver, downloadFilter)
                 }
-                val prefs: SharedPreferences =
-                    PreferenceManager.getDefaultSharedPreferences(this)
                 val stats: String? =
-                    prefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
+                    mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
                 val downloads = JSONObject(stats!!)
                 downloads.put(id.toString(), pkg)
-                prefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
+                mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
                     .commit()
                 Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                 mDownloadList.add(id as Long)
@@ -97,8 +95,7 @@ class DownloadService : Service() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
 
-        val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        prefs.edit().remove(PREF_CURRENT_DOWNLOADS).commit()
+        mPrefs.edit().remove(PREF_CURRENT_DOWNLOADS).commit()
 
         if (mDownloadReceiver != null) {
             unregisterReceiver(mDownloadReceiver)
