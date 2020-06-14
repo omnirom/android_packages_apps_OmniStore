@@ -1,8 +1,10 @@
 package org.omnirom.omnistore
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.*
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -21,6 +23,7 @@ import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,11 +32,13 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "OmniStore:MainActivity"
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
+    private val REQUEST_ERMISSION = 0
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
     private var mShowAUpdates = false
     private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
+    private var pendingApp: AppItem? = null
 
     inner class DownloadReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -105,6 +110,15 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == REQUEST_ERMISSION && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
+            pendingApp?.let { doDownloadApp(it) }
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (mFetchRunning) {
             return false
@@ -135,6 +149,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun downloadApp(app: AppItem) {
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            pendingApp = null
+            doDownloadApp(app)
+        } else {
+            pendingApp = app
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ), REQUEST_ERMISSION
+            )
+        }
+    }
+
+    private fun doDownloadApp(app: AppItem) {
         if (mFetchRunning) {
             return
         }
@@ -153,10 +181,15 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             val request: DownloadManager.Request =
                                 DownloadManager.Request(Uri.parse(url))
-                            request.setDestinationInExternalPublicDir(
-                                Environment.DIRECTORY_DOWNLOADS,
+                            request.setDestinationInExternalFilesDir(
+                                this@MainActivity,
+                                null,
                                 app.file()
                             )
+                            val oldDownload = File(this@MainActivity.getExternalFilesDir(null), app.file())
+                            if(oldDownload.exists()) {
+                                oldDownload.delete()
+                            }
                             //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                             //request.setNotificationVisibility()
                             app.mDownloadId = mDownloadManager.enqueue(request)
@@ -189,10 +222,6 @@ class MainActivity : AppCompatActivity() {
 
     fun isDownloading(): Boolean {
         return mAppsList.filter { it.mDownloadId != -1L }.isNotEmpty()
-    }
-
-    fun downloadAll() {
-        mAppsList.filter { it.mDownloadId == -1L }.forEach { downloadApp(it) }
     }
 
     fun startProgress() {
