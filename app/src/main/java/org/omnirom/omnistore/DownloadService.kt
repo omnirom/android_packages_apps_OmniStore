@@ -112,7 +112,7 @@ class DownloadService : Service() {
             context,
             NOTIFICATION_CHANNEL_PROGRESS
         )
-            .setContentTitle("Download and install")
+            .setContentTitle(getString(R.string.notification_download_title))
             .setSmallIcon(R.drawable.ic_notification)
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -128,7 +128,7 @@ class DownloadService : Service() {
         )
         notification.addAction(
             R.drawable.ic_cancel,
-            "Stop",
+            getString(R.string.notificatioon_action_stop),
             cancelPendingIntent
         )
 

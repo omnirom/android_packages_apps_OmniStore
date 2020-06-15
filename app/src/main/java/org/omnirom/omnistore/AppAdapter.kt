@@ -2,6 +2,7 @@ package org.omnirom.omnistore
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -41,12 +42,47 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             note = view.findViewById(R.id.app_note)
             indicator = view.findViewById(R.id.app_indicator)
             view.setOnClickListener {
-                if (app.appSettingsEnabled()) {
-                    val intent =
-                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.parse("package:" + app.pkg())
-                    it?.context?.startActivity(intent)
+                val builder = AlertDialog.Builder(context)
+                builder.setTitle(context.getString(R.string.dialog_app_info_title))
+
+                val v =
+                    LayoutInflater.from(context).inflate(R.layout.app_info_dialog, null, false)
+                v.findViewById<TextView>(R.id.app_title).text = app.title()
+                v.findViewById<TextView>(R.id.app_pkg).text = app.pkg()
+
+                var version = ""
+                if (app.updateAvailable()) {
+                    version = app.mVersionName
+                    v.findViewById<View>(R.id.update_row).visibility = View.VISIBLE
+                    v.findViewById<TextView>(R.id.app_update).text = app.versionName()
+                } else if (app.appNotInstaled()) {
+                    version = app.versionName()
+                } else if (app.appInstalled() or app.appDisabled()) {
+                    version = app.mVersionName
                 }
+                v.findViewById<TextView>(R.id.app_version).text = version
+
+                if (app.description() != null) {
+                    v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
+                    v.findViewById<TextView>(R.id.app_description).text = app.description()
+                }
+                if (app.note() != null) {
+                    v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
+                    v.findViewById<TextView>(R.id.app_description).text = app.note()
+                }
+                builder.setView(v)
+                builder.setPositiveButton(android.R.string.ok, null)
+                if (app.appSettingsEnabled()) {
+                    builder.setNeutralButton(
+                        R.string.menu_item_settings,
+                        DialogInterface.OnClickListener { _, _ ->
+                            val intent =
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data = Uri.parse("package:" + app.pkg())
+                            it?.context?.startActivity(intent)
+                        })
+                }
+                builder.create().show()
             }
             note.setOnClickListener {
                 val builder = AlertDialog.Builder(it?.context)
@@ -57,13 +93,13 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             }
 
             image.visibility = View.VISIBLE
-            image.setOnClickListener(View.OnClickListener {
+            image.setOnClickListener {
                 if (app.mDownloadId == -1L) {
                     (context as MainActivity).downloadApp(app)
                 } else {
                     (context as MainActivity).cancelDownloadApp(app)
                 }
-            })
+            }
         }
     }
 
@@ -120,7 +156,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 holder.progress.visibility = View.VISIBLE
             } else {
                 if (app.installEnabled()) {
-                    holder.image.setImageResource(R.drawable.ic_download)
+                    holder.image.setImageResource(R.drawable.ic_download_outline)
                     holder.image.visibility = View.VISIBLE
                 } else {
                     holder.image.visibility = View.GONE
@@ -128,17 +164,17 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 holder.progress.visibility = View.GONE
                 if (app.updateAvailable()) {
                     holder.status.text =
-                        context.getString(R.string.status_update_available) + " " + app.versionName()
+                        context.getString(R.string.status_update_available)
                     holder.indicator.visibility = View.VISIBLE
                 } else if (app.appInstalled()) {
                     holder.status.text =
-                        context.getString(R.string.status_installed) + " " + app.mVersionName
+                        context.getString(R.string.status_installed)
                 } else if (app.appNotInstaled()) {
                     holder.status.text =
-                        context.getString(R.string.status_not_installed) + " " + app.versionName()
+                        context.getString(R.string.status_not_installed)
                 } else if (app.appDisabled()) {
                     holder.status.text =
-                        context.getString(R.string.status_disabled) + " " + app.mVersionName
+                        context.getString(R.string.status_disabled)
                 }
             }
 

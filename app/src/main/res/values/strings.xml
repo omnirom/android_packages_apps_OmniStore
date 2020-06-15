@@ -13,10 +13,19 @@
     <string name="status_not_installed">Not installed"</string>
     <string name="status_disabled">Disabled</string>
     <string name="status_installing">Installing\u2026</string>
-    <string name="menu_item_updates">Updates</string>
+    <string name="menu_item_filter">Filter</string>
     <string name="dialog_title_network_error">Network Error</string>
     <string name="dialog_message_network_error">Network connection not available.\nPlease make sure you are connected to a network.</string>
     <string name="separator_item_updates">Updates</string>
     <string name="separator_item_installed">Installed</string>
-    <string name="separator_item_not_installed">Not Installed</string>
+    <string name="separator_item_not_installed">Not installed</string>
+    <string name="notificatioon_action_stop">Stop</string>
+    <string name="notification_download_title">Download and install</string>
+    <string name="notification_channel_downloads">Download</string>
+    <string name="notification_channel_updates">Updates</string>
+    <string name="dialog_app_info_title">App info</string>
+    <string name="dialog_app_info_pkg">Package:</string>
+    <string name="dialog_app_info_name">Name:</string>
+    <string name="dialog_app_info_version">Version:</string>
+    <string name="dialog_app_info_update">Update:</string>
 </resources>

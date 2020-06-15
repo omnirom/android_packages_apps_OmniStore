@@ -24,6 +24,11 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,6 +42,7 @@
                 android:layout_gravity="center_vertical"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
+                android:text="ccccccccccccccccccc"
                 android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
 
             <ImageView
@@ -64,7 +70,9 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            android:text="nnnnnnnnnnnnnnnnnnnnn"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/app_status"
@@ -72,8 +80,13 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
+            android:text="aaaaaaaaaaaaaaa"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 
     <ProgressBar
@@ -82,7 +95,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_gravity="center_vertical"
-        android:indeterminateTint="?android:attr/colorControlNormal"
+        android:indeterminateTint="?android:attr/textColorSecondary"
         android:visibility="gone" />
 
     <ImageView
@@ -92,5 +105,5 @@
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_download" />
+        android:src="@drawable/ic_download_outline" />
 </LinearLayout>

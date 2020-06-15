@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="2">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/dialog_app_info_name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/app_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_marginStart="5dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/description_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/app_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_span="2"
+                android:maxLines="3"
+                android:text="@string/dialog_app_info_version"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/dialog_app_info_pkg"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/app_pkg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_marginStart="5dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/dialog_app_info_version"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/app_version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_marginStart="5dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/update_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:text="@string/dialog_app_info_update"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/app_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_column="2"
+                android:layout_marginStart="5dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        </TableRow>
+
+
+    </TableLayout>
+</LinearLayout>

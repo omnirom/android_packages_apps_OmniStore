@@ -23,7 +23,7 @@ class App : Application() {
         if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_PROGRESS) == null) {
             val channelProgress = NotificationChannel(
                 NOTIFICATION_CHANNEL_PROGRESS,
-                "Download",
+                getString(R.string.notification_channel_downloads),
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channelProgress)
@@ -31,7 +31,7 @@ class App : Application() {
         if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_UPDATE) == null) {
             val channelUpdate = NotificationChannel(
                 NOTIFICATION_CHANNEL_UPDATE,
-                "Updates",
+                getString(R.string.notification_channel_updates),
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channelUpdate)

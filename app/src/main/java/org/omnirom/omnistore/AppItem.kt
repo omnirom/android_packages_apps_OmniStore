@@ -101,6 +101,16 @@ class AppItem(val appData: JSONObject) : ListItem {
         return null
     }
 
+    fun description(): String? {
+        if (appData.has("description")) {
+            try {
+                return appData.get("description").toString()
+            } catch (e: JSONException) {
+            }
+        }
+        return null
+    }
+
     fun versionName(): String {
         try {
             return appData.get("versionName").toString()

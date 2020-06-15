@@ -21,7 +21,7 @@ import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
-import org.omnirom.omnistore.Constants.PREF_FILTER_ACTIVE
+import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
 
@@ -35,8 +35,8 @@ class MainActivity : AppCompatActivity() {
     private val REQUEST_ERMISSION = 0
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
-    private var mShowAUpdates = false
-    private lateinit var mFilterMenu: MenuItem
+    private var mViewGroups = true
+    //private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
     private lateinit var mPrefs: SharedPreferences
@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
             JobUtils().scheduleCheckUpdates(this)
         }
-        mShowAUpdates = mPrefs.getBoolean(PREF_FILTER_ACTIVE, false)
+        mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
 
         refresh()
     }
@@ -109,12 +109,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.main, menu)
-        mFilterMenu = menu!!.findItem(R.id.menu_item_updates)
-        if (mShowAUpdates) {
+        /*mFilterMenu = menu!!.findItem(R.id.menu_item_filter)
+        if (mViewGroups) {
             mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
         } else {
             mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
-        }
+        }*/
         return true
     }
 
@@ -136,15 +136,15 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
-            R.id.menu_item_updates -> {
-                if (mShowAUpdates) {
+            R.id.menu_item_filter -> {
+                if (mViewGroups) {
                     showAll()
-                    mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
+                    //mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
                 } else {
                     showGrouped()
-                    mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
+                    //mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
                 }
-                mPrefs.edit().putBoolean(PREF_FILTER_ACTIVE, mShowAUpdates).commit()
+                mPrefs.edit().putBoolean(PREF_VIEW_GROUPS, mViewGroups).commit()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -227,12 +227,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun cancelAllDownloads() {
-        mDisplayList.filter { it is AppItem }.filter { (it as AppItem).mDownloadId != -1L }
+        mDisplayList.filter { it is AppItem && it.mDownloadId != -1L }
             .forEach { cancelDownloadApp((it as AppItem)) }
     }
 
     fun isDownloading(): Boolean {
-        return mDisplayList.filter { it is AppItem }.filter { (it as AppItem).mDownloadId != -1L }
+        return mDisplayList.filter { it is AppItem && it.mDownloadId != -1L }
             .isNotEmpty()
     }
 
@@ -245,8 +245,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun handleDownloadComplete(downloadId: Long?) {
-        val list = mDisplayList.filter { it is AppItem }
-            .filter { (it as AppItem).mDownloadId == downloadId }
+        val list = mDisplayList.filter { it is AppItem && it.mDownloadId == downloadId }
         if (list.size == 1) {
             (list.first() as AppItem).mDownloadId = -1
         }
@@ -259,7 +258,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
         for (id in downloads.keys()) {
             val pkg = downloads.get(id).toString()
-            val dl = mAllAppsList.filter { it.pkg().equals(pkg) }
+            val dl = mAllAppsList.filter { it.pkg() == pkg }
             if (dl.size == 1) {
                 dl.first().mDownloadId = id.toLong()
                 Log.d(TAG, "set downloadId = " + id + " to " + dl.first())
@@ -339,7 +338,7 @@ class MainActivity : AppCompatActivity() {
 
             (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
         }
-        mShowAUpdates = true
+        mViewGroups = true
     }
 
     private fun showAll() {
@@ -349,7 +348,7 @@ class MainActivity : AppCompatActivity() {
             mDisplayList.sortBy { it.title() }
             (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
         }
-        mShowAUpdates = false
+        mViewGroups = false
     }
 
     private fun showNetworkError(url: String) {
@@ -361,7 +360,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applySortAndFilter() {
-        if (mShowAUpdates) {
+        if (mViewGroups) {
             showGrouped()
         } else {
             showAll()
