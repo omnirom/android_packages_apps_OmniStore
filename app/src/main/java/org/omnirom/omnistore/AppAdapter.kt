@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -12,14 +13,19 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
+import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.Constants.TYPE_APP_ITEM
 import org.omnirom.omnistore.Constants.TYPE_SEPARATOR_ITEM
 
 
 class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    val mPrefs =
+            PreferenceManager.getDefaultSharedPreferences(context)
 
     inner class AppItemViewHolder : RecyclerView.ViewHolder {
         lateinit var app: AppItem
@@ -31,6 +37,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
         var progress: ProgressBar
         var note: ImageView
         var indicator: ImageView
+        var version: TextView
 
         constructor(view: View) : super(view) {
             title = view.findViewById(R.id.app_name)
@@ -41,6 +48,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             progress = view.findViewById(R.id.app_progress)
             note = view.findViewById(R.id.app_note)
             indicator = view.findViewById(R.id.app_indicator)
+            version = view.findViewById(R.id.app_version)
             view.setOnClickListener {
                 val builder = AlertDialog.Builder(context)
                 builder.setTitle(context.getString(R.string.dialog_app_info_title))
@@ -61,6 +69,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                     version = app.mVersionName
                 }
                 v.findViewById<TextView>(R.id.app_version).text = version
+                v.findViewById<TextView>(R.id.app_status).text = getStatusString(app)
 
                 if (app.description() != null) {
                     v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
@@ -140,7 +149,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             holder.app = app
             holder.title.text = app.title()
             Picasso.with(context).load(app.iconUrl())
-                    .error(R.drawable.ic_warning).into(holder.logo)
+                .error(R.drawable.ic_warning).into(holder.logo)
             holder.pkg.text = app.pkg()
             holder.indicator.visibility = View.GONE
             holder.note.visibility = View.GONE
@@ -148,7 +157,6 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             if (app.mDownloadId != -1L) {
                 holder.image.setImageResource(R.drawable.ic_cancel)
                 holder.image.visibility = View.VISIBLE
-                holder.status.text = context.getString(R.string.status_installing)
                 holder.progress.visibility = View.VISIBLE
             } else {
                 if (app.installEnabled()) {
@@ -158,19 +166,26 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                     holder.image.visibility = View.GONE
                 }
                 holder.progress.visibility = View.GONE
+                holder.status.text = getStatusString(app)
                 if (app.updateAvailable()) {
-                    holder.status.text =
                         context.getString(R.string.status_update_available)
+                    holder.version.text =
+                        context.resources.getString(R.string.app_item_version) + " " + app.versionName()
                     holder.indicator.visibility = View.VISIBLE
                 } else if (app.appInstalled()) {
-                    holder.status.text =
-                        context.getString(R.string.status_installed)
+                    holder.version.text =
+                        context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
                 } else if (app.appNotInstaled()) {
-                    holder.status.text =
-                        context.getString(R.string.status_not_installed)
+                    holder.version.text =
+                        context.resources.getString(R.string.app_item_version) + " " + app.versionName()
                 } else if (app.appDisabled()) {
-                    holder.status.text =
-                        context.getString(R.string.status_disabled)
+                    holder.version.text =
+                        context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
+                }
+                if (mPrefs.getBoolean(PREF_VIEW_GROUPS, false)) {
+                    holder.status.visibility = View.GONE
+                } else {
+                    holder.status.visibility = View.VISIBLE
                 }
             }
 
@@ -180,6 +195,24 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
         } else if (holder is SeparatorItemViewHolder) {
             val separator: SeparatorItem = items[position] as SeparatorItem
             holder.title.text = separator.title()
+        }
+    }
+
+    private fun getStatusString(app: AppItem) : String {
+        return when {
+            app.updateAvailable() -> {
+                context.getString(R.string.status_update_available)
+            }
+            app.appInstalled() -> {
+                context.getString(R.string.status_installed)
+            }
+            app.appNotInstaled() -> {
+                context.getString(R.string.status_not_installed)
+            }
+            app.appDisabled() -> {
+                context.getString(R.string.status_disabled)
+            }
+            else -> ""
         }
     }
 }
