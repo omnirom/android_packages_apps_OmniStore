@@ -46,8 +46,6 @@ class NetworkUtils {
                     val appData = AppItem(app)
                     if (appData.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
                         mNewAppsList.add(appData)
-                    } else {
-                        Log.i(TAG, "ignore app " + app.toString())
                     }
                 }
             } else {

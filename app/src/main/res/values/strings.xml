@@ -28,4 +28,8 @@
     <string name="dialog_app_info_name">Name:</string>
     <string name="dialog_app_info_version">Version:</string>
     <string name="dialog_app_info_update">Update:</string>
+    <string name="notification_updates_title">New updates are available</string>
+    <string name="notification_updates_line_one">Updated:</string>
+    <string name="notification_updates_line_two">New"</string>
+
 </resources>

@@ -20,6 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
+import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
@@ -299,6 +300,11 @@ class MainActivity : AppCompatActivity() {
                         stopProgress()
                         mFetchRunning = false
                         applySortAndFilter()
+
+                        val pkgList = HashSet<String>()
+                        mAllAppsList.forEach { pkgList.add(it.pkg()) }
+                        // to compare on update check if app list has changed
+                        mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
                     }
                 },
                 newAppsList

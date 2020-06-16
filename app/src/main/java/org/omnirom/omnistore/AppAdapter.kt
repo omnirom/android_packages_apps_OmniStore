@@ -139,12 +139,8 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             val app: AppItem = items[position] as AppItem
             holder.app = app
             holder.title.text = app.title()
-            if (app.iconUrl() != null) {
-                Picasso.with(context).load(app.iconUrl())
-                    .error(R.mipmap.ic_launcher).into(holder.logo)
-            } else {
-                holder.logo.setImageResource(R.mipmap.ic_launcher)
-            }
+            Picasso.with(context).load(app.iconUrl())
+                    .error(R.drawable.ic_warning).into(holder.logo)
             holder.pkg.text = app.pkg()
             holder.indicator.visibility = View.GONE
             holder.note.visibility = View.GONE
