@@ -25,7 +25,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val mPrefs =
-            PreferenceManager.getDefaultSharedPreferences(context)
+        PreferenceManager.getDefaultSharedPreferences(context)
 
     inner class AppItemViewHolder : RecyclerView.ViewHolder {
         lateinit var app: AppItem
@@ -166,29 +166,28 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                     holder.image.visibility = View.GONE
                 }
                 holder.progress.visibility = View.GONE
-                holder.status.text = getStatusString(app)
-                if (app.updateAvailable()) {
-                        context.getString(R.string.status_update_available)
-                    holder.version.text =
-                        context.resources.getString(R.string.app_item_version) + " " + app.versionName()
-                    holder.indicator.visibility = View.VISIBLE
-                } else if (app.appInstalled()) {
-                    holder.version.text =
-                        context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
-                } else if (app.appNotInstaled()) {
-                    holder.version.text =
-                        context.resources.getString(R.string.app_item_version) + " " + app.versionName()
-                } else if (app.appDisabled()) {
-                    holder.version.text =
-                        context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
-                }
-                if (mPrefs.getBoolean(PREF_VIEW_GROUPS, false)) {
-                    holder.status.visibility = View.GONE
-                } else {
-                    holder.status.visibility = View.VISIBLE
-                }
             }
-
+            holder.status.text = getStatusString(app)
+            if (app.updateAvailable()) {
+                context.getString(R.string.status_update_available)
+                holder.version.text =
+                    context.resources.getString(R.string.app_item_version) + " " + app.versionName()
+                holder.indicator.visibility = View.VISIBLE
+            } else if (app.appInstalled()) {
+                holder.version.text =
+                    context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
+            } else if (app.appNotInstaled()) {
+                holder.version.text =
+                    context.resources.getString(R.string.app_item_version) + " " + app.versionName()
+            } else if (app.appDisabled()) {
+                holder.version.text =
+                    context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
+            }
+            if (mPrefs.getBoolean(PREF_VIEW_GROUPS, true)) {
+                holder.status.visibility = View.GONE
+            } else {
+                holder.status.visibility = View.VISIBLE
+            }
             if (app.note() != null) {
                 holder.note.visibility = View.VISIBLE
             }
@@ -198,7 +197,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
         }
     }
 
-    private fun getStatusString(app: AppItem) : String {
+    private fun getStatusString(app: AppItem): String {
         return when {
             app.updateAvailable() -> {
                 context.getString(R.string.status_update_available)
