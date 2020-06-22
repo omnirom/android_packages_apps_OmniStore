@@ -74,8 +74,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 if (app.description() != null) {
                     v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_description).text = app.description()
-                }
-                if (app.note() != null) {
+                } else  if (app.note() != null ) {
                     v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_description).text = app.note()
                 }

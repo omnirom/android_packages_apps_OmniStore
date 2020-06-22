@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val REQUEST_ERMISSION = 0
+    private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
     private var mViewGroups = true
@@ -180,6 +181,9 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "downloadApp no fileUrl")
             return
         }
+        // get a user feedback asap
+        setAppItemDownloadState(app, FAKE_DOWNLOAD_ID)
+
         val url = app.fileUrl()!!
         val checkApp =
             NetworkUtils().CheckAppTask(
@@ -187,6 +191,8 @@ class MainActivity : AppCompatActivity() {
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean) {
                         if (networkError) {
+                            // reset
+                            setAppItemDownloadState(app, -1)
                             showNetworkError(url)
                         } else {
                             val request: DownloadManager.Request =
@@ -202,9 +208,8 @@ class MainActivity : AppCompatActivity() {
                                 oldDownload.delete()
                             }
                             //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-                            //request.setNotificationVisibility()
-                            app.mDownloadId = mDownloadManager.enqueue(request)
-                            (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+                            // now we have a real id
+                            setAppItemDownloadState(app, mDownloadManager.enqueue(request))
 
                             val serviceIndent =
                                 Intent(this@MainActivity, DownloadService::class.java)
@@ -223,8 +228,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
         mDownloadManager.remove(app.mDownloadId)
-        app.mDownloadId = -1L
-        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+
+        setAppItemDownloadState(app, -1)
     }
 
     fun cancelAllDownloads() {
@@ -248,9 +253,9 @@ class MainActivity : AppCompatActivity() {
     fun handleDownloadComplete(downloadId: Long?) {
         val list = mDisplayList.filter { it is AppItem && it.mDownloadId == downloadId }
         if (list.size == 1) {
-            (list.first() as AppItem).mDownloadId = -1
+            val app = (list.first() as AppItem)
+            setAppItemDownloadState(app, -1)
         }
-        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
     }
 
     private fun syncRunningDownloads() {
@@ -371,5 +376,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             showAll()
         }
+    }
+
+    private fun setAppItemDownloadState(app: AppItem, id: Long) {
+        app.mDownloadId = id
+        (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
     }
 }

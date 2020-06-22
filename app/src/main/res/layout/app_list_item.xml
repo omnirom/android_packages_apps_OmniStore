@@ -49,8 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
-                android:background="?android:attr/selectableItemBackground"
+                android:layout_marginStart="10dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_info" />
 
             <ImageView
@@ -58,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:src="@drawable/ic_star" />
 
         </LinearLayout>
