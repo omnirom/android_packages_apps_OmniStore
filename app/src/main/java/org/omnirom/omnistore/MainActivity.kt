@@ -197,13 +197,14 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             val request: DownloadManager.Request =
                                 DownloadManager.Request(Uri.parse(url))
+                            val fileName = File(app.file()).name
                             request.setDestinationInExternalFilesDir(
                                 this@MainActivity,
                                 null,
-                                app.file()
+                                fileName
                             )
                             val oldDownload =
-                                File(this@MainActivity.getExternalFilesDir(null), app.file())
+                                File(this@MainActivity.getExternalFilesDir(null), fileName)
                             if (oldDownload.exists()) {
                                 oldDownload.delete()
                             }
@@ -295,21 +296,20 @@ class MainActivity : AppCompatActivity() {
                         if (networkError) {
                             showNetworkError(Constants.APPS_LIST_URI)
                         } else {
-                            synchronized(this@MainActivity) {
-                                mAllAppsList.clear()
-                                mAllAppsList.addAll(newAppsList)
-                                updateAllAppStatus()
-                                syncRunningDownloads()
-                            }
+                            mAllAppsList.clear()
+                            mAllAppsList.addAll(newAppsList)
+                            updateAllAppStatus()
+                            syncRunningDownloads()
+
+                            val pkgList = HashSet<String>()
+                            mAllAppsList.forEach { pkgList.add(it.pkg()) }
+                            // to compare on update check if app list has changed
+                            mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
+
+                            applySortAndFilter()
                         }
                         stopProgress()
                         mFetchRunning = false
-                        applySortAndFilter()
-
-                        val pkgList = HashSet<String>()
-                        mAllAppsList.forEach { pkgList.add(it.pkg()) }
-                        // to compare on update check if app list has changed
-                        mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
                     }
                 },
                 newAppsList

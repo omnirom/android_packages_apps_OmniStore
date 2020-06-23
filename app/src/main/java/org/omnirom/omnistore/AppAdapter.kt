@@ -61,7 +61,8 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 var version = ""
                 if (app.updateAvailable()) {
                     version = app.mVersionName
-                    v.findViewById<View>(R.id.update_row).visibility = View.VISIBLE
+                    v.findViewById<View>(R.id.app_update_title).visibility = View.VISIBLE
+                    v.findViewById<TextView>(R.id.app_update).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_update).text = app.versionName()
                 } else if (app.appNotInstaled()) {
                     version = app.versionName()
@@ -72,10 +73,10 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 v.findViewById<TextView>(R.id.app_status).text = getStatusString(app)
 
                 if (app.description() != null) {
-                    v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
+                    v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_description).text = app.description()
-                } else  if (app.note() != null ) {
-                    v.findViewById<View>(R.id.description_row).visibility = View.VISIBLE
+                } else if (app.note() != null) {
+                    v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_description).text = app.note()
                 }
                 builder.setView(v)
