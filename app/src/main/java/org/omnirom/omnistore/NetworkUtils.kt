@@ -41,6 +41,7 @@ class NetworkUtils {
             val appListData: String? = downloadUrlMemoryAsString(Constants.APPS_LIST_URI)
             if (appListData != null) {
                 val apps = JSONArray(appListData)
+                //Log.d(TAG, "" + apps)
                 for (i in 0 until apps.length()) {
                     val app = apps.getJSONObject(i);
                     val appData = AppItem(app)
@@ -101,6 +102,7 @@ class NetworkUtils {
         urlConnection.setReadTimeout(HTTP_READ_TIMEOUT)
         urlConnection.setRequestMethod("GET")
         urlConnection.setDoInput(true)
+        urlConnection.setDefaultUseCaches(false)
         urlConnection.connect()
         val code: Int = urlConnection.getResponseCode()
         if (code != HttpsURLConnection.HTTP_OK) {
