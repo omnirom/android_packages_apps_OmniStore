@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">Einstellungen</string>
+    <string name="menu_item_check">Prüfen</string>
+    <string name="title_settings">Einstellungen</string>
+    <string name="category_notifications">Benachrichtigungen</string>
+    <string name="notification_settings_title">Benachrichtigungen verwalten</string>
+    <string name="check_updates_title">Suche nach Updates</string>
+    <string name="status_update_available">Aktualisierung verfügbar</string>
+    <string name="status_installed">Installiert</string>
+    <string name="status_not_installed">Nicht installiert</string>
+    <string name="status_disabled">Deaktiviert</string>
+    <string name="status_installing">Installiert\u2026</string>
+    <string name="menu_item_filter">Filter</string>
+    <string name="dialog_title_network_error">Netzwerkfehler</string>
+    <string name="dialog_message_network_error">Netzwerkverbindung nicht verfügbar.\nBitte stellen Sie sicher, dass Sie mit einem Netzwerk verbunden sind.</string>
+    <string name="separator_item_updates">Updates</string>
+    <string name="separator_item_installed">Installiert</string>
+    <string name="separator_item_not_installed">Nicht installiert</string>
+    <string name="notificatioon_action_stop">Stop</string>
+    <string name="notification_download_title">Herunterladen und installieren</string>
+    <string name="notification_channel_downloads">Herunterladen</string>
+    <string name="notification_channel_updates">Updates</string>
+    <string name="dialog_app_info_title">App Info</string>
+    <string name="dialog_app_info_pkg">Paket:</string>
+    <string name="dialog_app_info_name">Name:</string>
+    <string name="dialog_app_info_version">Version:</string>
+    <string name="dialog_app_info_update">Update:</string>
+    <string name="notification_updates_title">Neues Updates verfügbar</string>
+    <string name="notification_updates_line_one">Aktualisiert:</string>
+    <string name="notification_updates_line_two">Neu</string>
+    <string name="app_item_version">Version:</string>
+    <string name="dialog_app_info_status">Status:</string>
+</resources>
