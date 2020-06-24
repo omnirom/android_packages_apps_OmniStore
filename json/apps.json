@@ -1,0 +1,171 @@
+[
+    {
+        "title": "Dolby Atmos DAX2",
+        "file": "com.dolby.daxappui.apk",
+        "devices": [
+            "oneplus7t",
+            "oneplus7tpro",
+            "oneplus7pro"
+        ],
+        "category": "extra",
+        "package" : "com.dolby.daxappui",
+        "icon" : "com.dolby.daxappui.png",
+        "versionCode" : "28",
+        "versionName" : "2-6-0-28_r1",
+        "description" : "Dolby Atmos application from RAZER."
+    },
+    {
+        "title": "DeskClock",
+        "file": "DeskClock.apk",
+        "category": "core",
+        "package" : "com.android.deskclock",
+        "icon" : "DeskClock.png",
+        "versionCode" : "2",
+        "versionName" : "1.0.1",
+        "description" : "AOSP clock application."
+    },
+    {
+        "title": "Calendar",
+        "file": "Calendar.apk",
+        "category": "core",
+        "package" : "com.android.calendar",
+        "icon" : "Calendar.png",
+        "versionCode" : "2",
+        "versionName" : "1.0.1",
+        "description" : "AOSP calendar application."
+    },
+    {
+        "title": "Google Calendar Sync Adapter",
+        "file": "GoogleCalendarSyncAdapter.apk",
+        "category": "extra",
+        "package" : "com.google.android.syncadapters.calendar",
+        "icon" : "GoogleCalendarSyncAdapter.png",
+        "versionCode" : "2016267990",
+        "versionName" : "6.0.44-267540251-release",
+        "description" : "Enable Google calendar syncing for AOSP calendar application."
+    },
+    {
+        "title": "OmniStore",
+        "file": "OmniStore.apk",
+        "category": "core",
+        "package" : "org.omnirom.omnistore",
+        "icon" : "OmniStore.png",
+        "versionCode" : "19",
+        "versionName" : "2.2.1",
+        "description" : "Mini-Me."
+    },
+    {
+        "title": "Calculator",
+        "file": "ExactCalculator.apk",
+        "category": "core",
+        "package" : "com.android.calculator2",
+        "icon" : "ExactCalculator.png",
+        "versionCode" : "2",
+        "versionName" : "1.0.1"
+    },
+    {
+        "title": "Gallery",
+        "file": "Gallery2.apk",
+        "category": "core",
+        "package" : "com.android.gallery3d",
+        "icon" : "Gallery2.png",
+        "versionCode" : "50002",
+        "versionName" : "1.2.2",
+        "description" : "AOSP gallery application."
+    },
+    {
+        "title": "OnePlus Gallery",
+        "file": "OnePlusGallery.apk",
+        "category": "extra",
+        "devices": [
+            "oneplus7t",
+            "oneplus7tpro",
+            "oneplus7pro",
+            "oneplus6",
+            "oneplus6t"        
+        ],
+        "package" : "com.oneplus.gallery",
+        "icon" : "OnePlusGallery.png",
+        "versionCode" : "23240750",
+        "versionName" : "3.7.24",
+        "note" : "Mandatory for gallery integration with OnePlus Camera"
+    },
+    {
+        "title": "OnePlus Camera",
+        "file": "OnePlusCamera.apk",
+        "category": "extra",
+        "devices": [
+            "oneplus7t",
+            "oneplus7tpro",
+            "oneplus7pro",
+            "oneplus6",
+            "oneplus6t"
+        ],
+        "package" : "com.oneplus.camera",
+        "icon" : "OnePlusCamera.png",
+        "versionCode" : "23270449",
+        "versionName" : "3.8.114",
+        "description" : "Native OnePlus camera application.",
+        "note" : "Reboot required after first installation"
+    },
+    {
+        "title": "Phonograph",
+        "file": "Phonograph.apk",
+        "category": "core",
+        "package" : "org.omnirom.gramophone",
+        "icon" : "Phonograph.png",
+        "versionCode" : "2",
+        "versionName" : "1.0.1",
+        "description" : "Music player."
+    },
+    {
+        "title": "Media Alarm Clock",
+        "file": "MediaAlarmClock.apk",
+        "category": "extra",
+        "package" : "com.maxwen.alarmclock",
+        "icon" : "MediaAlarmClock.png",
+        "versionCode" : "41",
+        "versionName" : "1.4.2",
+        "description" : "Alarm clock with Spotify and cloud support."
+    },
+    {
+        "title": "Chromium",
+        "file": "ChromeModernPublic.apk",
+        "category": "core",
+        "package" : "org.chromium.chrome",
+        "icon" : "Chromium.png",
+        "versionCode" : "410310115",
+        "versionName" : "83.0.4103.101",
+        "description" : "Open-source browser with Bromite privacy patches. Build by the OmniROM-team."
+    },
+    {
+        "title": "OmniClock",
+        "file": "OmniClock.apk",
+        "category": "extra",
+        "package" : "com.maxwen.deskclock",
+        "icon" : "OmniClock.png",
+        "versionCode" : "102",
+        "versionName" : "2.3.10",
+        "description" : "World clock - stopwatch - timer and alarm clock."
+    },
+    {
+        "title": "Webview",
+        "file": "SystemWebView.apk",
+        "category": "core",
+        "package" : "com.android.webview",
+        "icon" : "Webview.png",
+        "versionCode" : "410310103",
+        "versionName" : "83.0.4103.101",
+        "description" : "Open-source Webview with Bromite privacy patches. Build by the OmniROM-team."
+    },
+    {
+        "title": "SnapdragonGallery",
+        "file": "SnapdragonGallery.apk",
+        "category": "extra",
+        "package" : "org.codeaurora.gallery",
+        "icon" : "SnapdragonGallery.png",
+        "versionCode" : "40030",
+        "versionName" : "1.1.40030",
+        "description" : "Fork of AOSP gallery with some enhancements."
+    }
+]
