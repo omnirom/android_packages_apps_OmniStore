@@ -27,13 +27,12 @@ class CheckUpdatesService : JobService() {
     }
 
     private fun createNotification(
-        context: Context,
         title: String,
         message1: String,
         message2: String
     ): Notification? {
         val notification = NotificationCompat.Builder(
-            context,
+            this,
             Constants.NOTIFICATION_CHANNEL_UPDATE
         )
             .setContentTitle(title)
@@ -41,7 +40,7 @@ class CheckUpdatesService : JobService() {
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
-            .setColor(context.resources.getColor(R.color.omni_logo_color))
+            .setColor(resources.getColor(R.color.omni_logo_color, null))
 
         when {
             message2.isNullOrEmpty() and !message1.isNullOrEmpty() -> {
@@ -58,9 +57,9 @@ class CheckUpdatesService : JobService() {
                 )
             }
         }
-        val showApp = Intent(context, MainActivity::class.java)
+        val showApp = Intent(this, MainActivity::class.java)
         val showAppIntent: PendingIntent = PendingIntent.getActivity(
-            context,
+            this,
             showApp.hashCode(), showApp, PendingIntent.FLAG_UPDATE_CURRENT
         )
         notification.setContentIntent(showAppIntent)
@@ -68,20 +67,20 @@ class CheckUpdatesService : JobService() {
     }
 
     private fun checkForUpdates(params: JobParameters?) {
-        val newAppsList: ArrayList<AppItem> = ArrayList()
+        val appsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
             NetworkUtils().FetchAppsTask(this, Runnable { }, object :
                 NetworkUtils.NetworkTaskCallback {
                 override fun postAction(networkError: Boolean) {
                     if (!networkError) {
-                        newAppsList.forEach { it.updateAppStatus(this@CheckUpdatesService.packageManager) }
-                        val updateApps = newAppsList.filter { it.updateAvailable() }
+                        appsList.forEach { it.updateAppStatus(this@CheckUpdatesService.packageManager) }
+                        val updateApps = appsList.filter { it.updateAvailable() }
 
                         val prefs =
                             PreferenceManager.getDefaultSharedPreferences(this@CheckUpdatesService)
                         val oldPkgList =
                             prefs.getStringSet(Constants.PREF_CURRENT_APPS, HashSet<String>())
-                        val newAppsList = newAppsList.filter { !oldPkgList!!.contains(it.pkg()) }
+                        val newAppsList = appsList.filter { !oldPkgList!!.contains(it.pkg()) }
 
                         var message1 = ""
                         var message2 = ""
@@ -115,7 +114,6 @@ class CheckUpdatesService : JobService() {
 
                         val notification =
                             createNotification(
-                                this@CheckUpdatesService,
                                 getString(R.string.notification_updates_title),
                                 message1,
                                 message2
@@ -128,7 +126,7 @@ class CheckUpdatesService : JobService() {
                     }
                     jobFinished(params, false)
                 }
-            }, newAppsList)
+            }, appsList)
         fetchApps.execute()
     }
 }

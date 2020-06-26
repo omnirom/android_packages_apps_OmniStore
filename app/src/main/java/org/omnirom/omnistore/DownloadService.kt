@@ -69,7 +69,6 @@ class DownloadService : Service() {
             startForeground(NOTIFICATION_PROGRESS_ID, showProgressNotification())
             val id = intent?.getLongExtra(EXTRA_DOWNLOAD_ID, -1)
             val pkg = intent?.getStringExtra(EXTRA_DOWNLOAD_PKG)
-            val name = intent?.getStringExtra(EXTRA_DOWNLOAD_NAME)
 
             Log.d(TAG, "ADD_DOWNLOAD DOWNLOAD_ID = " + id + " DOWNLOAD_PKG = " + pkg)
 
@@ -127,7 +126,7 @@ class DownloadService : Service() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
             .setOngoing(true)
-            .setColor(resources.getColor(R.color.omni_logo_color))
+            .setColor(resources.getColor(R.color.omni_logo_color, null))
 
         val cancelIntent = Intent(this, DownloadService::class.java)
         cancelIntent.action = ACTION_CANCEL_DOWNLOAD
@@ -165,7 +164,7 @@ class DownloadService : Service() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
             .setOnlyAlertOnce(true)
-            .setColor(resources.getColor(R.color.omni_logo_color))
+            .setColor(resources.getColor(R.color.omni_logo_color, null))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setFullScreenIntent(fullScreenPendingIntent, true)
 

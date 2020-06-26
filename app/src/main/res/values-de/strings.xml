@@ -11,7 +11,6 @@
     <string name="status_installed">Installiert</string>
     <string name="status_not_installed">Nicht installiert</string>
     <string name="status_disabled">Deaktiviert</string>
-    <string name="status_installing">Installiert\u2026</string>
     <string name="menu_item_filter">Filter</string>
     <string name="dialog_title_network_error">Netzwerkfehler</string>
     <string name="dialog_message_network_error">Netzwerkverbindung nicht verfügbar.\nBitte stellen Sie sicher, dass Sie mit einem Netzwerk verbunden sind.</string>

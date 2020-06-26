@@ -11,7 +11,6 @@
     <string name="status_installed">Nainstalováno</string>
     <string name="status_not_installed">Není nainstalováno</string>
     <string name="status_disabled">Vypnuto</string>
-    <string name="status_installing">Inicializace\u2026</string>
     <string name="menu_item_filter">Filtr</string>
     <string name="dialog_title_network_error">Chyba sítě</string>
     <string name="dialog_message_network_error">Připojení k síti není k dispozici.\nUjistěte se, že jste připojeni k síti.</string>
