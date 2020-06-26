@@ -20,9 +20,11 @@
     <string name="separator_item_installed">Installed</string>
     <string name="separator_item_not_installed">Not installed</string>
     <string name="notificatioon_action_stop">Stop</string>
-    <string name="notification_download_title">Download and install</string>
-    <string name="notification_channel_downloads">Download</string>
+    <string name="notification_download_title">Download</string>
+    <string name="notification_channel_downloads">Downloads</string>
     <string name="notification_channel_updates">Updates</string>
+    <string name="notification_channel_install">Installations</string>
+    <string name="notification_install_title">Install</string>
     <string name="dialog_app_info_title">App info</string>
     <string name="dialog_app_info_pkg">Package:</string>
     <string name="dialog_app_info_name">Name:</string>

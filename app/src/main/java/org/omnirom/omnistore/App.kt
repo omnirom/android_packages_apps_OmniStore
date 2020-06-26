@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_INSTALL
 
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
@@ -35,6 +36,15 @@ class App : Application() {
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channelUpdate)
+        }
+        if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_INSTALL) == null) {
+            val channelInstall = NotificationChannel(
+                NOTIFICATION_CHANNEL_INSTALL,
+                getString(R.string.notification_channel_install),
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channelInstall.setSound(null, null)
+            notificationManager.createNotificationChannel(channelInstall)
         }
     }
 }

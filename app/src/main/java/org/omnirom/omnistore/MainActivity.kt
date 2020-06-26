@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                             serviceIndent.action = ACTION_ADD_DOWNLOAD
                             serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app.mDownloadId)
                             serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.pkg())
+                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_NAME, app.title())
                             startForegroundService(serviceIndent)
                         }
                     }
