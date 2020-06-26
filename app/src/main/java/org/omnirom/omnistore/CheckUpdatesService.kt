@@ -88,13 +88,29 @@ class CheckUpdatesService : JobService() {
 
                         if (updateApps.isNotEmpty()) {
                             Log.d(TAG, "checkForUpdates: updates available " + updateApps)
-                            updateApps.forEach { message1 += it.title() + ", " }
-                            message1 = getString(R.string.notification_updates_line_one) + " " + message1.substring(0, message1.length - 2)
+                            updateApps.slice(0..(updateApps.size - 1).coerceAtMost(2))
+                                .forEach { message1 += it.title() + ", " }
+                            message1 =
+                                getString(R.string.notification_updates_line_one) + " " + message1.substring(
+                                    0,
+                                    message1.length - 2
+                                )
+                            if (updateApps.size > 3) {
+                                message1 += ",..."
+                            }
                         }
                         if (newAppsList.isNotEmpty()) {
                             Log.d(TAG, "checkForUpdates: new apps available " + newAppsList)
-                            newAppsList.forEach { message2 += it.title() + ", " }
-                            message2 = getString(R.string.notification_updates_line_two) + " " + message2.substring(0, message2.length - 2)
+                            newAppsList.slice(0..(newAppsList.size - 1).coerceAtMost(2))
+                                .forEach { message2 += it.title() + ", " }
+                            message2 =
+                                getString(R.string.notification_updates_line_two) + " " + message2.substring(
+                                    0,
+                                    message2.length - 2
+                                )
+                            if (newAppsList.size > 3) {
+                                message2 += ",..."
+                            }
                         }
 
                         val notification =

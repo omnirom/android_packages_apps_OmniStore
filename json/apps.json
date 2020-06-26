@@ -134,8 +134,8 @@
         "category": "core",
         "package" : "org.chromium.chrome",
         "icon" : "Chromium.png",
-        "versionCode" : "410310115",
-        "versionName" : "83.0.4103.101",
+        "versionCode" : "410311615",
+        "versionName" : "83.0.4103.116",
         "description" : "Open-source browser with Bromite privacy patches. Build by the OmniROM-team."
     },
     {
@@ -154,8 +154,8 @@
         "category": "core",
         "package" : "com.android.webview",
         "icon" : "Webview.png",
-        "versionCode" : "410310103",
-        "versionName" : "83.0.4103.101",
+        "versionCode" : "410311603",
+        "versionName" : "83.0.4103.116",
         "description" : "Open-source Webview with Bromite privacy patches. Build by the OmniROM-team."
     },
     {
