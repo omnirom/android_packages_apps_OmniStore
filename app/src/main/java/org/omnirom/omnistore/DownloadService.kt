@@ -3,7 +3,6 @@ package org.omnirom.omnistore
 import android.app.*
 import android.content.*
 import android.net.Uri
-import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -12,7 +11,6 @@ import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.ACTION_CANCEL_DOWNLOAD
 import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_ID
-import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_NAME
 import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_PKG
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
@@ -21,14 +19,12 @@ import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 class DownloadService : Service() {
     private val TAG = "OmniStore:DownloadService"
 
-    private val NOTIFICATION_PROGRESS_ID = Int.MAX_VALUE
-    private val NOTIFICATION_INSTALL_ID = Int.MAX_VALUE - 1
+    private val NOTIFICATION_PROGRESS_ID = Int.MAX_VALUE;
 
     private var mDownloadReceiver: DownloadReceiver? = null
     private var mDownloadList: ArrayList<Long> = ArrayList()
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mPrefs: SharedPreferences
-    private val mHandler = Handler()
 
     override fun onCreate() {
         super.onCreate()
@@ -101,10 +97,6 @@ class DownloadService : Service() {
 
         mPrefs.edit().remove(PREF_CURRENT_DOWNLOADS).commit()
 
-        val notificationManager =
-            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_INSTALL_ID)
-
         if (mDownloadReceiver != null) {
             unregisterReceiver(mDownloadReceiver)
             stopForeground(true)
@@ -143,52 +135,19 @@ class DownloadService : Service() {
         return notification.build()
     }
 
-    private fun showInstallNotification(uri: Uri): Notification {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(
-            uri, "application/vnd.android.package-archive"
-        )
-        intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
-                or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-        val fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
-            intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        val notification = NotificationCompat.Builder(
-            this,
-            Constants.NOTIFICATION_CHANNEL_INSTALL
-        )
-            .setContentTitle(getString(R.string.notification_install_title))
-            .setSmallIcon(R.drawable.ic_notification)
-            .setAutoCancel(false)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setLocalOnly(true)
-            .setOnlyAlertOnce(true)
-            .setColor(resources.getColor(R.color.omni_logo_color, null))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
-
-        return notification.build()
-    }
-
     private fun handleDownloadComplete(downloadId: Long) {
         var uri: Uri? = mDownloadManager.getUriForDownloadedFile(downloadId)
         if (uri == null) {
             // includes also cancel
             return
         }
-        // thanks google - we cant start activity from bg so use the
-        // trick to create a full screen high prio notification
-        val notification = showInstallNotification(uri)
-        val notificationManager =
-            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_INSTALL_ID)
-        notificationManager.notify(NOTIFICATION_INSTALL_ID, notification)
-
-        mHandler.postDelayed({
-            // WTF???? - but it works
-            notificationManager.cancel(NOTIFICATION_INSTALL_ID)
-        }, 250)
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(
+            uri, "application/vnd.android.package-archive"
+        )
+        intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
+                or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
     }
 
     private fun cancelAllDownloads() {

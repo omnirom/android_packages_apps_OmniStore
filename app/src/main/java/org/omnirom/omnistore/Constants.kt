@@ -11,11 +11,9 @@ object Constants {
     const val ACTION_CANCEL_DOWNLOAD = "cancel_download"
     const val EXTRA_DOWNLOAD_ID = "id"
     const val EXTRA_DOWNLOAD_PKG = "pkg"
-    const val EXTRA_DOWNLOAD_NAME = "name"
 
     const val NOTIFICATION_CHANNEL_UPDATE = "org.omnirom.omnistore.notification.updates"
     const val NOTIFICATION_CHANNEL_PROGRESS = "org.omnirom.omnistore.notification.progress"
-    const val NOTIFICATION_CHANNEL_INSTALL = "org.omnirom.omnistore.notification.install"
 
     const val TYPE_APP_ITEM = 0
     const val TYPE_SEPARATOR_ITEM = 1

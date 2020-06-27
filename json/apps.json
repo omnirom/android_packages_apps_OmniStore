@@ -50,8 +50,8 @@
         "category": "core",
         "package" : "org.omnirom.omnistore",
         "icon" : "OmniStore.png",
-        "versionCode" : "20",
-        "versionName" : "2.3.0",
+        "versionCode" : "22",
+        "versionName" : "2.3.2",
         "description" : "Mini-Me."
     },
     {
@@ -60,7 +60,7 @@
         "category": "core",
         "package" : "com.android.calculator2",
         "icon" : "ExactCalculator.png",
-        "versionCode" : "2",
+        "versionCode" : "1",
         "versionName" : "1.0.1"
     },
     {

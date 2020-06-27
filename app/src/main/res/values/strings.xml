@@ -22,8 +22,6 @@
     <string name="notification_download_title">Downloading\u2026</string>
     <string name="notification_channel_downloads">Downloads</string>
     <string name="notification_channel_updates">Updates</string>
-    <string name="notification_channel_install">Installations</string>
-    <string name="notification_install_title">Installing\u2026</string>
     <string name="dialog_app_info_title">App info</string>
     <string name="dialog_app_info_pkg">Package:</string>
     <string name="dialog_app_info_name">Name:</string>
