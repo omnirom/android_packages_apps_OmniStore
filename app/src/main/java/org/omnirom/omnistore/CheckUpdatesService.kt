@@ -43,10 +43,10 @@ class CheckUpdatesService : JobService() {
             .setColor(resources.getColor(R.color.omni_logo_color, null))
 
         when {
-            message2.isNullOrEmpty() and !message1.isNullOrEmpty() -> {
+            message2.isEmpty() and message1.isNotEmpty() -> {
                 notification.setContentText(message1)
             }
-            message1.isNullOrEmpty() and !message2.isNullOrEmpty() -> {
+            message1.isEmpty() and message2.isNotEmpty() -> {
                 notification.setContentText(message2)
             }
             else -> {
@@ -82,47 +82,51 @@ class CheckUpdatesService : JobService() {
                             prefs.getStringSet(Constants.PREF_CURRENT_APPS, HashSet<String>())
                         val newAppsList = appsList.filter { !oldPkgList!!.contains(it.pkg()) }
 
-                        var message1 = ""
-                        var message2 = ""
+                        if (updateApps.isNotEmpty() || newAppsList.isNotEmpty()) {
+                            var message1 = ""
+                            var message2 = ""
 
-                        if (updateApps.isNotEmpty()) {
-                            Log.d(TAG, "checkForUpdates: updates available " + updateApps)
-                            updateApps.slice(0..(updateApps.size - 1).coerceAtMost(2))
-                                .forEach { message1 += it.title() + ", " }
-                            message1 =
-                                getString(R.string.notification_updates_line_one) + " " + message1.substring(
-                                    0,
-                                    message1.length - 2
-                                )
-                            if (updateApps.size > 3) {
-                                message1 += ",..."
+                            if (updateApps.isNotEmpty()) {
+                                Log.d(TAG, "checkForUpdates: updates available " + updateApps)
+                                updateApps.slice(0..(updateApps.size - 1).coerceAtMost(2))
+                                    .forEach { message1 += it.title() + ", " }
+                                message1 =
+                                    getString(R.string.notification_updates_line_one) + " " + message1.substring(
+                                        0,
+                                        message1.length - 2
+                                    )
+                                if (updateApps.size > 3) {
+                                    message1 += ",..."
+                                }
+                            }
+                            if (newAppsList.isNotEmpty()) {
+                                Log.d(TAG, "checkForUpdates: new apps available " + newAppsList)
+                                newAppsList.slice(0..(newAppsList.size - 1).coerceAtMost(2))
+                                    .forEach { message2 += it.title() + ", " }
+                                message2 =
+                                    getString(R.string.notification_updates_line_two) + " " + message2.substring(
+                                        0,
+                                        message2.length - 2
+                                    )
+                                if (newAppsList.size > 3) {
+                                    message2 += ",..."
+                                }
+                            }
+
+                            if (message1.isNotEmpty() or message2.isNotEmpty()) {
+                                val notification =
+                                    createNotification(
+                                        getString(R.string.notification_updates_title),
+                                        message1,
+                                        message2
+                                    )
+
+                                val notificationManager =
+                                    this@CheckUpdatesService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                                notificationManager.cancel(NOTIFICATION_UPDATES_ID)
+                                notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
                             }
                         }
-                        if (newAppsList.isNotEmpty()) {
-                            Log.d(TAG, "checkForUpdates: new apps available " + newAppsList)
-                            newAppsList.slice(0..(newAppsList.size - 1).coerceAtMost(2))
-                                .forEach { message2 += it.title() + ", " }
-                            message2 =
-                                getString(R.string.notification_updates_line_two) + " " + message2.substring(
-                                    0,
-                                    message2.length - 2
-                                )
-                            if (newAppsList.size > 3) {
-                                message2 += ",..."
-                            }
-                        }
-
-                        val notification =
-                            createNotification(
-                                getString(R.string.notification_updates_title),
-                                message1,
-                                message2
-                            )
-
-                        val notificationManager =
-                            this@CheckUpdatesService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                        notificationManager.cancel(NOTIFICATION_UPDATES_ID)
-                        notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
                     }
                     jobFinished(params, false)
                 }
