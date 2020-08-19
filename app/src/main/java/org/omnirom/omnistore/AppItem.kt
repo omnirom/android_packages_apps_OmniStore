@@ -1,11 +1,11 @@
 package org.omnirom.omnistore
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.omnirom.omnistore.Constants.APPS_BASE_URI
 
 class AppItem(val appData: JSONObject) : ListItem {
     private var mInstalled: InstallState = InstallState.UNINSTALLED
@@ -59,9 +59,9 @@ class AppItem(val appData: JSONObject) : ListItem {
         }
     }
 
-    fun fileUrl(): String? {
+    fun fileUrl(context: Context): String? {
         try {
-            return APPS_BASE_URI + appData.get("file").toString()
+            return Constants.getAppsRootUri(context) + appData.get("file").toString()
         } catch (e: JSONException) {
             return null
         }
@@ -75,9 +75,9 @@ class AppItem(val appData: JSONObject) : ListItem {
         }
     }
 
-    fun iconUrl(): String? {
+    fun iconUrl(context: Context): String? {
         try {
-            return APPS_BASE_URI + appData.get("icon").toString()
+            return Constants.getAppsRootUri(context) + appData.get("icon").toString()
         } catch (e: JSONException) {
             return null
         }

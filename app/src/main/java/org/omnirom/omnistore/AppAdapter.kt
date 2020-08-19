@@ -148,7 +148,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             val app: AppItem = items[position] as AppItem
             holder.app = app
             holder.title.text = app.title()
-            Picasso.with(context).load(app.iconUrl())
+            Picasso.with(context).load(app.iconUrl(context))
                 .error(R.drawable.ic_warning).into(holder.logo)
             holder.pkg.text = app.pkg()
             holder.indicator.visibility = View.GONE

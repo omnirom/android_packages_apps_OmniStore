@@ -177,14 +177,14 @@ class MainActivity : AppCompatActivity() {
         if (mFetchRunning) {
             return
         }
-        if (app.fileUrl() == null) {
+        if (app.fileUrl(this) == null) {
             Log.d(TAG, "downloadApp no fileUrl")
             return
         }
         // get a user feedback asap
         setAppItemDownloadState(app, FAKE_DOWNLOAD_ID)
 
-        val url = app.fileUrl()!!
+        val url = app.fileUrl(this)!!
         val checkApp =
             NetworkUtils().CheckAppTask(
                 url,
@@ -294,7 +294,7 @@ class MainActivity : AppCompatActivity() {
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean) {
                         if (networkError) {
-                            showNetworkError(Constants.APPS_LIST_URI)
+                            showNetworkError(Constants.getAppsQueryUri(this@MainActivity))
                         } else {
                             mAllAppsList.clear()
                             mAllAppsList.addAll(newAppsList)
@@ -362,7 +362,7 @@ class MainActivity : AppCompatActivity() {
         mViewGroups = false
     }
 
-    private fun showNetworkError(url: String) {
+    private fun showNetworkError(url: String?) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.dialog_title_network_error))
         builder.setMessage(getString(R.string.dialog_message_network_error));

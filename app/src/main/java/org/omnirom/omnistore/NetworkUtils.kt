@@ -38,7 +38,7 @@ class NetworkUtils {
         }
 
         override fun doInBackground(vararg params: String?): Int {
-            val appListData: String? = downloadUrlMemoryAsString(Constants.APPS_LIST_URI)
+            val appListData: String? = downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext))
             if (appListData != null) {
                 val apps = JSONArray(appListData)
                 //Log.d(TAG, "" + apps)
