@@ -1,2 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">Configurações</string>
+    <string name="menu_item_check">Verificar</string>
+    <string name="title_settings">Configurações</string>
+    <string name="category_notifications">Notificações</string>
+    <string name="notification_settings_title">Gerenciar as notificações</string>
+    <string name="check_updates_title">Verificar atualizações</string>
+    <string name="status_update_available">Atualização disponível.</string>
+    <string name="status_installed">Instalado</string>
+    <string name="status_not_installed">Não Instalado</string>
+    <string name="status_disabled">Desabilitado</string>
+    <string name="menu_item_filter">Filtro</string>
+    <string name="dialog_title_network_error">Erro de Rede</string>
+    <string name="dialog_message_network_error">Conexão de rede não disponível. \nVerifique se você está conectado a uma rede.</string>
+    <string name="separator_item_updates">Atualizações</string>
+    <string name="separator_item_installed">Instalado</string>
+    <string name="separator_item_not_installed">Não Instalado</string>
+    <string name="notificatioon_action_stop">Pare</string>
+    <string name="notification_download_title">Baixando\u2026</string>
+    <string name="notification_channel_downloads">Downloads</string>
+    <string name="notification_channel_updates">Atualizações</string>
+    <string name="dialog_app_info_title">Informação do Aplicativo</string>
+    <string name="dialog_app_info_pkg">Pacote</string>
+    <string name="dialog_app_info_name">Nome:</string>
+    <string name="dialog_app_info_version">Versão:</string>
+    <string name="dialog_app_info_update">Atualização:</string>
+    <string name="notification_updates_title">Novas atualizações estão disponíveis</string>
+    <string name="notification_updates_line_one">Atualizado:</string>
+    <string name="notification_updates_line_two">Novo\"</string>
+    <string name="app_item_version">Versão:</string>
+    <string name="dialog_app_info_status">Status:</string>
+</resources>

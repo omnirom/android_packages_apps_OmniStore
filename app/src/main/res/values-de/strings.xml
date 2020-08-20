@@ -18,8 +18,8 @@
     <string name="separator_item_installed">Installiert</string>
     <string name="separator_item_not_installed">Nicht installiert</string>
     <string name="notificatioon_action_stop">Stop</string>
-    <string name="notification_download_title">Herunterladen und installieren</string>
-    <string name="notification_channel_downloads">Herunterladen</string>
+    <string name="notification_download_title">Lädt\u2026 runter</string>
+    <string name="notification_channel_downloads">Downloads</string>
     <string name="notification_channel_updates">Updates</string>
     <string name="dialog_app_info_title">App Info</string>
     <string name="dialog_app_info_pkg">Paket:</string>

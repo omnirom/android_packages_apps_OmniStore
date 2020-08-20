@@ -18,8 +18,8 @@
     <string name="separator_item_installed">Nainstalováno</string>
     <string name="separator_item_not_installed">Není nainstalováno</string>
     <string name="notificatioon_action_stop">Ukončit</string>
-    <string name="notification_download_title">Stáhnout a nainstalovat</string>
-    <string name="notification_channel_downloads">Stáhnout</string>
+    <string name="notification_download_title">Stahování\u2026</string>
+    <string name="notification_channel_downloads">Stahování</string>
     <string name="notification_channel_updates">Aktualizace</string>
     <string name="dialog_app_info_title">Informace o aplikaci</string>
     <string name="dialog_app_info_pkg">Balíček:</string>

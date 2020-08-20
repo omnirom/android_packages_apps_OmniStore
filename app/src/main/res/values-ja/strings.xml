@@ -1,2 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="notification_channel_updates">アップデート</string>
+    <string name="dialog_app_info_title">アプリ情報</string>
+    <string name="dialog_app_info_pkg">パッケージ:</string>
+    <string name="dialog_app_info_name">名前:</string>
+    <string name="dialog_app_info_version">バージョン:</string>
+    <string name="dialog_app_info_update">アップデート:</string>
+    <string name="notification_updates_title">新しいアップデートを利用可能です</string>
+    <string name="notification_updates_line_one">アップデート日:</string>
+    <string name="notification_updates_line_two">新規</string>
+    <string name="app_item_version">バージョン:</string>
+    <string name="dialog_app_info_status">ステータス:</string>
+</resources>

@@ -1,2 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">Ayarlar</string>
+    <string name="menu_item_check">Yokla</string>
+    <string name="title_settings">Ayarlar</string>
+    <string name="category_notifications">Bildirimler</string>
+    <string name="notification_settings_title">Bildirimleri yönet</string>
+    <string name="check_updates_title">Güncellemeleri yokla</string>
+    <string name="status_update_available">Güncelleme mevcut</string>
+    <string name="status_installed">Kuruldu</string>
+    <string name="status_not_installed">Kurulmamış</string>
+    <string name="status_disabled">Devre dışı</string>
+    <string name="menu_item_filter">Filtre</string>
+    <string name="dialog_title_network_error">Ağ Hatâsı</string>
+    <string name="dialog_message_network_error">Ağ bağlantısı mevcut değildir.\nLütfen bir ağa bağlı olduğunuzdan emin olunuz.</string>
+    <string name="separator_item_updates">Güncellemeler</string>
+    <string name="separator_item_installed">Kurulan</string>
+    <string name="separator_item_not_installed">Kurulmamış</string>
+    <string name="notificatioon_action_stop">Durdur</string>
+    <string name="notification_download_title">İndiriliyor\u2026</string>
+    <string name="notification_channel_downloads">İndirmeler</string>
+    <string name="notification_channel_updates">Güncellemeler</string>
+    <string name="dialog_app_info_title">Uygulama bilgisi</string>
+    <string name="dialog_app_info_pkg">Paket:</string>
+    <string name="dialog_app_info_name">İsim:</string>
+    <string name="dialog_app_info_version">Versiyon:</string>
+    <string name="dialog_app_info_update">Güncelleme:</string>
+    <string name="notification_updates_title">Yeni güncellemeler mevcut</string>
+    <string name="notification_updates_line_one">Güncellendi:</string>
+    <string name="notification_updates_line_two">Yeni</string>
+    <string name="app_item_version">Versiyon:</string>
+    <string name="dialog_app_info_status">Vaziyet:</string>
+</resources>
