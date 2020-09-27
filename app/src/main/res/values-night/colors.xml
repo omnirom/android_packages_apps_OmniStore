@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main_background_light">@*android:color/primary_device_default_settings</color>
+    <color name="main_background_light">@color/material_blue_grey_950</color>
 </resources>
