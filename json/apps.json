@@ -97,7 +97,20 @@
         "devices": [
             "oneplus7t",
             "oneplus7tpro",
-            "oneplus7pro",
+            "oneplus7pro"
+        ],
+        "package" : "com.oneplus.camera",
+        "icon" : "OnePlusCamera.png",
+        "versionCode" : "23290612",
+        "versionName" : "3.10.22",
+        "description" : "Native OnePlus camera application.",
+        "note" : "Reboot required after first installation. 720p @ 960fps not working"
+    },
+    {
+        "title": "OnePlus Camera",
+        "file": "OnePlusCamera_op6.apk",
+        "category": "extra",
+        "devices": [
             "oneplus6",
             "oneplus6t"
         ],
@@ -106,7 +119,7 @@
         "versionCode" : "23270449",
         "versionName" : "3.8.114",
         "description" : "Native OnePlus camera application.",
-        "note" : "Reboot required after first installation"
+        "note" : "Reboot required after first installation."
     },
     {
         "title": "Phonograph",
@@ -124,8 +137,8 @@
         "category": "extra",
         "package" : "com.maxwen.alarmclock",
         "icon" : "MediaAlarmClock.png",
-        "versionCode" : "41",
-        "versionName" : "1.4.2",
+        "versionCode" : "43",
+        "versionName" : "1.4.4",
         "description" : "Alarm clock with Spotify and cloud support."
     },
     {
@@ -144,8 +157,8 @@
         "category": "extra",
         "package" : "com.maxwen.deskclock",
         "icon" : "OmniClock.png",
-        "versionCode" : "102",
-        "versionName" : "2.3.10",
+        "versionCode" : "104",
+        "versionName" : "2.3.12",
         "description" : "World clock - stopwatch - timer and alarm clock."
     },
     {
