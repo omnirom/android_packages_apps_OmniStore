@@ -39,6 +39,7 @@ import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.Constants.PREF_SHOW_INTRO
 import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
@@ -55,6 +56,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
     private var mViewGroups = true
+    private var mInitialRefresh = false
+
     //private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
@@ -122,7 +125,20 @@ class MainActivity : AppCompatActivity() {
         }
         mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
 
-        refresh()
+        if (!mPrefs.getBoolean(PREF_SHOW_INTRO, false)) {
+            mPrefs.edit().putBoolean(PREF_SHOW_INTRO, true).commit();
+            startActivity(Intent(this, IntroActivity::class.java))
+        } else {
+            mInitialRefresh = true
+            refresh()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!mInitialRefresh){
+            refresh()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
