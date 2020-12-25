@@ -30,6 +30,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".IntroActivity"
+            android:theme="@style/IntroTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name=".BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

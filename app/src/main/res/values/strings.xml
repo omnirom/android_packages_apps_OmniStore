@@ -32,4 +32,6 @@
     <string name="notification_updates_line_two">New"</string>
     <string name="app_item_version">Version:</string>
     <string name="dialog_app_info_status">Status:</string>
+    <string name="store_intro_title">Welcome to the OmniStore!</string>
+    <string name="store_intro">The store applications are provided on an \“as is\” basis without warranties of any kind.</string>
 </resources>
