@@ -1,2 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">Seaded</string>
+    <string name="menu_item_check">Vali</string>
+    <string name="title_settings">Seaded</string>
+    <string name="category_notifications">Teavitused</string>
+    <string name="notification_settings_title">Halda teavitusi</string>
+    <string name="check_updates_title">Kontrolli uuendusi</string>
+    <string name="status_update_available">Uuendus saadaval</string>
+    <string name="status_installed">Installitud</string>
+    <string name="status_not_installed">Installimata</string>
+    <string name="status_disabled">Keelatud</string>
+    <string name="menu_item_filter">Filter</string>
+    <string name="dialog_title_network_error">Võrguviga</string>
+    <string name="dialog_message_network_error">Võrguühendus pole saadaval.\nPalun veendu, et oled võrku ühendatud.</string>
+    <string name="separator_item_updates">Uuendused</string>
+    <string name="separator_item_installed">Installitud</string>
+    <string name="separator_item_not_installed">Installimata</string>
+    <string name="notificatioon_action_stop">Peata</string>
+    <string name="notification_download_title">Allalaadimine\u2026</string>
+    <string name="notification_channel_downloads">Allalaadimised</string>
+    <string name="notification_channel_updates">Uuendused</string>
+    <string name="dialog_app_info_title">Rakenduse teave</string>
+    <string name="dialog_app_info_pkg">Pakett:</string>
+    <string name="dialog_app_info_name">Nimi:</string>
+    <string name="dialog_app_info_version">Versioon:</string>
+    <string name="dialog_app_info_update">Uuendus:</string>
+    <string name="notification_updates_title">Uued uuendused on saadaval</string>
+    <string name="notification_updates_line_one">Uuendatud:</string>
+    <string name="notification_updates_line_two">Uus</string>
+    <string name="app_item_version">Versioon:</string>
+    <string name="dialog_app_info_status">Olek:</string>
+</resources>

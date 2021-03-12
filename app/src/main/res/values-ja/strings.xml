@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">設定</string>
+    <string name="menu_item_check">確認</string>
+    <string name="title_settings">設定</string>
+    <string name="category_notifications">通知</string>
+    <string name="notification_settings_title">通知の管理</string>
+    <string name="check_updates_title">アップデートを確認</string>
+    <string name="status_update_available">アップデートがあります</string>
+    <string name="status_installed">インストール済み</string>
+    <string name="status_not_installed">未インストール</string>
+    <string name="status_disabled">無効</string>
+    <string name="menu_item_filter">フィルター</string>
+    <string name="dialog_title_network_error">ネットワークエラー</string>
+    <string name="dialog_message_network_error">ネットワークに接続できません。\nネットワークに接続していることを確認して下さい。</string>
+    <string name="separator_item_updates">アップデート</string>
+    <string name="separator_item_installed">インストール済み</string>
+    <string name="separator_item_not_installed">未インストール</string>
+    <string name="notificatioon_action_stop">停止</string>
+    <string name="notification_download_title">ダウンロード中\u2026</string>
+    <string name="notification_channel_downloads">ダウンロード</string>
     <string name="notification_channel_updates">アップデート</string>
     <string name="dialog_app_info_title">アプリ情報</string>
     <string name="dialog_app_info_pkg">パッケージ:</string>
