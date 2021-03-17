@@ -36,9 +36,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
+import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
 import org.omnirom.omnistore.Constants.PREF_SHOW_INTRO
 import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
@@ -49,32 +51,18 @@ class MainActivity : AppCompatActivity() {
     private val mDisplayList: ArrayList<ListItem> = ArrayList()
     private val mAllAppsList: ArrayList<AppItem> = ArrayList()
     private val TAG = "OmniStore:MainActivity"
-    private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
+    private val mInstallReceiver: InstallReceiver = InstallReceiver()
     private val REQUEST_ERMISSION = 0
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
     private var mViewGroups = true
-    private var mInitialRefresh = false
 
     //private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
     private lateinit var mPrefs: SharedPreferences
-
-    inner class DownloadReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(TAG, "onReceive " + intent?.action)
-            if (intent?.action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-                val downloadId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                if (downloadId == -1L) {
-                    return
-                }
-                handleDownloadComplete(downloadId)
-            }
-        }
-    }
 
     inner class PackageReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -91,9 +79,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // when we are active we trigger install right away - else we do it in next onResume
+    inner class InstallReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive " + intent?.action)
+            if (intent?.action.equals(ACTION_START_INSTALL)) {
+                installPendingPackage()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"));
+        Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"))
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         setContentView(R.layout.activity_main)
 
@@ -103,15 +101,6 @@ class MainActivity : AppCompatActivity() {
         mRecyclerView.layoutManager = LinearLayoutManager(this)
         mRecyclerView.adapter = AppAdapter(mDisplayList, this)
 
-        val downloadFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        registerReceiver(mDownloadReceiver, downloadFilter)
-
-        val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
-        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
-        packageFilter.addDataScheme("package")
-        registerReceiver(mPackageReceiver, packageFilter)
-
         findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
             if (isDownloading()) {
                 // TODO alert
@@ -119,25 +108,44 @@ class MainActivity : AppCompatActivity() {
             }
             refresh()
         }
+        mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
 
         if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
             JobUtils().scheduleCheckUpdates(this)
         }
-        mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
 
         if (!mPrefs.getBoolean(PREF_SHOW_INTRO, false)) {
-            mPrefs.edit().putBoolean(PREF_SHOW_INTRO, true).commit();
+            mPrefs.edit().putBoolean(PREF_SHOW_INTRO, true).commit()
             startActivity(Intent(this, IntroActivity::class.java))
-        } else {
-            mInitialRefresh = true
-            refresh()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (!mInitialRefresh){
+
+        val installFilter = IntentFilter(ACTION_START_INSTALL)
+        registerReceiver(mInstallReceiver, installFilter)
+
+        val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        packageFilter.addDataScheme("package")
+        registerReceiver(mPackageReceiver, packageFilter)
+
+        if (!installPendingPackage()) {
             refresh()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(mInstallReceiver)
+        } catch (e: Exception) {
+        }
+        try {
+            unregisterReceiver(mPackageReceiver)
+        } catch (e: Exception) {
         }
     }
 
@@ -184,12 +192,6 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(mDownloadReceiver)
-        unregisterReceiver(mPackageReceiver)
     }
 
     fun downloadApp(app: AppItem) {
@@ -284,7 +286,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<FrameLayout>(R.id.progress).visibility = View.GONE
     }
 
-    fun handleDownloadComplete(downloadId: Long?) {
+    fun handleInstallComplete(downloadId: Long?) {
         val list = mDisplayList.filter { it is AppItem && it.mDownloadId == downloadId }
         if (list.size == 1) {
             val app = (list.first() as AppItem)
@@ -367,7 +369,10 @@ class MainActivity : AppCompatActivity() {
             try {
                 var item = mDisplayList.first { it.sortOrder() == 1 }
                 val idx = mDisplayList.indexOf(item)
-                mDisplayList.add(idx, SeparatorItem(getString(R.string.separator_item_installed)))
+                mDisplayList.add(
+                    idx,
+                    SeparatorItem(getString(R.string.separator_item_installed))
+                )
             } catch (e: NoSuchElementException) {
             }
             try {
@@ -398,7 +403,7 @@ class MainActivity : AppCompatActivity() {
     private fun showNetworkError(url: String?) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.dialog_title_network_error))
-        builder.setMessage(getString(R.string.dialog_message_network_error));
+        builder.setMessage(getString(R.string.dialog_message_network_error))
         builder.setPositiveButton(android.R.string.ok, null)
         builder.create().show()
     }
@@ -414,5 +419,49 @@ class MainActivity : AppCompatActivity() {
     private fun setAppItemDownloadState(app: AppItem, id: Long) {
         app.mDownloadId = id
         (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+    }
+
+    private fun installPackage(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(
+            uri, "application/vnd.android.package-archive"
+        )
+        intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
+                or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
+    }
+
+    private fun installPendingPackage(): Boolean {
+        // dont start installing anything until all downloads are done
+        if (isDownloadsRunning()) {
+            return false
+        }
+        val stats: String? =
+            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
+        val installs = JSONObject(stats!!)
+        if (installs.length() != 0) {
+            // we have installs pending so start with the first one - we will come back in
+            // onResume when its done and come back here
+            Log.d(TAG, "CURRENT_INSTALLS = " + installs)
+            val first = installs.names()[0] as String
+            val data = installs[first] as JSONObject
+            val uri: Uri = Uri.parse(data.get("uri") as String)
+            // this means when we press back or home we will not asked again for this install
+            // and this is a not really an unintended behaviour - back or home == cancel
+            installs.remove(first)
+            mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+                .commit()
+            // stop the progress for this
+            handleInstallComplete(first.toLong())
+            installPackage(uri)
+            return true
+        }
+        return false
+    }
+
+    private fun isDownloadsRunning(): Boolean {
+        val stats: String? = mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
+        val downloads = JSONObject(stats!!)
+        return downloads.length() != 0
     }
 }
