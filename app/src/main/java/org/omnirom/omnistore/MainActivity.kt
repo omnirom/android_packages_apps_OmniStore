@@ -36,21 +36,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
+import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
 import org.omnirom.omnistore.Constants.PREF_SHOW_INTRO
 import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
     private val mDisplayList: ArrayList<ListItem> = ArrayList()
     private val mAllAppsList: ArrayList<AppItem> = ArrayList()
     private val TAG = "OmniStore:MainActivity"
-    private val mDownloadReceiver: DownloadReceiver = DownloadReceiver()
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
+    private val mInstallReceiver: InstallReceiver = InstallReceiver()
     private val REQUEST_ERMISSION = 0
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
@@ -62,19 +65,6 @@ class MainActivity : AppCompatActivity() {
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
     private lateinit var mPrefs: SharedPreferences
-
-    inner class DownloadReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(TAG, "onReceive " + intent?.action)
-            if (intent?.action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-                val downloadId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-                if (downloadId == -1L) {
-                    return
-                }
-                handleDownloadComplete(downloadId)
-            }
-        }
-    }
 
     inner class PackageReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -91,6 +81,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    inner class InstallReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive " + intent?.action)
+            if (intent?.action.equals(ACTION_START_INSTALL)) {
+                installPendingPackage()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"));
@@ -103,15 +102,6 @@ class MainActivity : AppCompatActivity() {
         mRecyclerView.layoutManager = LinearLayoutManager(this)
         mRecyclerView.adapter = AppAdapter(mDisplayList, this)
 
-        val downloadFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        registerReceiver(mDownloadReceiver, downloadFilter)
-
-        val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
-        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
-        packageFilter.addDataScheme("package")
-        registerReceiver(mPackageReceiver, packageFilter)
-
         findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
             if (isDownloading()) {
                 // TODO alert
@@ -119,11 +109,12 @@ class MainActivity : AppCompatActivity() {
             }
             refresh()
         }
+        mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
+
 
         if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
             JobUtils().scheduleCheckUpdates(this)
         }
-        mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
 
         if (!mPrefs.getBoolean(PREF_SHOW_INTRO, false)) {
             mPrefs.edit().putBoolean(PREF_SHOW_INTRO, true).commit();
@@ -136,8 +127,29 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (!mInitialRefresh){
+
+        if (!installPendingPackage() && !mInitialRefresh) {
             refresh()
+        }
+        val installFilter = IntentFilter(ACTION_START_INSTALL)
+        registerReceiver(mInstallReceiver, installFilter)
+
+        val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+        packageFilter.addDataScheme("package")
+        registerReceiver(mPackageReceiver, packageFilter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(mInstallReceiver)
+        } catch (e: Exception) {
+        }
+        try {
+            unregisterReceiver(mPackageReceiver)
+        } catch (e: Exception) {
         }
     }
 
@@ -188,8 +200,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(mDownloadReceiver)
-        unregisterReceiver(mPackageReceiver)
     }
 
     fun downloadApp(app: AppItem) {
@@ -284,7 +294,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<FrameLayout>(R.id.progress).visibility = View.GONE
     }
 
-    fun handleDownloadComplete(downloadId: Long?) {
+    fun handleInstallComplete(downloadId: Long?) {
         val list = mDisplayList.filter { it is AppItem && it.mDownloadId == downloadId }
         if (list.size == 1) {
             val app = (list.first() as AppItem)
@@ -414,5 +424,45 @@ class MainActivity : AppCompatActivity() {
     private fun setAppItemDownloadState(app: AppItem, id: Long) {
         app.mDownloadId = id
         (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
+    }
+
+    private fun installPackage(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(
+            uri, "application/vnd.android.package-archive"
+        )
+        intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
+                or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
+    }
+
+    private fun installPendingPackage(): Boolean {
+        // dont start installing anything until all downloads are done
+        if (isDownloadsRunning()) {
+            return false
+        }
+        val stats: String? =
+            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
+        val installs = JSONObject(stats!!)
+        if (installs.length() != 0) {
+            // we still have installs pending
+            Log.d(TAG, "CURRENT_INSTALLS = " + installs)
+            val first = installs.names()[0].toString()
+            val uri: Uri = Uri.parse(installs[first].toString())
+            installs.remove(first)
+            mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+                .commit()
+            // stop the progress
+            handleInstallComplete(first.toLong())
+            installPackage(uri)
+            return true
+        }
+        return false
+    }
+
+    private fun isDownloadsRunning(): Boolean {
+        val stats: String? = mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
+        val downloads = JSONObject(stats!!)
+        return downloads.length() != 0
     }
 }
