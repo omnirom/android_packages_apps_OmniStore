@@ -24,13 +24,17 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
+import org.json.JSONArray
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.ACTION_CANCEL_DOWNLOAD
+import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
 import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_ID
 import org.omnirom.omnistore.Constants.EXTRA_DOWNLOAD_PKG
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
+import kotlin.jvm.internal.Ref
 
 
 class DownloadService : Service() {
@@ -58,8 +62,9 @@ class DownloadService : Service() {
                         TAG,
                         "ACTION_DOWNLOAD_COMPLETE DOWNLOAD_ID = " + downloadId + " " + mDownloadList
                     )
-                    handleDownloadComplete(downloadId as Long)
+
                     mDownloadList.remove(downloadId)
+                    handleDownloadComplete(downloadId as Long)
 
                     val stats: String? =
                         mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
@@ -69,7 +74,13 @@ class DownloadService : Service() {
                         .commit()
                     Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                     if (mDownloadList.isEmpty()) {
-                        Log.d(TAG, "kill me")
+                        Log.d(TAG, "downloads done - now kill me and start install if needed")
+                        val stats: String? =
+                            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
+                        val installs = JSONObject(stats!!)
+                        if (installs.length() != 0) {
+                            triggerInstall()
+                        }
                         this@DownloadService.stopSelf()
                     }
                 }
@@ -158,13 +169,18 @@ class DownloadService : Service() {
             // includes also cancel
             return
         }
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(
-            uri, "application/vnd.android.package-archive"
-        )
-        intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
-                or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(intent)
+        val stats: String? =
+            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
+        val installs = JSONObject(stats!!)
+        installs.put(downloadId.toString(), uri.toString())
+        mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+            .commit()
+        Log.d(TAG, "CURRENT_INSTALLS = " + installs)
+    }
+
+    private fun triggerInstall() {
+        val intent = Intent(ACTION_START_INSTALL)
+        sendBroadcast(intent)
     }
 
     private fun cancelAllDownloads() {
