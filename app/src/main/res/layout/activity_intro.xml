@@ -48,6 +48,18 @@
             android:text="@string/store_intro"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
+        <TextView
+            android:id="@+id/permission_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:gravity="center"
+            android:text="@string/permission_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
         <Button
             android:id="@+id/ok"
             style="@style/Widget.AppCompat.Button.Colored"
