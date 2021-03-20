@@ -24,6 +24,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "OmniStore:MainActivity"
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val mInstallReceiver: InstallReceiver = InstallReceiver()
-    private val REQUEST_ERMISSION = 0
+    private val REQUEST_STORAGE_PERMS = 0
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
@@ -165,7 +166,7 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<String?>,
         grantResults: IntArray
     ) {
-        if (requestCode == REQUEST_ERMISSION && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
+        if (requestCode == REQUEST_STORAGE_PERMS && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
             pendingApp?.let { doDownloadApp(it) }
         }
     }
@@ -203,7 +204,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissions(
                 arrayOf(
                     Manifest.permission.READ_EXTERNAL_STORAGE
-                ), REQUEST_ERMISSION
+                ), REQUEST_STORAGE_PERMS
             )
         }
     }
