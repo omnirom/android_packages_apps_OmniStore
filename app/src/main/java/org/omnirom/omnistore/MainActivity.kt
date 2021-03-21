@@ -446,7 +446,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "CURRENT_INSTALLS = " + installs)
             val first = installs.names()?.get(0) as String
             val data = installs[first] as JSONObject
-            val uri: Uri = Uri.parse(data.get("uri") as String)
+            val uri = Uri.parse(data.get("uri") as String)
             // this means when we press back or home we will not asked again for this install
             // and this is a not really an unintended behaviour - back or home == cancel
             installs.remove(first)

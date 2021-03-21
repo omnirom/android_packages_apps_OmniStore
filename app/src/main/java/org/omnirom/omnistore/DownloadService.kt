@@ -66,12 +66,14 @@ class DownloadService : Service() {
                     val stats: String? =
                         mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
                     val downloads = JSONObject(stats!!)
-                    val pkg = downloads.get(downloadId.toString())
-                    downloads.remove(downloadId.toString())
-                    mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
-                        .commit()
+                    if (downloads.has(downloadId.toString())) {
+                        val pkg = downloads.get(downloadId.toString())
+                        downloads.remove(downloadId.toString())
+                        mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
+                            .commit()
 
-                    handleDownloadComplete(downloadId as Long, pkg as String)
+                        handleDownloadComplete(downloadId as Long, pkg as String)
+                    }
 
                     Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                     if (mDownloadList.isEmpty()) {
