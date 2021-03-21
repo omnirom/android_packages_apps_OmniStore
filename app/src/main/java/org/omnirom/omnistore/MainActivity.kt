@@ -265,7 +265,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         mDownloadManager.remove(app.mDownloadId)
-
+        removePendingInstall(app.mDownloadId)
         setAppItemDownloadState(app, -1)
     }
 
@@ -464,5 +464,16 @@ class MainActivity : AppCompatActivity() {
         val stats: String? = mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
         val downloads = JSONObject(stats!!)
         return downloads.length() != 0
+    }
+
+    private fun removePendingInstall(downloadId: Long) {
+        val stats: String? =
+            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
+        val installs = JSONObject(stats!!)
+        if (installs.has(downloadId.toString())) {
+            installs.remove(downloadId.toString())
+            mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+                .commit()
+        }
     }
 }
