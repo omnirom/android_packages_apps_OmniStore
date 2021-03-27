@@ -27,7 +27,6 @@
     <string name="dialog_app_info_version">Version:</string>
     <string name="dialog_app_info_update">Update:</string>
     <string name="notification_updates_title">Neues Updates verfügbar</string>
-    <string name="notification_updates_line_one">Aktualisiert:</string>
     <string name="notification_updates_line_two">Neu</string>
     <string name="app_item_version">Version:</string>
     <string name="dialog_app_info_status">Status:</string>

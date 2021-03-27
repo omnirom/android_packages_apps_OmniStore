@@ -27,8 +27,11 @@
     <string name="dialog_app_info_version">Versiyon:</string>
     <string name="dialog_app_info_update">Güncelleme:</string>
     <string name="notification_updates_title">Yeni güncellemeler mevcut</string>
-    <string name="notification_updates_line_one">Güncellendi:</string>
+    <string name="notification_updates_line_one">Güncellendi</string>
     <string name="notification_updates_line_two">Yeni</string>
     <string name="app_item_version">Versiyon:</string>
     <string name="dialog_app_info_status">Vaziyet:</string>
+    <string name="store_intro_title">OmniStore\'a hoş geldiniz!</string>
+    <string name="store_intro">Mağaza uygulamaları \“olduğu gibi\” sağlanır. Herhangi bir garanti yoktur.</string>
+    <string name="permission_text">OmniStore\'dan uygulama kurmaya izin verilsin mi?</string>
 </resources>
