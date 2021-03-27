@@ -1,2 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">Nastavenia</string>
+    <string name="menu_item_check">Skontrolovať</string>
+    <string name="title_settings">Nastavenia</string>
+    <string name="category_notifications">Upozornenia</string>
+    <string name="notification_settings_title">Spravovať upozornenia</string>
+    <string name="check_updates_title">Skontrolovať aktualizácie</string>
+    <string name="status_update_available">Aktualizácia je dostupná.</string>
+    <string name="status_installed">Nainštalované</string>
+    <string name="status_not_installed">Nie je nainštalované</string>
+    <string name="status_disabled">Vypnuté</string>
+    <string name="menu_item_filter">Filter</string>
+    <string name="dialog_title_network_error">Chyba siete</string>
+    <string name="dialog_message_network_error">Pripojenie k sieti nie je k dispozícii.\nPresvedčte sa, že ste pripojení k sieti.</string>
+    <string name="separator_item_updates">Aktualizácie</string>
+    <string name="separator_item_installed">Nainštalované</string>
+    <string name="separator_item_not_installed">Nie je nainštalované</string>
+    <string name="notificatioon_action_stop">Zastaviť</string>
+    <string name="notification_download_title">Sťahovanie\u2026</string>
+    <string name="notification_channel_downloads">Sťahovania</string>
+    <string name="notification_channel_updates">Aktualizácie</string>
+    <string name="dialog_app_info_title">Informácie o aplikácii</string>
+    <string name="dialog_app_info_pkg">Balíček:</string>
+    <string name="dialog_app_info_name">Názov:</string>
+    <string name="dialog_app_info_version">Verzia:</string>
+    <string name="dialog_app_info_update">Aktualizácia:</string>
+    <string name="notification_updates_title">K dispozícii sú nové aktualizácie</string>
+    <string name="notification_updates_line_two">Nová</string>
+    <string name="app_item_version">Verzia:</string>
+    <string name="dialog_app_info_status">Stav:</string>
+</resources>
