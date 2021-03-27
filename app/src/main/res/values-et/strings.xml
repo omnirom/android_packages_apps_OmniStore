@@ -27,7 +27,6 @@
     <string name="dialog_app_info_version">Versioon:</string>
     <string name="dialog_app_info_update">Uuendus:</string>
     <string name="notification_updates_title">Uued uuendused on saadaval</string>
-    <string name="notification_updates_line_one">Uuendatud:</string>
     <string name="notification_updates_line_two">Uus</string>
     <string name="app_item_version">Versioon:</string>
     <string name="dialog_app_info_status">Olek:</string>

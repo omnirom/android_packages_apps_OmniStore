@@ -1,2 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">OmniStore</string>
+    <string name="menu_item_settings">Impostazioni</string>
+    <string name="menu_item_check">Controlla</string>
+    <string name="title_settings">Impostazioni</string>
+    <string name="category_notifications">Notifiche</string>
+    <string name="notification_settings_title">Gestisci notifiche</string>
+    <string name="check_updates_title">Verifica la presenza di aggiornamenti</string>
+    <string name="status_update_available">Aggiornamento disponibile</string>
+    <string name="status_installed">Installato</string>
+    <string name="status_not_installed">Non installato\"</string>
+    <string name="status_disabled">Disattivato</string>
+    <string name="menu_item_filter">Filtro</string>
+    <string name="dialog_title_network_error">Errore di rete</string>
+    <string name="dialog_message_network_error">Connessione di rete non disponibile.\nAssicurati di essere connesso a una rete.</string>
+    <string name="separator_item_updates">Aggiornamenti</string>
+    <string name="separator_item_installed">Installato</string>
+    <string name="separator_item_not_installed">Non installato</string>
+    <string name="notificatioon_action_stop">Interrompi</string>
+    <string name="notification_download_title">Download in corso\u2026</string>
+    <string name="notification_channel_downloads">Downloads</string>
+    <string name="notification_channel_updates">Aggiornamenti</string>
+    <string name="dialog_app_info_title">Informazioni app</string>
+    <string name="dialog_app_info_pkg">Pacchetto:</string>
+    <string name="dialog_app_info_name">Nome:</string>
+    <string name="dialog_app_info_version">Versione:</string>
+    <string name="dialog_app_info_update">Aggiornamento:</string>
+    <string name="notification_updates_title">Nuovi aggiornamenti sono disponibili</string>
+    <string name="notification_updates_line_one">Aggiornato</string>
+    <string name="notification_updates_line_two">Nuovo\"</string>
+    <string name="app_item_version">Versione:</string>
+    <string name="dialog_app_info_status">Stato:</string>
+    <string name="store_intro_title">Benvenuto in OmniStore!</string>
+    <string name="store_intro">Le applicazioni dello store sono fornite su una base \“così come è\” senza garanzie di alcun tipo.</string>
+    <string name="permission_text">Consentire l\'installazione di applicazioni da OmniStore?</string>
+</resources>
