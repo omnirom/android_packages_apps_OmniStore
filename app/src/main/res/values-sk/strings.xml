@@ -27,7 +27,11 @@
     <string name="dialog_app_info_version">Verzia:</string>
     <string name="dialog_app_info_update">Aktualizácia:</string>
     <string name="notification_updates_title">K dispozícii sú nové aktualizácie</string>
+    <string name="notification_updates_line_one">Aktualizované</string>
     <string name="notification_updates_line_two">Nová</string>
     <string name="app_item_version">Verzia:</string>
     <string name="dialog_app_info_status">Stav:</string>
+    <string name="store_intro_title">Vitajte v OmniStore!</string>
+    <string name="store_intro">Aplikácie v obchode sú poskytované \"tak, ako sú\" bez akýchkoľvek záruk.</string>
+    <string name="permission_text">Povoliť inštaláciu aplikácií z OmniStore?</string>
 </resources>
