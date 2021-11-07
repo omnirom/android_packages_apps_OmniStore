@@ -55,21 +55,31 @@ class NetworkUtils {
         }
 
         override fun doInBackground(vararg params: String?): Int {
-            val appListData: String? = downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext))
+            var appListData: String? = downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext, ""))
             if (appListData != null) {
-                val apps = JSONArray(appListData)
-                //Log.d(TAG, "" + apps)
-                for (i in 0 until apps.length()) {
-                    val app = apps.getJSONObject(i);
-                    val appData = AppItem(app)
-                    if (appData.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
-                        mNewAppsList.add(appData)
-                    }
+                loadAppsList(appListData)
+
+                // add extra if available
+                appListData = downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext, DeviceUtils().getProperty(mContext, "ro.build.version.release")))
+                if (appListData != null) {
+                    loadAppsList(appListData)
                 }
             } else {
                 mNetworkError = true
             }
             return 0
+        }
+
+        private fun loadAppsList(appListData: String) {
+            val apps = JSONArray(appListData)
+            //Log.d(TAG, "" + apps)
+            for (i in 0 until apps.length()) {
+                val app = apps.getJSONObject(i);
+                val appData = AppItem(app)
+                if (appData.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
+                    mNewAppsList.add(appData)
+                }
+            }
         }
 
         override fun onPostExecute(result: Int?) {

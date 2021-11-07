@@ -9,8 +9,8 @@ android {
         applicationId "org.omnirom.omnistore"
         minSdkVersion 27
         targetSdkVersion 29
-        versionCode 28
-        versionName "2.3.8"
+        versionCode 29
+        versionName "2.3.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
