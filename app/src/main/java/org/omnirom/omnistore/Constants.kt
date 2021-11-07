@@ -58,9 +58,10 @@ object Constants {
         return u.toString()
     }
 
-    fun getAppsQueryUri(context: Context): String {
+    fun getAppsQueryUri(context: Context, postfix: String): String {
+        val fileName = if (postfix.isEmpty()) "store/apps.json" else "store/apps-$postfix.json"
         var queryUri: String? = Settings.System.getString(context.contentResolver, "store_query_uri")
-            ?: "store/apps.json"
+            ?: fileName
         if (URLUtil.isNetworkUrl(queryUri)) {
             return queryUri!!;
         }
