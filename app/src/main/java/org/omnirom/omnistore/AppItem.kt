@@ -35,33 +35,21 @@ class AppItem(val appData: JSONObject) : ListItem {
 
     fun isValied(device: String): Boolean {
         try {
-            appData.get("file").toString()
-            appData.get("title").toString()
-            appData.get("package").toString()
-            appData.get("icon").toString()
-            appData.get("versionCode").toString()
-            appData.get("versionName").toString()
-
-            var matchFilter = false
             if (appData.has("devices")) {
+                var matchFilter = false
                 if (device.isNotEmpty()) {
                     val devices: JSONArray = appData.getJSONArray("devices")
                     for (i in 0 until devices.length()) {
                         if (devices.get(i).toString() == device) {
                             matchFilter = true;
+                            break;
                         }
                     }
                 }
-            } else {
-                matchFilter = true
+                if (!matchFilter)
+                    return false
             }
-            return matchFilter
-            /*if (matchFilter) {
-                // TODO do we really need to check?
-                if (NetworkUtils().setupHttpsRequest(fileUrl()!!) != null) {
-                    return true
-                }
-            }*/
+            return true
         } catch (e: JSONException) {
             Log.e(TAG, "isValied", e)
         }
