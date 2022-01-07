@@ -34,7 +34,7 @@ class NetworkUtils {
     var mNetworkError = false
 
     interface NetworkTaskCallback {
-        fun postAction(networkError: Boolean)
+        fun postAction(networkError: Boolean, reponseCode: Int)
     }
 
     inner class FetchAppsTask(
@@ -55,12 +55,18 @@ class NetworkUtils {
         }
 
         override fun doInBackground(vararg params: String?): Int {
-            var appListData: String? = downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext, ""))
+            var appListData: String? =
+                downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext, ""))
             if (appListData != null) {
                 loadAppsList(appListData)
 
                 // add extra if available
-                appListData = downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext, DeviceUtils().getProperty(mContext, "ro.build.version.release")))
+                appListData = downloadUrlMemoryAsString(
+                    Constants.getAppsQueryUri(
+                        mContext,
+                        DeviceUtils().getProperty(mContext, "ro.build.version.release")
+                    )
+                )
                 if (appListData != null) {
                     loadAppsList(appListData)
                 }
@@ -77,6 +83,9 @@ class NetworkUtils {
                 val app = apps.getJSONObject(i);
                 val appData = AppItem(app)
                 if (appData.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
+                    val idx = mNewAppsList.indexOf(appData)
+                    if (idx != -1)
+                        mNewAppsList.removeAt(idx)
                     mNewAppsList.add(appData)
                 }
             }
@@ -84,7 +93,7 @@ class NetworkUtils {
 
         override fun onPostExecute(result: Int?) {
             super.onPostExecute(result)
-            mPostAction.postAction(mNetworkError)
+            mPostAction.postAction(mNetworkError, HttpsURLConnection.HTTP_INTERNAL_ERROR)
         }
     }
 
@@ -94,30 +103,20 @@ class NetworkUtils {
     ) : AsyncTask<String, Int, Int>() {
         val mPostAction: NetworkTaskCallback = postAction
         val mUrl: String = url
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-            mNetworkError = false
-        }
+        var responseCode: Int = HttpsURLConnection.HTTP_OK
 
         override fun doInBackground(vararg params: String?): Int {
-            var urlConnection: HttpsURLConnection? = null
             try {
-                urlConnection = setupHttpsRequest(mUrl)
-                if (urlConnection == null) {
-                    mNetworkError = true
-                }
+                responseCode = checkHttpsUrl(mUrl)
             } catch (e: Exception) {
-                mNetworkError = true
-            } finally {
-                urlConnection?.disconnect()
+                responseCode = HttpsURLConnection.HTTP_INTERNAL_ERROR
             }
             return 0
         }
 
         override fun onPostExecute(result: Int?) {
             super.onPostExecute(result)
-            mPostAction.postAction(mNetworkError)
+            mPostAction.postAction(responseCode != HttpsURLConnection.HTTP_OK, responseCode)
         }
     }
 
@@ -138,6 +137,22 @@ class NetworkUtils {
         }
         return urlConnection
     }
+
+    fun checkHttpsUrl(urlStr: String): Int {
+        Log.d(TAG, "checkHttpsUrl: " + urlStr)
+        val url = URL(urlStr)
+        val urlConnection = url.openConnection() as HttpsURLConnection
+        urlConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
+        urlConnection.setReadTimeout(HTTP_READ_TIMEOUT)
+        urlConnection.setRequestMethod("GET")
+        urlConnection.setDoInput(true)
+        urlConnection.setDefaultUseCaches(false)
+        urlConnection.connect()
+        val code = urlConnection.getResponseCode()
+        urlConnection.disconnect()
+        return code
+    }
+
 
     private fun downloadUrlMemoryAsString(url: String): String? {
         Log.d(TAG, "downloadUrlMemoryAsString: " + url)

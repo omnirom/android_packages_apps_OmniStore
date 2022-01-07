@@ -46,6 +46,7 @@ import org.omnirom.omnistore.Constants.PREF_SHOW_INTRO
 import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
+import javax.net.ssl.HttpsURLConnection
 
 
 class MainActivity : AppCompatActivity() {
@@ -225,11 +226,11 @@ class MainActivity : AppCompatActivity() {
             NetworkUtils().CheckAppTask(
                 url,
                 object : NetworkTaskCallback {
-                    override fun postAction(networkError: Boolean) {
+                    override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
                             // reset
                             setAppItemDownloadState(app, -1)
-                            showNetworkError()
+                            showNetworkError(reponseCode)
                         } else {
                             val request: DownloadManager.Request =
                                 DownloadManager.Request(Uri.parse(url))
@@ -328,9 +329,9 @@ class MainActivity : AppCompatActivity() {
                     startProgress()
                 },
                 object : NetworkTaskCallback {
-                    override fun postAction(networkError: Boolean) {
+                    override fun postAction(networkError: Boolean, responseCode: Int) {
                         if (networkError) {
-                            showNetworkError()
+                            showNetworkError(responseCode)
                         } else {
                             mAllAppsList.clear()
                             mAllAppsList.addAll(newAppsList)
@@ -401,10 +402,14 @@ class MainActivity : AppCompatActivity() {
         mViewGroups = false
     }
 
-    private fun showNetworkError() {
+    private fun showNetworkError(reponseCode: Int) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.dialog_title_network_error))
-        builder.setMessage(getString(R.string.dialog_message_network_error))
+        if (reponseCode == HttpsURLConnection.HTTP_NOT_FOUND) {
+            builder.setMessage(getString(R.string.dialog_message_network_error_not_found))
+        } else {
+            builder.setMessage(getString(R.string.dialog_message_network_error))
+        }
         builder.setPositiveButton(android.R.string.ok, null)
         builder.create().show()
     }
@@ -429,6 +434,13 @@ class MainActivity : AppCompatActivity() {
         )
         intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
                 or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
+    }
+
+    private fun uninstallPackage(pkg: String) {
+        val intent = Intent(Intent.ACTION_DELETE)
+        intent.data = Uri.parse("package:" + pkg)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 

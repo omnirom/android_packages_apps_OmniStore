@@ -88,7 +88,7 @@ class CheckUpdatesService : JobService() {
         val fetchApps =
             NetworkUtils().FetchAppsTask(this, Runnable { }, object :
                 NetworkUtils.NetworkTaskCallback {
-                override fun postAction(networkError: Boolean) {
+                override fun postAction(networkError: Boolean, reponseCode: Int) {
                     if (!networkError) {
                         appsList.forEach { it.updateAppStatus(this@CheckUpdatesService.packageManager) }
                         val updateApps = appsList.filter { it.updateAvailable() }

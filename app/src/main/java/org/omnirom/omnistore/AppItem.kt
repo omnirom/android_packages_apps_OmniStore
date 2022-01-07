@@ -196,4 +196,10 @@ class AppItem(val appData: JSONObject) : ListItem {
             mVersionName = "unknown"
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is AppItem)
+            return pkg() == other.pkg()
+        return false
+    }
 }
