@@ -152,7 +152,7 @@ class DownloadService : Service() {
         cancelIntent.action = ACTION_CANCEL_DOWNLOAD
         val cancelPendingIntent: PendingIntent = PendingIntent.getService(
             this,
-            cancelIntent.hashCode(), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            cancelIntent.hashCode(), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         notification.addAction(
             R.drawable.ic_cancel,

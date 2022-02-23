@@ -22,4 +22,9 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@color/main_background_light</item>
     </style>
+
+    <style name="Theme.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:background">@color/main_background_light</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
 </resources>

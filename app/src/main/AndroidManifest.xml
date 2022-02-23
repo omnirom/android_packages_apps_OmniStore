@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.omnirom.omnistore">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -8,6 +9,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <application
         android:name=".App"
@@ -17,27 +20,31 @@
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".SettingsActivity">
+        <activity android:name=".SettingsActivity"
+        android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
         <activity android:name=".IntroActivity"
-            android:theme="@style/IntroTheme" >
+            android:theme="@style/IntroTheme"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <receiver android:name=".BootReceiver">
+        <receiver android:name=".BootReceiver"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -49,7 +56,8 @@
 
         <service
             android:name=".CheckUpdatesService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
 
     </application>
 </manifest>

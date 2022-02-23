@@ -42,7 +42,7 @@
                 android:layout_gravity="center_vertical"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
             <ImageView
                 android:id="@+id/app_note"
@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
             android:visibility="gone" />
 
         <TextView
@@ -78,7 +78,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
         <TextView
             android:id="@+id/app_status"
@@ -87,7 +87,7 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:visibility="gone"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
         <Space
             android:layout_width="match_parent"

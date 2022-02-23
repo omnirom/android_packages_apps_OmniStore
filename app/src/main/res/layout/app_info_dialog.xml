@@ -18,7 +18,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/dialog_app_info_name"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:textStyle="bold" />
 
             <TextView
@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
             <TextView
                 android:id="@+id/app_description"
@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:maxLines="3"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                 android:visibility="gone" />
 
             <TextView
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_app_info_pkg"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:textStyle="bold" />
 
             <TextView
@@ -50,21 +50,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_app_info_version"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/app_version"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
 
             <TextView
@@ -72,14 +72,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_app_info_status"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/app_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
             <TextView
                 android:id="@+id/app_update_title"
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/dialog_app_info_update"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
@@ -95,7 +95,7 @@
                 android:id="@+id/app_update"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>

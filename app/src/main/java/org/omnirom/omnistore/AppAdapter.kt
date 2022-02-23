@@ -24,6 +24,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.Settings
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -67,11 +68,12 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             indicator = view.findViewById(R.id.app_indicator)
             version = view.findViewById(R.id.app_version)
             view.setOnClickListener {
-                val builder = AlertDialog.Builder(context)
+                val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
+                val builder = AlertDialog.Builder(themeContext)
                 builder.setTitle(context.getString(R.string.dialog_app_info_title))
 
                 val v =
-                    LayoutInflater.from(context).inflate(R.layout.app_info_dialog, null, false)
+                    LayoutInflater.from(themeContext).inflate(R.layout.app_info_dialog, null, false)
                 v.findViewById<TextView>(R.id.app_title).text = app.title()
                 v.findViewById<TextView>(R.id.app_pkg).text = app.pkg()
 

@@ -120,6 +120,8 @@ class MainActivity : AppCompatActivity() {
             mPrefs.edit().putBoolean(PREF_SHOW_INTRO, true).commit()
             startActivity(Intent(this, IntroActivity::class.java))
         }
+        this.supportActionBar!!.elevation = 0f
+
     }
 
     override fun onResume() {

@@ -77,8 +77,9 @@ class CheckUpdatesService : JobService() {
         val showApp = Intent(this, MainActivity::class.java)
         val showAppIntent: PendingIntent = PendingIntent.getActivity(
             this,
-            showApp.hashCode(), showApp, PendingIntent.FLAG_UPDATE_CURRENT
-        )
+            showApp.hashCode(),
+            showApp,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         notification.setContentIntent(showAppIntent)
         return notification.build()
     }

@@ -2,11 +2,13 @@
 .gradle
 /local.properties
 /.idea/caches
+/.idea/inspectionProfiles
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/deploymentTargetDropDown.xml
 .DS_Store
 /build
 /app/release
@@ -14,3 +16,4 @@
 /captures
 .externalNativeBuild
 .cxx
+local.properties
