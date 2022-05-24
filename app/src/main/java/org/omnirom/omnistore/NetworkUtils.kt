@@ -61,19 +61,30 @@ class NetworkUtils {
                 loadAppsList(appListData)
 
                 // add extra if available
-                appListData = downloadUrlMemoryAsString(
-                    Constants.getAppsQueryUri(
-                        mContext,
-                        DeviceUtils().getProperty(mContext, "ro.build.version.release")
-                    )
-                )
-                if (appListData != null) {
-                    loadAppsList(appListData)
-                }
+                val extraFiles = mutableListOf<String>()
+                extraFiles.add(DeviceUtils().getProperty(mContext, "ro.build.version.release"))
+                extraFiles.add(DeviceUtils().getProperty(mContext, "ro.omni.device"))
+                loadExtraAppList(extraFiles)
             } else {
                 mNetworkError = true
             }
             return 0
+        }
+
+        private fun loadExtraAppList(extraFiles: List<String>) {
+            extraFiles.forEach { file ->
+                Log.d(TAG, "loadExtraAppList " + file)
+                val appListData = downloadUrlMemoryAsString(
+                    Constants.getAppsQueryUri(
+                        mContext,
+                        file
+                    )
+                )
+                if (appListData != null) {
+                    Log.d(TAG, "loadAppsList " + file)
+                    loadAppsList(appListData)
+                }
+            }
         }
 
         private fun loadAppsList(appListData: String) {
