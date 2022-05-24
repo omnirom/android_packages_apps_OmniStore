@@ -62,15 +62,14 @@
 
         <Button
             android:id="@+id/ok"
-            style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+            style="@style/ButtonStyleDefault"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="@android:string/ok"
-            android:textColor="@color/colorAccent"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:textColor="@android:color/white"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
         <Space
