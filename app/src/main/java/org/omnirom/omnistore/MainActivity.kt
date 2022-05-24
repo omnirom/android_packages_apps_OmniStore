@@ -42,7 +42,6 @@ import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
-import org.omnirom.omnistore.Constants.PREF_SHOW_INTRO
 import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
@@ -116,12 +115,15 @@ class MainActivity : AppCompatActivity() {
             JobUtils().scheduleCheckUpdates(this)
         }
 
-        if (!mPrefs.getBoolean(PREF_SHOW_INTRO, false)) {
-            mPrefs.edit().putBoolean(PREF_SHOW_INTRO, true).commit()
+        if (!hasInstallPermissions()) {
             startActivity(Intent(this, IntroActivity::class.java))
         }
         this.supportActionBar!!.elevation = 0f
 
+    }
+
+    private fun hasInstallPermissions(): Boolean {
+        return packageManager.canRequestPackageInstalls()
     }
 
     override fun onResume() {

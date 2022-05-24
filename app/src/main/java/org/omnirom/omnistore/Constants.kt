@@ -27,7 +27,6 @@ object Constants {
     const val PREF_CHECK_UPDATES = "check_updates"
     const val PREF_VIEW_GROUPS = "view_groups"
     const val PREF_CURRENT_APPS = "current_apps"
-    const val PREF_SHOW_INTRO = "show_intro"
     const val PREF_CURRENT_INSTALLS = "current_installs"
     const val ACTION_ADD_DOWNLOAD = "add_download"
     const val ACTION_CANCEL_DOWNLOAD = "cancel_download"
