@@ -24,10 +24,11 @@ android {
             versionNameSuffix '-DEBUG'
         }
     }
-
-    lintOptions {
+    lint {
         abortOnError false
     }
+    namespace 'org.omnirom.omnistore'
+
 }
 
 dependencies {
