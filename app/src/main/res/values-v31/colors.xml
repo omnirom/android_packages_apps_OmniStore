@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@android:color/system_neutral1_50</color>
-    <color name="colorPrimaryDark">@android:color/system_neutral1_50</color>
-    <color name="main_background_light">@android:color/system_neutral1_50</color>
-    <color name="colorAccent">#1565C0</color>
-    <color name="toolbar_icon_color">?android:attr/colorControlNormal</color>
+    <color name="main_background">@android:color/system_neutral1_50</color>
 </resources>

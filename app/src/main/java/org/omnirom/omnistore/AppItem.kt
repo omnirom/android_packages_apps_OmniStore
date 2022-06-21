@@ -19,170 +19,111 @@ package org.omnirom.omnistore
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
+import com.google.gson.annotations.SerializedName
 
-class AppItem(val appData: JSONObject) : ListItem {
-    private var mInstalled: InstallState = InstallState.UNINSTALLED
-    var mDownloadId: Long = -1
-    var mVersionCode: Int = -1
-    var mVersionName: String = ""
+//     {
+//        "title": "Calendar",
+//        "file": "Calendar.apk",
+//        "category": "core",
+//        "package" : "com.android.calendar",
+//        "icon" : "Calendar.png",
+//        "versionCode" : "6",
+//        "versionName" : "1.0.5",
+//"devices": [
+//"oneplus7t",
+//],
+//        "description" : "AOSP calendar application.",
+//        "note" : "Depending on your setup you might also need Google Calendar Sync Adapter"
+//    },
+data class AppItem(
+    val title: String,
+    val file: String,
+    val category: String,
+    @SerializedName("package")
+    val packageName: String,
+    val icon: String,
+    var versionCode: String,
+    var versionName: String,
+    val description: String,
+    val note: String,
+    val devices: List<String>,
+
+    ) : ListItem {
     private val TAG = "OmniStore:AppItem"
 
     enum class InstallState { DISABLED, INSTALLED, UNINSTALLED }
 
-    fun isValied(device: String): Boolean {
-        try {
-            if (appData.has("devices")) {
-                var matchFilter = false
-                if (device.isNotEmpty()) {
-                    val devices: JSONArray = appData.getJSONArray("devices")
-                    for (i in 0 until devices.length()) {
-                        if (devices.get(i).toString() == device) {
-                            matchFilter = true;
-                            break;
-                        }
-                    }
-                }
-                if (!matchFilter)
-                    return false
-            }
-            return true
-        } catch (e: JSONException) {
-            Log.e(TAG, "isValied", e)
-        }
-        return false
-    }
+    var mInstalled: InstallState = InstallState.UNINSTALLED
+    var mDownloadId: Long = -1
+    var mVersionCodeInstalled: Int = 0
+    var mVersionNameInstalled: String = "unknown"
 
-    fun file(): String {
-        try {
-            return appData.get("file").toString()
-        } catch (e: JSONException) {
-            return "unknown"
+    fun isValied(device: String): Boolean {
+        if (devices != null) {
+            return devices.contains(device)
         }
+        return true
     }
 
     fun fileUrl(context: Context): String? {
-        try {
-            return Constants.getAppsRootUri(context) + appData.get("file").toString()
-        } catch (e: JSONException) {
-            return null
-        }
-    }
-
-    override fun title(): String {
-        try {
-            return appData.get("title").toString()
-        } catch (e: JSONException) {
-            return "unknown"
-        }
+        return Constants.getAppsRootUri(context) + file
     }
 
     fun iconUrl(context: Context): String? {
-        try {
-            return Constants.getAppsRootUri(context) + appData.get("icon").toString()
-        } catch (e: JSONException) {
-            return null
-        }
-    }
-
-    fun pkg(): String {
-        try {
-            return appData.get("package").toString()
-        } catch (e: JSONException) {
-            return "unknown"
-        }
-    }
-
-    fun note(): String? {
-        if (appData.has("note")) {
-            try {
-                return appData.get("note").toString()
-            } catch (e: JSONException) {
-            }
-        }
-        return null
-    }
-
-    fun description(): String? {
-        if (appData.has("description")) {
-            try {
-                return appData.get("description").toString()
-            } catch (e: JSONException) {
-            }
-        }
-        return null
-    }
-
-    fun versionName(): String {
-        try {
-            return appData.get("versionName").toString()
-        } catch (e: JSONException) {
-            return "unknown"
-        }
-    }
-
-    override fun toString(): String {
-        return appData.toString()
-    }
-
-    fun versionCode(): Int {
-        try {
-            return appData.get("versionCode").toString().toInt()
-        } catch (e: JSONException) {
-            return 0
-        }
+        return Constants.getAppsRootUri(context) + icon
     }
 
     fun installEnabled(): Boolean {
-        return appNotInstaled() || (appInstalled() && (versionCode() > mVersionCode))
+        return appNotInstaled() || (appInstalled() && (versionCode.toInt() > mVersionCodeInstalled))
     }
 
     fun updateAvailable(): Boolean {
-        return appInstalled() && (versionCode() > mVersionCode)
+        return appInstalled() && (versionCode.toInt() > mVersionCodeInstalled)
     }
 
     fun appSettingsEnabled(): Boolean {
-        return mInstalled != InstallState.UNINSTALLED
+        return mInstalled != AppItem.InstallState.UNINSTALLED
     }
 
     fun appDisabled(): Boolean {
-        return mInstalled == InstallState.DISABLED
+        return mInstalled == AppItem.InstallState.DISABLED
     }
 
     fun appInstalled(): Boolean {
-        return mInstalled == InstallState.INSTALLED
+        return mInstalled == AppItem.InstallState.INSTALLED
     }
 
     fun appNotInstaled(): Boolean {
-        return mInstalled == InstallState.UNINSTALLED
+        return mInstalled == AppItem.InstallState.UNINSTALLED
     }
 
-    fun setInstalledStatus(status: InstallState) {
+    fun setInstalledStatus(status: AppItem.InstallState) {
         mInstalled = status
+    }
+
+    override fun title(): String {
+        return title
     }
 
     override fun sortOrder(): Int {
         if (updateAvailable()) return 0
         when (mInstalled) {
-            InstallState.INSTALLED -> return 1
-            InstallState.UNINSTALLED -> return 2
-            InstallState.DISABLED -> return 3
+            AppItem.InstallState.INSTALLED -> return 1
+            AppItem.InstallState.UNINSTALLED -> return 2
+            AppItem.InstallState.DISABLED -> return 3
         }
     }
 
     fun updateAppStatus(packageManager: PackageManager) {
         try {
             val pkgInfo = packageManager.getPackageInfo(
-                pkg(),
+                packageName,
                 0
             )
-            mVersionCode = pkgInfo.versionCode
-            mVersionName = pkgInfo.versionName
+            mVersionCodeInstalled = pkgInfo.versionCode
+            mVersionNameInstalled = pkgInfo.versionName
             val enabled: Int =
-                packageManager.getApplicationEnabledSetting(pkg())
+                packageManager.getApplicationEnabledSetting(packageName)
             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
                 enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
             ) {
@@ -192,14 +133,17 @@ class AppItem(val appData: JSONObject) : ListItem {
             }
         } catch (e: Exception) {
             setInstalledStatus(AppItem.InstallState.UNINSTALLED)
-            mVersionCode = -1
-            mVersionName = "unknown"
         }
+    }
+
+    fun initStatus() {
+        mDownloadId = -1
+        mInstalled = InstallState.UNINSTALLED
     }
 
     override fun equals(other: Any?): Boolean {
         if (other is AppItem)
-            return pkg() == other.pkg()
+            return packageName == other.packageName
         return false
     }
 }

@@ -3,6 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
     android:background="?android:attr/selectableItemBackground"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
@@ -86,8 +88,8 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:visibility="gone"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            android:visibility="gone" />
 
         <Space
             android:layout_width="match_parent"

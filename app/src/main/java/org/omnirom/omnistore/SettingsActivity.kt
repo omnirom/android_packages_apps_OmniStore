@@ -22,9 +22,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
+import com.google.android.material.appbar.MaterialToolbar
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 
 class SettingsActivity : AppCompatActivity() {
@@ -37,7 +39,7 @@ class SettingsActivity : AppCompatActivity() {
                 findPreference<Preference>("notification_settings")
             notificationPreference?.setOnPreferenceClickListener {
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, activity!!.packageName)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, requireActivity().packageName)
                 startActivity(intent)
                 false
             }
@@ -46,23 +48,28 @@ class SettingsActivity : AppCompatActivity() {
                 findPreference<SwitchPreference>(PREF_CHECK_UPDATES)
             checkUpdatesPreference?.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue as Boolean)
-                    JobUtils().scheduleCheckUpdates(activity!!)
+                    JobUtils().scheduleCheckUpdates(requireActivity())
                 else
-                    JobUtils().cancelCheckForUpdates(activity!!)
+                    JobUtils().cancelCheckForUpdates(requireActivity())
                 true
             }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.settings_activity)
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar);
+        setSupportActionBar(toolbar)
         this.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        this.supportActionBar!!.elevation = 0f
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        supportFragmentManager.beginTransaction().replace(android.R.id.content, SettingsFragment())
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment())
             .commit()
     }
 
