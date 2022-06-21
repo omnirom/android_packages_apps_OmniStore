@@ -18,20 +18,15 @@
 package org.omnirom.omnistore
 
 import android.content.Context
-import android.os.AsyncTask
 import android.util.Log
-import org.json.JSONArray
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.net.URL
-import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.net.ssl.HttpsURLConnection
 
 class NetworkUtils {
     private val TAG = "OmniStore:NetworkUtils"
-    private val HTTP_READ_TIMEOUT = 30000
-    private val HTTP_CONNECTION_TIMEOUT = 30000
-    var mNetworkError = false
 
     interface NetworkTaskCallback {
         fun postAction(networkError: Boolean, reponseCode: Int)
@@ -42,152 +37,79 @@ class NetworkUtils {
         preAction: Runnable,
         postAction: NetworkTaskCallback,
         newAppsList: ArrayList<AppItem>
-    ) : AsyncTask<String, Int, Int>() {
+    ) {
         val mNewAppsList: ArrayList<AppItem> = newAppsList
         val mPreaction: Runnable = preAction
         val mPostAction: NetworkTaskCallback = postAction
         val mContext: Context = context
+        var mNetworkError = false
 
-        override fun onPreExecute() {
-            super.onPreExecute()
+        fun run() {
             mPreaction.run()
-            mNetworkError = false
-        }
 
-        override fun doInBackground(vararg params: String?): Int {
-            var appListData: String? =
-                downloadUrlMemoryAsString(Constants.getAppsQueryUri(mContext, ""))
-            if (appListData != null) {
-                loadAppsList(appListData)
+            val omniStoreApi = RetrofitManager.getInstance().create(OmniStoreApi::class.java)
+            GlobalScope.launch {
+                val appList = omniStoreApi.getApps("apps")
 
-                // add extra if available
-                val extraFiles = mutableListOf<String>()
-                extraFiles.add(DeviceUtils().getProperty(mContext, "ro.build.version.release"))
-                extraFiles.add(DeviceUtils().getProperty(mContext, "ro.omni.device"))
-                loadExtraAppList(extraFiles)
-            } else {
-                mNetworkError = true
-            }
-            return 0
-        }
+                if (appList.isSuccessful && appList.body() != null) {
+                    loadAppsList(appList.body()!!)
 
-        private fun loadExtraAppList(extraFiles: List<String>) {
-            extraFiles.forEach { file ->
-                Log.d(TAG, "loadExtraAppList " + file)
-                val appListData = downloadUrlMemoryAsString(
-                    Constants.getAppsQueryUri(
-                        mContext,
-                        file
-                    )
-                )
-                if (appListData != null) {
-                    Log.d(TAG, "loadAppsList " + file)
-                    loadAppsList(appListData)
+                    // add extra if available
+                    val extraFiles = mutableListOf<String>()
+                    extraFiles.add(DeviceUtils().getProperty(mContext, "ro.build.version.release"))
+                    extraFiles.add(DeviceUtils().getProperty(mContext, "ro.omni.device"))
+                    loadExtraAppList(extraFiles, omniStoreApi)
+                } else {
+                    mNetworkError = true
+                }
+                withContext(Dispatchers.Main) {
+                    mPostAction.postAction(mNetworkError, HttpsURLConnection.HTTP_INTERNAL_ERROR)
                 }
             }
         }
 
-        private fun loadAppsList(appListData: String) {
-            val apps = JSONArray(appListData)
-            //Log.d(TAG, "" + apps)
-            for (i in 0 until apps.length()) {
-                val app = apps.getJSONObject(i);
-                val appData = AppItem(app)
-                if (appData.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
-                    val idx = mNewAppsList.indexOf(appData)
+        suspend fun loadExtraAppList(extraFiles: List<String>, omniStoreApi: OmniStoreApi) {
+            extraFiles.forEach { file ->
+                val appList = omniStoreApi.getApps(file)
+
+                if (appList.isSuccessful && appList.body() != null) {
+                    Log.d(TAG, "loadExtraAppList " + file)
+                    loadAppsList(appList.body()!!)
+                }
+            }
+        }
+
+        private fun loadAppsList(appsList: List<AppItem>) {
+            for (app in appsList) {
+                if (app.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
+                    val idx = mNewAppsList.indexOf(app)
                     if (idx != -1)
                         mNewAppsList.removeAt(idx)
-                    mNewAppsList.add(appData)
+                    app.initStatus()
+                    mNewAppsList.add(app)
                 }
             }
-        }
-
-        override fun onPostExecute(result: Int?) {
-            super.onPostExecute(result)
-            mPostAction.postAction(mNetworkError, HttpsURLConnection.HTTP_INTERNAL_ERROR)
         }
     }
 
     inner class CheckAppTask(
         url: String,
         postAction: NetworkTaskCallback
-    ) : AsyncTask<String, Int, Int>() {
+    ) {
         val mPostAction: NetworkTaskCallback = postAction
         val mUrl: String = url
         var responseCode: Int = HttpsURLConnection.HTTP_OK
 
-        override fun doInBackground(vararg params: String?): Int {
-            try {
-                responseCode = checkHttpsUrl(mUrl)
-            } catch (e: Exception) {
-                responseCode = HttpsURLConnection.HTTP_INTERNAL_ERROR
+        fun run() {
+            val omniStoreApi = RetrofitManager.getInstance().create(OmniStoreApi::class.java)
+            GlobalScope.launch {
+                val reponse = omniStoreApi.checkApp(mUrl)
+                responseCode = reponse.code()
+
+                withContext(Dispatchers.Main) {
+                    mPostAction.postAction(responseCode != HttpsURLConnection.HTTP_OK, responseCode)
+                }
             }
-            return 0
-        }
-
-        override fun onPostExecute(result: Int?) {
-            super.onPostExecute(result)
-            mPostAction.postAction(responseCode != HttpsURLConnection.HTTP_OK, responseCode)
-        }
-    }
-
-    fun setupHttpsRequest(urlStr: String): HttpsURLConnection? {
-        Log.d(TAG, "setupHttpsRequest: " + urlStr)
-        val url = URL(urlStr)
-        val urlConnection = url.openConnection() as HttpsURLConnection
-        urlConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
-        urlConnection.setReadTimeout(HTTP_READ_TIMEOUT)
-        urlConnection.setRequestMethod("GET")
-        urlConnection.setDoInput(true)
-        urlConnection.setDefaultUseCaches(false)
-        urlConnection.connect()
-        val code: Int = urlConnection.getResponseCode()
-        if (code != HttpsURLConnection.HTTP_OK) {
-            Log.d(TAG, "response: " + code)
-            return null
-        }
-        return urlConnection
-    }
-
-    fun checkHttpsUrl(urlStr: String): Int {
-        Log.d(TAG, "checkHttpsUrl: " + urlStr)
-        val url = URL(urlStr)
-        val urlConnection = url.openConnection() as HttpsURLConnection
-        urlConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT)
-        urlConnection.setReadTimeout(HTTP_READ_TIMEOUT)
-        urlConnection.setRequestMethod("GET")
-        urlConnection.setDoInput(true)
-        urlConnection.setDefaultUseCaches(false)
-        urlConnection.connect()
-        val code = urlConnection.getResponseCode()
-        urlConnection.disconnect()
-        return code
-    }
-
-
-    private fun downloadUrlMemoryAsString(url: String): String? {
-        Log.d(TAG, "downloadUrlMemoryAsString: " + url)
-        var urlConnection: HttpsURLConnection? = null
-        return try {
-            urlConnection = setupHttpsRequest(url)
-            if (urlConnection == null) {
-                return null
-            }
-            val input: InputStream = urlConnection.inputStream
-            val byteArray = ByteArrayOutputStream()
-            var byteInt: Int = 0
-            while (input.read().also({ byteInt = it }) >= 0) {
-                byteArray.write(byteInt)
-            }
-            val bytes: ByteArray = byteArray.toByteArray() ?: return null
-            String(bytes, StandardCharsets.UTF_8)
-        } catch (e: Exception) {
-            // Download failed for any number of reasons, timeouts, connection
-            // drops, etc. Just log it in debugging mode.
-            Log.e(TAG, "downloadUrlMemoryAsString " + e, e)
-            null
-        } finally {
-            urlConnection?.disconnect()
         }
     }
 }

@@ -24,16 +24,18 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
@@ -91,12 +93,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         super.onCreate(savedInstanceState)
         Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"))
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         setContentView(R.layout.activity_main)
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar);
+        setSupportActionBar(toolbar)
 
         mRecyclerView = findViewById<RecyclerView>(R.id.app_list)
         mRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -118,8 +125,6 @@ class MainActivity : AppCompatActivity() {
         if (!hasInstallPermissions()) {
             startActivity(Intent(this, IntroActivity::class.java))
         }
-        this.supportActionBar!!.elevation = 0f
-
     }
 
     private fun hasInstallPermissions(): Boolean {
@@ -171,6 +176,7 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<String?>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_STORAGE_PERMS && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
             pendingApp?.let { doDownloadApp(it) }
         }
@@ -225,10 +231,9 @@ class MainActivity : AppCompatActivity() {
         // get a user feedback asap
         setAppItemDownloadState(app, FAKE_DOWNLOAD_ID)
 
-        val url = app.fileUrl(this)!!
         val checkApp =
             NetworkUtils().CheckAppTask(
-                url,
+                app.file,
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
@@ -236,9 +241,11 @@ class MainActivity : AppCompatActivity() {
                             setAppItemDownloadState(app, -1)
                             showNetworkError(reponseCode)
                         } else {
+                            val url = app.fileUrl(this@MainActivity)
+
                             val request: DownloadManager.Request =
                                 DownloadManager.Request(Uri.parse(url))
-                            val fileName = File(app.file()).name
+                            val fileName = File(app.file).name
                             request.setDestinationInExternalFilesDir(
                                 this@MainActivity,
                                 null,
@@ -257,12 +264,12 @@ class MainActivity : AppCompatActivity() {
                                 Intent(this@MainActivity, DownloadService::class.java)
                             serviceIndent.action = ACTION_ADD_DOWNLOAD
                             serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app.mDownloadId)
-                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.pkg())
+                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.packageName)
                             startForegroundService(serviceIndent)
                         }
                     }
                 })
-        checkApp.execute()
+        checkApp.run()
     }
 
     fun cancelDownloadApp(app: AppItem) {
@@ -306,7 +313,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
         for (id in downloads.keys()) {
             val pkg = downloads.get(id).toString()
-            val dl = mAllAppsList.filter { it.pkg() == pkg }
+            val dl = mAllAppsList.filter { it.packageName == pkg }
             if (dl.size == 1) {
                 dl.first().mDownloadId = id.toLong()
                 Log.d(TAG, "set downloadId = " + id + " to " + dl.first())
@@ -343,7 +350,7 @@ class MainActivity : AppCompatActivity() {
                             syncRunningDownloads()
 
                             val pkgList = HashSet<String>()
-                            mAllAppsList.forEach { pkgList.add(it.pkg()) }
+                            mAllAppsList.forEach { pkgList.add(it.packageName) }
                             // to compare on update check if app list has changed
                             mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
 
@@ -355,7 +362,7 @@ class MainActivity : AppCompatActivity() {
                 },
                 newAppsList
             )
-        fetchApps.execute()
+        fetchApps.run()
     }
 
     private fun showGrouped() {

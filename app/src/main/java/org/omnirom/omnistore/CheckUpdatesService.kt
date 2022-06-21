@@ -98,7 +98,7 @@ class CheckUpdatesService : JobService() {
                             PreferenceManager.getDefaultSharedPreferences(this@CheckUpdatesService)
                         val oldPkgList =
                             prefs.getStringSet(Constants.PREF_CURRENT_APPS, HashSet<String>())
-                        val newAppsList = appsList.filter { !oldPkgList!!.contains(it.pkg()) }
+                        val newAppsList = appsList.filter { !oldPkgList!!.contains(it.packageName) }
 
                         if (updateApps.isNotEmpty() || newAppsList.isNotEmpty()) {
                             var message1 = ""
@@ -149,6 +149,6 @@ class CheckUpdatesService : JobService() {
                     jobFinished(params, false)
                 }
             }, appsList)
-        fetchApps.execute()
+        fetchApps.run()
     }
 }

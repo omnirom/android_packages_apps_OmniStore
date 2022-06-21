@@ -60,17 +60,17 @@
             android:text="@string/permission_text"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/ok"
-            style="@style/ButtonStyleDefault"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:backgroundTint="@color/colorAccent"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:text="@android:string/ok"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+            android:textColor="@android:color/white" />
 
         <Space
             android:layout_width="match_parent"

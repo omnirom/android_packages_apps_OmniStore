@@ -17,7 +17,6 @@
  */
 package org.omnirom.omnistore
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -31,6 +30,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
@@ -75,28 +75,28 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 val v =
                     LayoutInflater.from(themeContext).inflate(R.layout.app_info_dialog, null, false)
                 v.findViewById<TextView>(R.id.app_title).text = app.title()
-                v.findViewById<TextView>(R.id.app_pkg).text = app.pkg()
+                v.findViewById<TextView>(R.id.app_pkg).text = app.packageName
 
                 var version = ""
                 if (app.updateAvailable()) {
-                    version = app.mVersionName
+                    version = app.versionName
                     v.findViewById<View>(R.id.app_update_title).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_update).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_update).text = app.versionName()
+                    v.findViewById<TextView>(R.id.app_update).text = version
                 } else if (app.appNotInstaled()) {
-                    version = app.versionName()
+                    version = app.versionName
                 } else if (app.appInstalled() or app.appDisabled()) {
-                    version = app.mVersionName
+                    version = app.mVersionNameInstalled
                 }
                 v.findViewById<TextView>(R.id.app_version).text = version
                 v.findViewById<TextView>(R.id.app_status).text = getStatusString(app)
 
-                if (app.description() != null) {
+                if (app.description != null) {
                     v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_description).text = app.description()
-                } else if (app.note() != null) {
+                    v.findViewById<TextView>(R.id.app_description).text = app.description
+                } else if (app.note != null) {
                     v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_description).text = app.note()
+                    v.findViewById<TextView>(R.id.app_description).text = app.note
                 }
                 builder.setView(v)
                 builder.setPositiveButton(android.R.string.ok, null)
@@ -106,16 +106,16 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                         DialogInterface.OnClickListener { _, _ ->
                             val intent =
                                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            intent.data = Uri.parse("package:" + app.pkg())
+                            intent.data = Uri.parse("package:" + app.packageName)
                             it?.context?.startActivity(intent)
                         })
                 }
                 builder.create().show()
             }
             note.setOnClickListener {
-                val builder = AlertDialog.Builder(it?.context)
+                val builder = AlertDialog.Builder(it.context)
                 builder.setTitle(app.title())
-                builder.setMessage(app.note());
+                builder.setMessage(app.note);
                 builder.setPositiveButton(android.R.string.ok, null)
                 builder.create().show()
             }
@@ -169,7 +169,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             holder.title.text = app.title()
             Picasso.with(context).load(app.iconUrl(context))
                 .error(R.drawable.ic_warning).into(holder.logo)
-            holder.pkg.text = app.pkg()
+            holder.pkg.text = app.packageName
             holder.indicator.visibility = View.GONE
             holder.note.visibility = View.GONE
 
@@ -190,24 +190,24 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             if (app.updateAvailable()) {
                 context.getString(R.string.status_update_available)
                 holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.versionName()
+                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
                 holder.indicator.visibility = View.VISIBLE
             } else if (app.appInstalled()) {
                 holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
+                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
             } else if (app.appNotInstaled()) {
                 holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.versionName()
+                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
             } else if (app.appDisabled()) {
                 holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.mVersionName
+                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
             }
             if (mPrefs.getBoolean(PREF_VIEW_GROUPS, true)) {
                 holder.status.visibility = View.GONE
             } else {
                 holder.status.visibility = View.VISIBLE
             }
-            if (app.note() != null) {
+            if (app.note != null) {
                 holder.note.visibility = View.VISIBLE
             }
         } else if (holder is SeparatorItemViewHolder) {
