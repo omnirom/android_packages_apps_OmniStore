@@ -38,37 +38,54 @@ class NetworkUtils {
         postAction: NetworkTaskCallback,
         newAppsList: ArrayList<AppItem>
     ) {
-        val mNewAppsList: ArrayList<AppItem> = newAppsList
-        val mPreaction: Runnable = preAction
-        val mPostAction: NetworkTaskCallback = postAction
-        val mContext: Context = context
-        var mNetworkError = false
+        private val mNewAppsList: ArrayList<AppItem> = newAppsList
+        private val mPreaction: Runnable = preAction
+        private val mPostAction: NetworkTaskCallback = postAction
+        private val mContext: Context = context
+        private var mNetworkError = false
 
         fun run() {
             mPreaction.run()
 
-            val omniStoreApi = RetrofitManager.getInstance().create(OmniStoreApi::class.java)
+            val omniStoreApi = RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
             GlobalScope.launch {
-                val appList = omniStoreApi.getApps("apps")
+                try {
+                    val appList = omniStoreApi.getApps("apps")
 
-                if (appList.isSuccessful && appList.body() != null) {
-                    loadAppsList(appList.body()!!)
+                    if (appList.isSuccessful && appList.body() != null) {
+                        loadAppsList(appList.body()!!)
 
-                    // add extra if available
-                    val extraFiles = mutableListOf<String>()
-                    extraFiles.add(DeviceUtils().getProperty(mContext, "ro.build.version.release"))
-                    extraFiles.add(DeviceUtils().getProperty(mContext, "ro.omni.device"))
-                    loadExtraAppList(extraFiles, omniStoreApi)
-                } else {
-                    mNetworkError = true
-                }
-                withContext(Dispatchers.Main) {
-                    mPostAction.postAction(mNetworkError, HttpsURLConnection.HTTP_INTERNAL_ERROR)
+                        // add extra if available
+                        val extraFiles = mutableListOf<String>()
+                        extraFiles.add(
+                            DeviceUtils().getProperty(
+                                mContext,
+                                "ro.build.version.release"
+                            )
+                        )
+                        extraFiles.add(DeviceUtils().getProperty(mContext, "ro.omni.device"))
+                        loadExtraAppList(extraFiles, omniStoreApi)
+                    } else {
+                        mNetworkError = true
+                    }
+                    withContext(Dispatchers.Main) {
+                        mPostAction.postAction(
+                            mNetworkError,
+                            HttpsURLConnection.HTTP_INTERNAL_ERROR
+                        )
+                    }
+                } catch (e: RetrofitManager.NoConnectivityException) {
+                    withContext(Dispatchers.Main) {
+                        mPostAction.postAction(
+                            true,
+                            HttpsURLConnection.HTTP_INTERNAL_ERROR
+                        )
+                    }
                 }
             }
         }
 
-        suspend fun loadExtraAppList(extraFiles: List<String>, omniStoreApi: OmniStoreApi) {
+        private suspend fun loadExtraAppList(extraFiles: List<String>, omniStoreApi: OmniStoreApi) {
             extraFiles.forEach { file ->
                 val appList = omniStoreApi.getApps(file)
 
@@ -85,7 +102,7 @@ class NetworkUtils {
                     val idx = mNewAppsList.indexOf(app)
                     if (idx != -1)
                         mNewAppsList.removeAt(idx)
-                    app.initStatus()
+                    app.initState()
                     mNewAppsList.add(app)
                 }
             }
@@ -93,21 +110,35 @@ class NetworkUtils {
     }
 
     inner class CheckAppTask(
+        context: Context,
         url: String,
         postAction: NetworkTaskCallback
     ) {
-        val mPostAction: NetworkTaskCallback = postAction
-        val mUrl: String = url
-        var responseCode: Int = HttpsURLConnection.HTTP_OK
+        private val mPostAction: NetworkTaskCallback = postAction
+        private val mUrl: String = url
+        private var responseCode: Int = HttpsURLConnection.HTTP_OK
+        private val mContext = context
 
         fun run() {
-            val omniStoreApi = RetrofitManager.getInstance().create(OmniStoreApi::class.java)
+            val omniStoreApi = RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
             GlobalScope.launch {
-                val reponse = omniStoreApi.checkApp(mUrl)
-                responseCode = reponse.code()
+                try {
+                    val reponse = omniStoreApi.checkApp(mUrl)
+                    responseCode = reponse.code()
 
-                withContext(Dispatchers.Main) {
-                    mPostAction.postAction(responseCode != HttpsURLConnection.HTTP_OK, responseCode)
+                    withContext(Dispatchers.Main) {
+                        mPostAction.postAction(
+                            responseCode != HttpsURLConnection.HTTP_OK,
+                            responseCode
+                        )
+                    }
+                } catch (e: RetrofitManager.NoConnectivityException) {
+                    withContext(Dispatchers.Main) {
+                        mPostAction.postAction(
+                            true,
+                            HttpsURLConnection.HTTP_INTERNAL_ERROR
+                        )
+                    }
                 }
             }
         }

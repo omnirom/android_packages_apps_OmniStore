@@ -34,7 +34,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
-import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.Constants.TYPE_APP_ITEM
 import org.omnirom.omnistore.Constants.TYPE_SEPARATOR_ITEM
 
@@ -91,12 +90,12 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 v.findViewById<TextView>(R.id.app_version).text = version
                 v.findViewById<TextView>(R.id.app_status).text = getStatusString(app)
 
-                if (app.description != null) {
+                if (app.description().isNotEmpty()) {
                     v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_description).text = app.description
-                } else if (app.note != null) {
+                    v.findViewById<TextView>(R.id.app_description).text = app.description()
+                } else if (app.note().isNotEmpty()) {
                     v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_description).text = app.note
+                    v.findViewById<TextView>(R.id.app_description).text = app.note()
                 }
                 builder.setView(v)
                 builder.setPositiveButton(android.R.string.ok, null)
@@ -116,7 +115,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
                 val builder = AlertDialog.Builder(themeContext)
                 builder.setTitle(app.title())
-                builder.setMessage(app.note);
+                builder.setMessage(app.note());
                 builder.setPositiveButton(android.R.string.ok, null)
                 builder.create().show()
             }
@@ -203,12 +202,9 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 holder.version.text =
                     context.resources.getString(R.string.app_item_version) + " " + app.versionName
             }
-            if (mPrefs.getBoolean(PREF_VIEW_GROUPS, true)) {
-                holder.status.visibility = View.GONE
-            } else {
-                holder.status.visibility = View.VISIBLE
-            }
-            if (app.note != null) {
+            holder.status.visibility = View.GONE
+
+            if (app.note().isNotEmpty()) {
                 holder.note.visibility = View.VISIBLE
             }
         } else if (holder is SeparatorItemViewHolder) {

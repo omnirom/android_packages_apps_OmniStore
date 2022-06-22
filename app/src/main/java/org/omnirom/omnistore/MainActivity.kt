@@ -45,7 +45,6 @@ import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
-import org.omnirom.omnistore.Constants.PREF_VIEW_GROUPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import java.io.File
 import javax.net.ssl.HttpsURLConnection
@@ -61,7 +60,6 @@ class MainActivity : AppCompatActivity() {
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
-    private var mViewGroups = true
 
     //private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
@@ -117,7 +115,6 @@ class MainActivity : AppCompatActivity() {
             }
             refresh()
         }
-        mViewGroups = mPrefs.getBoolean(PREF_VIEW_GROUPS, true)
 
         if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
             JobUtils().scheduleCheckUpdates(this)
@@ -192,17 +189,6 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
-            R.id.menu_item_filter -> {
-                if (mViewGroups) {
-                    showAll()
-                    //mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
-                } else {
-                    showGrouped()
-                    //mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
-                }
-                mPrefs.edit().putBoolean(PREF_VIEW_GROUPS, mViewGroups).commit()
-                true
-            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -234,6 +220,7 @@ class MainActivity : AppCompatActivity() {
 
         val checkApp =
             NetworkUtils().CheckAppTask(
+                this,
                 app.file,
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean, reponseCode: Int) {
@@ -401,17 +388,6 @@ class MainActivity : AppCompatActivity() {
 
             (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
         }
-        mViewGroups = true
-    }
-
-    private fun showAll() {
-        synchronized(this@MainActivity) {
-            mDisplayList.clear()
-            mDisplayList.addAll(mAllAppsList)
-            mDisplayList.sortBy { it.title() }
-            (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
-        }
-        mViewGroups = false
     }
 
     private fun showNetworkError(reponseCode: Int) {
@@ -428,11 +404,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applySortAndFilter() {
-        if (mViewGroups) {
-            showGrouped()
-        } else {
-            showAll()
-        }
+        showGrouped()
     }
 
     private fun setAppItemDownloadState(app: AppItem, id: Long) {
