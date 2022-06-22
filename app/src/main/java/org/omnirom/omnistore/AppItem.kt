@@ -44,8 +44,10 @@ data class AppItem(
     val icon: String,
     var versionCode: String,
     var versionName: String,
-    val description: String,
-    val note: String,
+    @SerializedName("description")
+    val _description: String,
+    @SerializedName("note")
+    val _note: String,
     val devices: List<String>,
 
     ) : ListItem {
@@ -65,11 +67,11 @@ data class AppItem(
         return true
     }
 
-    fun fileUrl(context: Context): String? {
+    fun fileUrl(context: Context): String {
         return Constants.getAppsRootUri(context) + file
     }
 
-    fun iconUrl(context: Context): String? {
+    fun iconUrl(context: Context): String {
         return Constants.getAppsRootUri(context) + icon
     }
 
@@ -82,22 +84,22 @@ data class AppItem(
     }
 
     fun appSettingsEnabled(): Boolean {
-        return mInstalled != AppItem.InstallState.UNINSTALLED
+        return mInstalled != InstallState.UNINSTALLED
     }
 
     fun appDisabled(): Boolean {
-        return mInstalled == AppItem.InstallState.DISABLED
+        return mInstalled == InstallState.DISABLED
     }
 
     fun appInstalled(): Boolean {
-        return mInstalled == AppItem.InstallState.INSTALLED
+        return mInstalled == InstallState.INSTALLED
     }
 
     fun appNotInstaled(): Boolean {
-        return mInstalled == AppItem.InstallState.UNINSTALLED
+        return mInstalled == InstallState.UNINSTALLED
     }
 
-    fun setInstalledStatus(status: AppItem.InstallState) {
+    fun setInstalledStatus(status: InstallState) {
         mInstalled = status
     }
 
@@ -107,11 +109,19 @@ data class AppItem(
 
     override fun sortOrder(): Int {
         if (updateAvailable()) return 0
-        when (mInstalled) {
-            AppItem.InstallState.INSTALLED -> return 1
-            AppItem.InstallState.UNINSTALLED -> return 2
-            AppItem.InstallState.DISABLED -> return 3
+        return when (mInstalled) {
+            InstallState.INSTALLED -> 1
+            InstallState.UNINSTALLED -> 2
+            InstallState.DISABLED -> 3
         }
+    }
+
+    fun note() : String {
+        return _note ?: ""
+    }
+
+    fun description() : String {
+        return _description ?: ""
     }
 
     fun updateAppStatus(packageManager: PackageManager) {
@@ -127,16 +137,16 @@ data class AppItem(
             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
                 enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
             ) {
-                setInstalledStatus(AppItem.InstallState.DISABLED)
+                setInstalledStatus(InstallState.DISABLED)
             } else {
-                setInstalledStatus(AppItem.InstallState.INSTALLED)
+                setInstalledStatus(InstallState.INSTALLED)
             }
         } catch (e: Exception) {
-            setInstalledStatus(AppItem.InstallState.UNINSTALLED)
+            setInstalledStatus(InstallState.UNINSTALLED)
         }
     }
 
-    fun initStatus() {
+    fun initState() {
         mDownloadId = -1
         mInstalled = InstallState.UNINSTALLED
     }
