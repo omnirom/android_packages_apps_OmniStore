@@ -218,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         val checkApp =
             NetworkUtils().CheckAppTask(
                 this,
-                app.file,
+                app.file!!,
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
@@ -335,7 +335,7 @@ class MainActivity : AppCompatActivity() {
                             syncRunningDownloads()
 
                             val pkgList = HashSet<String>()
-                            mAllAppsList.forEach { pkgList.add(it.packageName) }
+                            mAllAppsList.forEach { pkgList.add(it.packageName!!) }
                             // to compare on update check if app list has changed
                             mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
 
@@ -352,6 +352,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showGrouped() {
         synchronized(this@MainActivity) {
+            mDisplayList.clear()
             mDisplayList.clear()
             mDisplayList.addAll(mAllAppsList)
 

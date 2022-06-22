@@ -78,12 +78,12 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
 
                 var version = ""
                 if (app.updateAvailable()) {
-                    version = app.versionName
+                    version = app.versionName?:""
                     v.findViewById<View>(R.id.app_update_title).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_update).visibility = View.VISIBLE
                     v.findViewById<TextView>(R.id.app_update).text = version
                 } else if (app.appNotInstaled()) {
-                    version = app.versionName
+                    version = app.versionName?:""
                 } else if (app.appInstalled() or app.appDisabled()) {
                     version = app.mVersionNameInstalled
                 }
