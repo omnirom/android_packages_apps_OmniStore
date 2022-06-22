@@ -161,12 +161,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.main, menu)
-        /*mFilterMenu = menu!!.findItem(R.id.menu_item_filter)
-        if (mViewGroups) {
-            mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_white)
-        } else {
-            mFilterMenu.icon = resources.getDrawable(R.drawable.ic_star_outline_white)
-        }*/
         return true
     }
 
@@ -218,7 +212,7 @@ class MainActivity : AppCompatActivity() {
         val checkApp =
             NetworkUtils().CheckAppTask(
                 this,
-                app.file,
+                app.file!!,
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
@@ -335,7 +329,7 @@ class MainActivity : AppCompatActivity() {
                             syncRunningDownloads()
 
                             val pkgList = HashSet<String>()
-                            mAllAppsList.forEach { pkgList.add(it.packageName) }
+                            mAllAppsList.forEach { pkgList.add(it.packageName!!) }
                             // to compare on update check if app list has changed
                             mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
 

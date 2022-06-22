@@ -55,13 +55,6 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:src="@drawable/ic_info" />
 
-            <ImageView
-                android:id="@+id/app_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="5dp"
-                android:src="@drawable/ic_star" />
 
         </LinearLayout>
 
@@ -86,16 +79,6 @@
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-            <TextView
-                android:id="@+id/app_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:ellipsize="end"
-                android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:visibility="gone" />
         </LinearLayout>
 
         <Space

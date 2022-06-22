@@ -47,7 +47,8 @@ class NetworkUtils {
         fun run() {
             mPreaction.run()
 
-            val omniStoreApi = RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
+            val omniStoreApi =
+                RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
             GlobalScope.launch {
                 try {
                     val appList = omniStoreApi.getApps("apps")
@@ -98,7 +99,13 @@ class NetworkUtils {
 
         private fun loadAppsList(appsList: List<AppItem>) {
             for (app in appsList) {
-                if (app.isValied(DeviceUtils().getProperty(mContext, "ro.omni.device"))) {
+                if (app.isValidApp() && app.isValidDevice(
+                        DeviceUtils().getProperty(
+                            mContext,
+                            "ro.omni.device"
+                        )
+                    )
+                ) {
                     val idx = mNewAppsList.indexOf(app)
                     if (idx != -1)
                         mNewAppsList.removeAt(idx)
@@ -120,7 +127,8 @@ class NetworkUtils {
         private val mContext = context
 
         fun run() {
-            val omniStoreApi = RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
+            val omniStoreApi =
+                RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
             GlobalScope.launch {
                 try {
                     val reponse = omniStoreApi.checkApp(mUrl)

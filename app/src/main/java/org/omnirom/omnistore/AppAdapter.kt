@@ -48,23 +48,19 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
         lateinit var app: AppItem
         var title: TextView
         var logo: ImageView
-        var status: TextView
         var image: ImageView
         var pkg: TextView
         var progress: ProgressBar
         var note: ImageView
-        var indicator: ImageView
         var version: TextView
 
         constructor(view: View) : super(view) {
             title = view.findViewById(R.id.app_name)
             logo = view.findViewById(R.id.app_logo)
-            status = view.findViewById(R.id.app_status)
             image = view.findViewById(R.id.app_image)
             pkg = view.findViewById(R.id.app_pkg)
             progress = view.findViewById(R.id.app_progress)
             note = view.findViewById(R.id.app_note)
-            indicator = view.findViewById(R.id.app_indicator)
             version = view.findViewById(R.id.app_version)
             view.setOnClickListener {
                 val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
@@ -78,24 +74,26 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
 
                 var version = ""
                 if (app.updateAvailable()) {
-                    version = app.versionName
+                    version = app.versionName?:""
                     v.findViewById<View>(R.id.app_update_title).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_update).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_update).text = version
+                    val appUpdate = v.findViewById<TextView>(R.id.app_update)
+                    appUpdate.visibility = View.VISIBLE
+                    appUpdate.text = version
                 } else if (app.appNotInstaled()) {
-                    version = app.versionName
+                    version = app.versionName?:""
                 } else if (app.appInstalled() or app.appDisabled()) {
                     version = app.mVersionNameInstalled
                 }
                 v.findViewById<TextView>(R.id.app_version).text = version
                 v.findViewById<TextView>(R.id.app_status).text = getStatusString(app)
 
+                val appDescription = v.findViewById<TextView>(R.id.app_description)
                 if (app.description().isNotEmpty()) {
-                    v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_description).text = app.description()
+                    appDescription.visibility = View.VISIBLE
+                    appDescription.text = app.description()
                 } else if (app.note().isNotEmpty()) {
-                    v.findViewById<TextView>(R.id.app_description).visibility = View.VISIBLE
-                    v.findViewById<TextView>(R.id.app_description).text = app.note()
+                    appDescription.visibility = View.VISIBLE
+                    appDescription.text = app.note()
                 }
                 builder.setView(v)
                 builder.setPositiveButton(android.R.string.ok, null)
@@ -170,7 +168,6 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             Picasso.with(context).load(app.iconUrl(context))
                 .error(R.drawable.ic_warning).into(holder.logo)
             holder.pkg.text = app.packageName
-            holder.indicator.visibility = View.GONE
             holder.note.visibility = View.GONE
 
             if (app.mDownloadId != -1L) {
@@ -186,12 +183,10 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 }
                 holder.progress.visibility = View.GONE
             }
-            holder.status.text = getStatusString(app)
             if (app.updateAvailable()) {
                 context.getString(R.string.status_update_available)
                 holder.version.text =
                     context.resources.getString(R.string.app_item_version) + " " + app.versionName
-                holder.indicator.visibility = View.VISIBLE
             } else if (app.appInstalled()) {
                 holder.version.text =
                     context.resources.getString(R.string.app_item_version) + " " + app.versionName
@@ -202,7 +197,6 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 holder.version.text =
                     context.resources.getString(R.string.app_item_version) + " " + app.versionName
             }
-            holder.status.visibility = View.GONE
 
             if (app.note().isNotEmpty()) {
                 holder.note.visibility = View.VISIBLE

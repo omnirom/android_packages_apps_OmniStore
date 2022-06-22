@@ -4,8 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.11018518518518519" />
+        <entry key="app/src/main/res/drawable/ic_download.xml" value="0.304" />
+        <entry key="app/src/main/res/drawable/ic_download_outline.xml" value="0.304" />
         <entry key="app/src/main/res/drawable/ic_filter_white.xml" value="0.158" />
         <entry key="app/src/main/res/drawable/ic_settings.xml" value="0.158" />
+        <entry key="app/src/main/res/drawable/ic_star_outline_white.xml" value="0.274" />
+        <entry key="app/src/main/res/drawable/ic_star_white.xml" value="0.274" />
         <entry key="app/src/main/res/layout-land/app_list_item.xml" value="0.134375" />
         <entry key="app/src/main/res/layout-land/settings_activity.xml" value="0.2275132275132275" />
         <entry key="app/src/main/res/layout/activity_intro.xml" value="0.2578125" />

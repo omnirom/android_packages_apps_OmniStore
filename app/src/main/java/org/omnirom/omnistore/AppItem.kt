@@ -36,19 +36,19 @@ import com.google.gson.annotations.SerializedName
 //        "note" : "Depending on your setup you might also need Google Calendar Sync Adapter"
 //    },
 data class AppItem(
-    val title: String,
-    val file: String,
-    val category: String,
+    val title: String?,
+    val file: String?,
+    val category: String?,
     @SerializedName("package")
-    val packageName: String,
-    val icon: String,
-    var versionCode: String,
-    var versionName: String,
+    val packageName: String?,
+    val icon: String?,
+    val versionCode: String?,
+    val versionName: String?,
     @SerializedName("description")
-    val _description: String,
+    val _description: String?,
     @SerializedName("note")
-    val _note: String,
-    val devices: List<String>,
+    val _note: String?,
+    val devices: List<String>?,
 
     ) : ListItem {
     private val TAG = "OmniStore:AppItem"
@@ -58,9 +58,13 @@ data class AppItem(
     var mInstalled: InstallState = InstallState.UNINSTALLED
     var mDownloadId: Long = -1
     var mVersionCodeInstalled: Int = 0
-    var mVersionNameInstalled: String = "unknown"
+    var mVersionNameInstalled: String = ""
 
-    fun isValied(device: String): Boolean {
+    fun isValidApp(): Boolean {
+        return packageName != null && file != null && icon != null && title != null && versionCode != null && versionName != null
+    }
+
+    fun isValidDevice(device: String): Boolean {
         if (devices != null) {
             return devices.contains(device)
         }
@@ -76,10 +80,16 @@ data class AppItem(
     }
 
     fun installEnabled(): Boolean {
+        if (versionCode == null) {
+            return false
+        }
         return appNotInstaled() || (appInstalled() && (versionCode.toInt() > mVersionCodeInstalled))
     }
 
     fun updateAvailable(): Boolean {
+        if (versionCode == null) {
+            return false
+        }
         return appInstalled() && (versionCode.toInt() > mVersionCodeInstalled)
     }
 
@@ -104,7 +114,7 @@ data class AppItem(
     }
 
     override fun title(): String {
-        return title
+        return title ?: ""
     }
 
     override fun sortOrder(): Int {
@@ -116,15 +126,18 @@ data class AppItem(
         }
     }
 
-    fun note() : String {
+    fun note(): String {
         return _note ?: ""
     }
 
-    fun description() : String {
+    fun description(): String {
         return _description ?: ""
     }
 
     fun updateAppStatus(packageManager: PackageManager) {
+        if (packageName == null) {
+            return
+        }
         try {
             val pkgInfo = packageManager.getPackageInfo(
                 packageName,
