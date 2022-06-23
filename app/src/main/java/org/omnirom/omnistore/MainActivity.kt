@@ -28,16 +28,12 @@ import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.FrameLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
@@ -46,6 +42,7 @@ import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
+import org.omnirom.omnistore.databinding.ActivityMainBinding
 import java.io.File
 import javax.net.ssl.HttpsURLConnection
 
@@ -60,11 +57,10 @@ class MainActivity : AppCompatActivity() {
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
-
-    //private lateinit var mFilterMenu: MenuItem
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
     private lateinit var mPrefs: SharedPreferences
+    private lateinit var mBinding: ActivityMainBinding
 
     inner class PackageReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -95,20 +91,20 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
+
         Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"))
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        setContentView(R.layout.activity_main)
-
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar);
-        setSupportActionBar(toolbar)
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+        setSupportActionBar(mBinding.toolbar)
 
-        mRecyclerView = findViewById<RecyclerView>(R.id.app_list)
+        mRecyclerView = mBinding.appList
         mRecyclerView.layoutManager = LinearLayoutManager(this)
         mRecyclerView.adapter = AppAdapter(mDisplayList, this)
 
-        findViewById<FloatingActionButton>(R.id.floatingActionButton).setOnClickListener {
+        mBinding.floatingActionButton.setOnClickListener {
             if (isDownloading()) {
                 // TODO alert
                 cancelAllDownloads()
@@ -271,11 +267,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startProgress() {
-        findViewById<FrameLayout>(R.id.progress).visibility = View.VISIBLE
+        mBinding.progress.visibility = View.VISIBLE
     }
 
     fun stopProgress() {
-        findViewById<FrameLayout>(R.id.progress).visibility = View.GONE
+        mBinding.progress.visibility = View.GONE
     }
 
     fun handleInstallComplete(downloadId: Long?) {
@@ -314,14 +310,14 @@ class MainActivity : AppCompatActivity() {
         val fetchApps =
             NetworkUtils().FetchAppsTask(
                 this,
-                Runnable {
+                {
                     mFetchRunning = true
                     startProgress()
                 },
                 object : NetworkTaskCallback {
-                    override fun postAction(networkError: Boolean, responseCode: Int) {
+                    override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
-                            showNetworkError(responseCode)
+                            showNetworkError(reponseCode)
                         } else {
                             mAllAppsList.clear()
                             mAllAppsList.addAll(newAppsList)
@@ -331,7 +327,7 @@ class MainActivity : AppCompatActivity() {
                             val pkgList = HashSet<String>()
                             mAllAppsList.forEach { pkgList.add(it.packageName!!) }
                             // to compare on update check if app list has changed
-                            mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).commit()
+                            mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).apply()
 
                             applySortAndFilter()
                         }
@@ -353,13 +349,13 @@ class MainActivity : AppCompatActivity() {
             mDisplayList.sortBy { it.sortOrder() }
 
             try {
-                var item = mDisplayList.first { it.sortOrder() == 0 }
+                val item = mDisplayList.first { it.sortOrder() == 0 }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(idx, SeparatorItem(getString(R.string.separator_item_updates)))
             } catch (e: NoSuchElementException) {
             }
             try {
-                var item = mDisplayList.first { it.sortOrder() == 1 }
+                val item = mDisplayList.first { it.sortOrder() == 1 }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(
                     idx,
@@ -368,7 +364,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: NoSuchElementException) {
             }
             try {
-                var item = mDisplayList.first { it.sortOrder() == 2 }
+                val item = mDisplayList.first { it.sortOrder() == 2 }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(
                     idx,
@@ -439,7 +435,7 @@ class MainActivity : AppCompatActivity() {
             // and this is a not really an unintended behaviour - back or home == cancel
             installs.remove(first)
             mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
-                .commit()
+                .apply()
             // stop the progress for this
             handleInstallComplete(first.toLong())
             installPackage(uri)
@@ -461,7 +457,7 @@ class MainActivity : AppCompatActivity() {
         if (installs.has(downloadId.toString())) {
             installs.remove(downloadId.toString())
             mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
-                .commit()
+                .apply()
         }
     }
 }

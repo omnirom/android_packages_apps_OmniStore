@@ -20,74 +20,57 @@ package org.omnirom.omnistore
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.Settings
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import org.omnirom.omnistore.Constants.TYPE_APP_ITEM
 import org.omnirom.omnistore.Constants.TYPE_SEPARATOR_ITEM
+import org.omnirom.omnistore.databinding.AppInfoDialogBinding
+import org.omnirom.omnistore.databinding.AppListItemBinding
+import org.omnirom.omnistore.databinding.SeparatorListItemBinding
 
 
 class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val mPrefs =
-        PreferenceManager.getDefaultSharedPreferences(context)
+    inner class AppItemViewHolder(mBinding: AppListItemBinding) :
+        RecyclerView.ViewHolder(mBinding.root) {
+        val title = mBinding.appName
+        val logo = mBinding.appLogo
+        val download = mBinding.appDownload
+        val pkg = mBinding.appPkg
+        val progress = mBinding.appProgress
+        val note = mBinding.appNote
+        val version = mBinding.appVersion
 
-    inner class AppItemViewHolder : RecyclerView.ViewHolder {
-        lateinit var app: AppItem
-        var title: TextView
-        var logo: ImageView
-        var image: ImageView
-        var pkg: TextView
-        var progress: ProgressBar
-        var note: ImageView
-        var version: TextView
-
-        constructor(view: View) : super(view) {
-            title = view.findViewById(R.id.app_name)
-            logo = view.findViewById(R.id.app_logo)
-            image = view.findViewById(R.id.app_image)
-            pkg = view.findViewById(R.id.app_pkg)
-            progress = view.findViewById(R.id.app_progress)
-            note = view.findViewById(R.id.app_note)
-            version = view.findViewById(R.id.app_version)
-            view.setOnClickListener {
+        fun bind(app: AppItem) {
+            itemView.setOnClickListener {
                 val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
                 val builder = AlertDialog.Builder(themeContext)
                 builder.setTitle(context.getString(R.string.dialog_app_info_title))
 
-                val v =
-                    LayoutInflater.from(themeContext).inflate(R.layout.app_info_dialog, null, false)
-                v.findViewById<TextView>(R.id.app_title).text = app.title()
-                v.findViewById<TextView>(R.id.app_pkg).text = app.packageName
+                val dialogBinding = AppInfoDialogBinding.inflate(LayoutInflater.from(themeContext))
+                dialogBinding.appTitle.text = app.title()
+                dialogBinding.appPkg.text = app.packageName
 
-                var version = ""
+                var version = app.versionNameCurrent()
                 if (app.updateAvailable()) {
-                    version = app.versionName?:""
-                    v.findViewById<View>(R.id.app_update_title).visibility = View.VISIBLE
-                    val appUpdate = v.findViewById<TextView>(R.id.app_update)
+                    version = app.versionNameInstalled
+                    dialogBinding.appUpdateTitle.visibility = View.VISIBLE
+                    val appUpdate = dialogBinding.appUpdate
                     appUpdate.visibility = View.VISIBLE
-                    appUpdate.text = version
-                } else if (app.appNotInstaled()) {
-                    version = app.versionName?:""
-                } else if (app.appInstalled() or app.appDisabled()) {
-                    version = app.mVersionNameInstalled
+                    appUpdate.text = app.versionName
                 }
-                v.findViewById<TextView>(R.id.app_version).text = version
-                v.findViewById<TextView>(R.id.app_status).text = getStatusString(app)
+                dialogBinding.appVersion.text = version
+                dialogBinding.appStatus.text = getStatusString(app)
 
-                val appDescription = v.findViewById<TextView>(R.id.app_description)
+                val appDescription = dialogBinding.appDescription
                 if (app.description().isNotEmpty()) {
                     appDescription.visibility = View.VISIBLE
                     appDescription.text = app.description()
@@ -95,17 +78,17 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                     appDescription.visibility = View.VISIBLE
                     appDescription.text = app.note()
                 }
-                builder.setView(v)
+                builder.setView(dialogBinding.root)
                 builder.setPositiveButton(android.R.string.ok, null)
                 if (app.appSettingsEnabled()) {
                     builder.setNeutralButton(
-                        R.string.menu_item_settings,
-                        DialogInterface.OnClickListener { _, _ ->
-                            val intent =
-                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            intent.data = Uri.parse("package:" + app.packageName)
-                            it?.context?.startActivity(intent)
-                        })
+                        R.string.menu_item_settings
+                    ) { _, _ ->
+                        val intent =
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.parse("package:" + app.packageName)
+                        it?.context?.startActivity(intent)
+                    }
                 }
                 builder.create().show()
             }
@@ -113,13 +96,11 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
                 val builder = AlertDialog.Builder(themeContext)
                 builder.setTitle(app.title())
-                builder.setMessage(app.note());
+                builder.setMessage(app.note())
                 builder.setPositiveButton(android.R.string.ok, null)
                 builder.create().show()
             }
-
-            image.visibility = View.VISIBLE
-            image.setOnClickListener {
+            download.setOnClickListener {
                 if (app.mDownloadId == -1L) {
                     (context as MainActivity).downloadApp(app)
                 } else {
@@ -129,12 +110,10 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
         }
     }
 
-    class SeparatorItemViewHolder : RecyclerView.ViewHolder {
-        var title: TextView
 
-        constructor(view: View) : super(view) {
-            title = view.findViewById(R.id.separator_title)
-        }
+    inner class SeparatorItemViewHolder(mBinding: SeparatorListItemBinding) :
+        RecyclerView.ViewHolder(mBinding.root) {
+        val title = mBinding.separatorTitle
     }
 
 
@@ -151,19 +130,15 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == TYPE_SEPARATOR_ITEM) {
-            return SeparatorItemViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.separator_list_item, parent, false)
-            )
+            return SeparatorItemViewHolder(SeparatorListItemBinding.inflate(LayoutInflater.from(context), parent, false))
         }
-        return AppItemViewHolder(
-            LayoutInflater.from(context).inflate(R.layout.app_list_item, parent, false)
-        )
+        return AppItemViewHolder(AppListItemBinding.inflate(LayoutInflater.from(context), parent, false))
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is AppItemViewHolder) {
             val app: AppItem = items[position] as AppItem
-            holder.app = app
+            holder.bind(app)
             holder.title.text = app.title()
             Picasso.with(context).load(app.iconUrl(context))
                 .error(R.drawable.ic_warning).into(holder.logo)
@@ -171,32 +146,20 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             holder.note.visibility = View.GONE
 
             if (app.mDownloadId != -1L) {
-                holder.image.setImageResource(R.drawable.ic_cancel)
-                holder.image.visibility = View.VISIBLE
+                holder.download.setImageResource(R.drawable.ic_cancel)
+                holder.download.visibility = View.VISIBLE
                 holder.progress.visibility = View.VISIBLE
             } else {
                 if (app.installEnabled()) {
-                    holder.image.setImageResource(R.drawable.ic_download_outline)
-                    holder.image.visibility = View.VISIBLE
+                    holder.download.setImageResource(R.drawable.ic_download_outline)
+                    holder.download.visibility = View.VISIBLE
                 } else {
-                    holder.image.visibility = View.GONE
+                    holder.download.visibility = View.GONE
                 }
                 holder.progress.visibility = View.GONE
             }
-            if (app.updateAvailable()) {
-                context.getString(R.string.status_update_available)
-                holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
-            } else if (app.appInstalled()) {
-                holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
-            } else if (app.appNotInstaled()) {
-                holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
-            } else if (app.appDisabled()) {
-                holder.version.text =
-                    context.resources.getString(R.string.app_item_version) + " " + app.versionName
-            }
+            holder.version.text =
+                context.resources.getString(R.string.app_item_version) + " " + app.versionNameCurrent()
 
             if (app.note().isNotEmpty()) {
                 holder.note.visibility = View.VISIBLE

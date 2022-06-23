@@ -57,8 +57,8 @@ data class AppItem(
 
     var mInstalled: InstallState = InstallState.UNINSTALLED
     var mDownloadId: Long = -1
-    var mVersionCodeInstalled: Int = 0
-    var mVersionNameInstalled: String = ""
+    var versionCodeInstalled: Int = 0
+    var versionNameInstalled: String = ""
 
     fun isValidApp(): Boolean {
         return packageName != null && file != null && icon != null && title != null && versionCode != null && versionName != null
@@ -83,14 +83,14 @@ data class AppItem(
         if (versionCode == null) {
             return false
         }
-        return appNotInstaled() || (appInstalled() && (versionCode.toInt() > mVersionCodeInstalled))
+        return appNotInstaled() || (appInstalled() && (versionCode.toInt() > versionCodeInstalled))
     }
 
     fun updateAvailable(): Boolean {
         if (versionCode == null) {
             return false
         }
-        return appInstalled() && (versionCode.toInt() > mVersionCodeInstalled)
+        return appInstalled() && (versionCode.toInt() > versionCodeInstalled)
     }
 
     fun appSettingsEnabled(): Boolean {
@@ -143,8 +143,9 @@ data class AppItem(
                 packageName,
                 0
             )
-            mVersionCodeInstalled = pkgInfo.versionCode
-            mVersionNameInstalled = pkgInfo.versionName
+            @Suppress("DEPRECATION")
+            versionCodeInstalled = pkgInfo.versionCode
+            versionNameInstalled = pkgInfo.versionName
             val enabled: Int =
                 packageManager.getApplicationEnabledSetting(packageName)
             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
@@ -168,5 +169,18 @@ data class AppItem(
         if (other is AppItem)
             return packageName == other.packageName
         return false
+    }
+
+    override fun hashCode(): Int {
+        return packageName.hashCode()
+    }
+
+    fun versionNameCurrent() : String {
+        if (updateAvailable() || appNotInstaled()) {
+            return versionName?:""
+        } else if (appInstalled() || appDisabled()) {
+            return versionNameInstalled
+        }
+        return ""
     }
 }

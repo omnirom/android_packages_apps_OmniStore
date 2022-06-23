@@ -28,8 +28,12 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.google.android.material.appbar.MaterialToolbar
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
+import org.omnirom.omnistore.databinding.ActivityMainBinding
+import org.omnirom.omnistore.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {
+
+    private lateinit var mBinding: SettingsActivityBinding
 
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -60,10 +64,11 @@ class SettingsActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.settings_activity)
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar);
-        setSupportActionBar(toolbar)
+        mBinding = SettingsActivityBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+        setSupportActionBar(mBinding.toolbar)
+
         this.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 

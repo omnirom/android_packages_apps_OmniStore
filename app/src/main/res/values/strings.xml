@@ -36,5 +36,7 @@
     <string name="store_intro_title">Welcome to the OmniStore!</string>
     <string name="store_intro">The store applications are provided on an \“as is\” basis without warranties of any kind.</string>
     <string name="permission_text">Allow installing apps from OmniStore?</string>
-
+    <string name="app_logo_image_description">App logo</string>
+    <string name="app_download_image_description">Download app</string>
+    <string name="app_note_image_description">Note</string>
 </resources>

@@ -10,8 +10,8 @@ android {
         applicationId "org.omnirom.omnistore"
         minSdkVersion 27
         targetSdkVersion 31
-        versionCode 33
-        versionName "2.5.0"
+        versionCode 34
+        versionName "2.5.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,6 +36,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    buildFeatures {
+        viewBinding true
+    }
+
     namespace 'org.omnirom.omnistore'
 
 }

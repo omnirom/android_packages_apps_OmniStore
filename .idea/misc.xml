@@ -14,7 +14,9 @@
         <entry key="app/src/main/res/layout-land/settings_activity.xml" value="0.2275132275132275" />
         <entry key="app/src/main/res/layout/activity_intro.xml" value="0.2578125" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.23282442748091603" />
+        <entry key="app/src/main/res/layout/app_info_dialog.xml" value="0.26875" />
         <entry key="app/src/main/res/layout/app_list_item.xml" value="0.26875" />
+        <entry key="app/src/main/res/layout/separator_list_item.xml" value="0.3015625" />
         <entry key="app/src/main/res/menu/main.xml" value="0.30104166666666665" />
       </map>
     </option>

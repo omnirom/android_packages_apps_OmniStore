@@ -16,7 +16,8 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="start|center_vertical"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:contentDescription="@string/app_logo_image_description"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -53,7 +54,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="10dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_info" />
+                android:src="@drawable/ic_info"
+                android:contentDescription="@string/app_note_image_description"/>
 
         </LinearLayout>
 
@@ -90,11 +92,12 @@
         android:visibility="gone" />
 
     <ImageView
-        android:id="@+id/app_image"
+        android:id="@+id/app_download"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_download_outline" />
+        android:src="@drawable/ic_download_outline"
+        android:contentDescription="@string/app_download_image_description"/>
 </LinearLayout>
