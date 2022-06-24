@@ -3,7 +3,7 @@
     android:title="@string/title_settings">
     <PreferenceCategory android:title="@string/category_notifications">
         <SwitchPreference
-            android:key="check_updates"
+            android:key="check_updates_worker"
             android:summary="@string/check_updates_summary"
             android:title="@string/check_updates_title" />
 

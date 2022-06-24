@@ -24,9 +24,11 @@ import android.webkit.URLUtil
 
 object Constants {
     const val PREF_CURRENT_DOWNLOADS = "current_downloads"
-    const val PREF_CHECK_UPDATES = "check_updates"
+    const val  PREF_CHECK_UPDATES_OLD = "check_updates"
     const val PREF_CURRENT_APPS = "current_apps"
     const val PREF_CURRENT_INSTALLS = "current_installs"
+    const val PREF_CHECK_UPDATES_WORKER = "check_updates_worker"
+
     const val ACTION_ADD_DOWNLOAD = "add_download"
     const val ACTION_CANCEL_DOWNLOAD = "cancel_download"
     const val ACTION_START_INSTALL = "start_install"

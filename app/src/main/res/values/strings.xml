@@ -6,7 +6,7 @@
     <string name="category_notifications">Notifications</string>
     <string name="notification_settings_summary"></string>
     <string name="notification_settings_title">Manage notifications</string>
-    <string name="check_updates_summary"></string>
+    <string name="check_updates_summary">Will check for updated apps daily</string>
     <string name="check_updates_title">Check for updates</string>
     <string name="status_update_available">Update available</string>
     <string name="status_installed">Installed</string>

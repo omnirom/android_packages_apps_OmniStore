@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 The OmniROM Project
+ *  Copyright (C) 2020-2022 The OmniROM Project
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,35 @@
  */
 package org.omnirom.omnistore
 
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
 import android.content.Context
 import android.util.Log
-import java.lang.reflect.Method
+import androidx.work.*
 import java.util.concurrent.TimeUnit
 
 class JobUtils {
     private val TAG = "OmniStore:JobUtils"
 
-    fun scheduleCheckUpdates(context: Context) {
-        cancelCheckForUpdates(context)
+    fun setupWorkManagerJob(context: Context) {
+        Log.d(TAG, "setupWorkManagerJob")
 
-        Log.d(TAG, "scheduleCheckUpdates")
-        val serviceComponent = ComponentName(context, CheckUpdatesService::class.java)
-        val builder = JobInfo.Builder(0, serviceComponent)
-        builder.setPeriodic(TimeUnit.DAYS.toMillis(1), TimeUnit.HOURS.toMillis(2))
-        //builder.setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(15))
-        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-        val jobScheduler = context.getSystemService(JobScheduler::class.java)
-        jobScheduler.schedule(builder.build())
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val work = PeriodicWorkRequestBuilder<CheckUpdatesWorker>(1, TimeUnit.DAYS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(context)
+            .enqueueUniquePeriodicWork(
+                CheckUpdatesWorker::class.java.name,
+                ExistingPeriodicWorkPolicy.REPLACE, work
+            )
     }
 
-    fun cancelCheckForUpdates(context: Context) {
-        Log.d(TAG, "cancelCheckForUpdates")
-        val jobScheduler = context.getSystemService(JobScheduler::class.java)
-        jobScheduler.cancelAll()
+    fun cancelWorkManagerJob(context: Context) {
+        Log.d(TAG, "cancelWorkManagerJob")
+
+        WorkManager.getInstance(context).cancelAllWork()
     }
 }

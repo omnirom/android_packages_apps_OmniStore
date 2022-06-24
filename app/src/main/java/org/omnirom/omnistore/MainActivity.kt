@@ -37,7 +37,8 @@ import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
-import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
+import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_OLD
+import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_WORKER
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
@@ -112,8 +113,11 @@ class MainActivity : AppCompatActivity() {
             refresh()
         }
 
-        if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
-            JobUtils().scheduleCheckUpdates(this)
+        // migrate from old setting
+        if (mPrefs.getBoolean(PREF_CHECK_UPDATES_OLD, false)) {
+            mPrefs.edit().putBoolean(PREF_CHECK_UPDATES_OLD, false).apply()
+            mPrefs.edit().putBoolean(PREF_CHECK_UPDATES_WORKER, true).apply()
+            JobUtils().setupWorkManagerJob(this)
         }
 
         if (!hasInstallPermissions()) {

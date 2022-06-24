@@ -26,9 +26,7 @@ import androidx.core.view.WindowCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
-import com.google.android.material.appbar.MaterialToolbar
-import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
-import org.omnirom.omnistore.databinding.ActivityMainBinding
+import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_WORKER
 import org.omnirom.omnistore.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {
@@ -49,12 +47,12 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             val checkUpdatesPreference =
-                findPreference<SwitchPreference>(PREF_CHECK_UPDATES)
+                findPreference<SwitchPreference>(PREF_CHECK_UPDATES_WORKER)
             checkUpdatesPreference?.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue as Boolean)
-                    JobUtils().scheduleCheckUpdates(requireActivity())
+                    JobUtils().setupWorkManagerJob(requireActivity())
                 else
-                    JobUtils().cancelCheckForUpdates(requireActivity())
+                    JobUtils().cancelWorkManagerJob(requireActivity())
                 true
             }
         }
