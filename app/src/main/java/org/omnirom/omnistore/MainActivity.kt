@@ -37,10 +37,12 @@ import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
 import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
 import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
-import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES
+import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_OLD
+import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_WORKER
 import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
 import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
+import org.omnirom.omnistore.Constants.PREF_UPDATE_APPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
 import org.omnirom.omnistore.databinding.ActivityMainBinding
 import java.io.File
@@ -112,8 +114,11 @@ class MainActivity : AppCompatActivity() {
             refresh()
         }
 
-        if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
-            JobUtils().scheduleCheckUpdates(this)
+        // migrate from old setting
+        if (mPrefs.getBoolean(PREF_CHECK_UPDATES_OLD, false)) {
+            mPrefs.edit().putBoolean(PREF_CHECK_UPDATES_OLD, false).apply()
+            mPrefs.edit().putBoolean(PREF_CHECK_UPDATES_WORKER, true).apply()
+            JobUtils().setupWorkManagerJob(this)
         }
 
         if (!hasInstallPermissions()) {
@@ -324,10 +329,15 @@ class MainActivity : AppCompatActivity() {
                             updateAllAppStatus()
                             syncRunningDownloads()
 
-                            val pkgList = HashSet<String>()
-                            mAllAppsList.forEach { pkgList.add(it.packageName!!) }
+                            val allPkgList = HashSet<String>()
+                            mAllAppsList.forEach { allPkgList.add(it.packageName!!) }
                             // to compare on update check if app list has changed
-                            mPrefs.edit().putStringSet(PREF_CURRENT_APPS, pkgList).apply()
+                            mPrefs.edit().putStringSet(PREF_CURRENT_APPS, allPkgList).apply()
+
+                            val updatePkgList = HashSet<String>()
+                            mAllAppsList.filter { it.updateAvailable() }.forEach { updatePkgList.add((it.packageName!!))}
+                            // to compare on update check if update available app list has changed
+                            mPrefs.edit().putStringSet(PREF_UPDATE_APPS, updatePkgList).apply()
 
                             applySortAndFilter()
                         }
