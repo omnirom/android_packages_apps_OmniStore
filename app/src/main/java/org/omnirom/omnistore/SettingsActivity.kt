@@ -52,9 +52,9 @@ class SettingsActivity : AppCompatActivity() {
                 findPreference<SwitchPreference>(PREF_CHECK_UPDATES)
             checkUpdatesPreference?.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue as Boolean)
-                    JobUtils().scheduleCheckUpdates(requireActivity())
+                    JobUtils().setupWorkManagerJob(requireActivity())
                 else
-                    JobUtils().cancelCheckForUpdates(requireActivity())
+                    JobUtils().cancelWorkManagerJob(requireActivity())
                 true
             }
         }

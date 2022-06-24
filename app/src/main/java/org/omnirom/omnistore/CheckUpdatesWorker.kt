@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 The OmniROM Project
+ *  Copyright (C) 2022 The OmniROM Project
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,20 +27,23 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
+import androidx.work.*
 
-class CheckUpdatesService : JobService() {
-    private val TAG = "OmniStore:CheckUpdateService"
+class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
+    private val TAG = "OmniStore:CheckUpdatesWorker"
     private val NOTIFICATION_UPDATES_ID = Int.MAX_VALUE - 1;
 
-    override fun onStopJob(params: JobParameters?): Boolean {
-        Log.d(TAG, "onStopJob")
-        return true
+    override suspend fun doWork(): Result {
+        Log.d(TAG, "doWork")
+        checkForUpdates()
+        return Result.success()
     }
 
-    override fun onStartJob(params: JobParameters?): Boolean {
-        Log.d(TAG, "onStartJob")
-        checkForUpdates(params)
-        return true
+    class Factory() : WorkerFactory() {
+        override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker {
+            return CheckUpdatesWorker(appContext, workerParameters)
+        }
     }
 
     private fun createNotification(
@@ -49,7 +52,7 @@ class CheckUpdatesService : JobService() {
         message2: String
     ): Notification? {
         val notification = NotificationCompat.Builder(
-            this,
+            context,
             Constants.NOTIFICATION_CHANNEL_UPDATE
         )
             .setContentTitle(title)
@@ -57,7 +60,7 @@ class CheckUpdatesService : JobService() {
             .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
-            .setColor(resources.getColor(R.color.omni_logo_color, null))
+            .setColor(context.resources.getColor(R.color.omni_logo_color, null))
 
         when {
             message2.isEmpty() and message1.isNotEmpty() -> {
@@ -74,9 +77,9 @@ class CheckUpdatesService : JobService() {
                 )
             }
         }
-        val showApp = Intent(this, MainActivity::class.java)
+        val showApp = Intent(context, MainActivity::class.java)
         val showAppIntent: PendingIntent = PendingIntent.getActivity(
-            this,
+            context,
             showApp.hashCode(),
             showApp,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -84,18 +87,18 @@ class CheckUpdatesService : JobService() {
         return notification.build()
     }
 
-    private fun checkForUpdates(params: JobParameters?) {
+    private fun checkForUpdates() {
         val appsList: ArrayList<AppItem> = ArrayList()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(this, Runnable { }, object :
+            NetworkUtils().FetchAppsTask(context, Runnable { }, object :
                 NetworkUtils.NetworkTaskCallback {
                 override fun postAction(networkError: Boolean, reponseCode: Int) {
                     if (!networkError) {
-                        appsList.forEach { it.updateAppStatus(this@CheckUpdatesService.packageManager) }
+                        appsList.forEach { it.updateAppStatus(context.packageManager) }
                         val updateApps = appsList.filter { it.updateAvailable() }
 
                         val prefs =
-                            PreferenceManager.getDefaultSharedPreferences(this@CheckUpdatesService)
+                            PreferenceManager.getDefaultSharedPreferences(context)
                         val oldPkgList =
                             prefs.getStringSet(Constants.PREF_CURRENT_APPS, HashSet<String>())
                         val newAppsList = appsList.filter { !oldPkgList!!.contains(it.packageName) }
@@ -109,7 +112,7 @@ class CheckUpdatesService : JobService() {
                                 updateApps.slice(0..(updateApps.size - 1).coerceAtMost(2))
                                     .forEach { message1 += it.title() + ", " }
                                 message1 =
-                                    getString(R.string.notification_updates_line_one) + " " + message1.substring(
+                                    context.resources.getString(R.string.notification_updates_line_one) + " " + message1.substring(
                                         0,
                                         message1.length - 2
                                     )
@@ -122,7 +125,7 @@ class CheckUpdatesService : JobService() {
                                 newAppsList.slice(0..(newAppsList.size - 1).coerceAtMost(2))
                                     .forEach { message2 += it.title() + ", " }
                                 message2 =
-                                    getString(R.string.notification_updates_line_two) + " " + message2.substring(
+                                    context.resources.getString(R.string.notification_updates_line_two) + " " + message2.substring(
                                         0,
                                         message2.length - 2
                                     )
@@ -134,19 +137,18 @@ class CheckUpdatesService : JobService() {
                             if (message1.isNotEmpty() or message2.isNotEmpty()) {
                                 val notification =
                                     createNotification(
-                                        getString(R.string.notification_updates_title),
+                                        context.resources.getString(R.string.notification_updates_title),
                                         message1,
                                         message2
                                     )
 
                                 val notificationManager =
-                                    this@CheckUpdatesService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                                 notificationManager.cancel(NOTIFICATION_UPDATES_ID)
                                 notificationManager.notify(NOTIFICATION_UPDATES_ID, notification)
                             }
                         }
                     }
-                    jobFinished(params, false)
                 }
             }, appsList)
         fetchApps.run()

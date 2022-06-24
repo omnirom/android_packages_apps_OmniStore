@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 The OmniROM Project
+ *  Copyright (C) 2020-2022 The OmniROM Project
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import androidx.work.*
 
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
@@ -31,6 +32,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        setupWorkManager()
     }
 
     private fun createNotificationChannel() {
@@ -53,5 +55,13 @@ class App : Application() {
             )
             notificationManager.createNotificationChannel(channelUpdate)
         }
+    }
+
+    private fun setupWorkManager() {
+        // initialize WorkManager with a Factory
+        val workManagerConfiguration = Configuration.Builder()
+            .setWorkerFactory(CheckUpdatesWorker.Factory())
+            .build()
+        WorkManager.initialize(this, workManagerConfiguration)
     }
 }

@@ -112,10 +112,6 @@ class MainActivity : AppCompatActivity() {
             refresh()
         }
 
-        if (mPrefs.getBoolean(PREF_CHECK_UPDATES, false)) {
-            JobUtils().scheduleCheckUpdates(this)
-        }
-
         if (!hasInstallPermissions()) {
             startActivity(Intent(this, IntroActivity::class.java))
         }
