@@ -55,16 +55,19 @@ class NetworkUtils {
 
                     if (appList.isSuccessful && appList.body() != null) {
                         loadAppsList(appList.body()!!)
+                        Log.d(TAG, "loadAppList " + mNewAppsList.size)
 
                         // add extra if available
                         val extraFiles = mutableListOf<String>()
                         extraFiles.add(
-                            DeviceUtils().getProperty(
+                            "apps-" + DeviceUtils().getProperty(
                                 mContext,
                                 "ro.build.version.release"
                             )
                         )
-                        extraFiles.add(DeviceUtils().getProperty(mContext, "ro.omni.device"))
+                        extraFiles.add("apps-" + DeviceUtils().getProperty(mContext, "ro.omni.device"))
+                        Log.d(TAG, "loadExtraAppList " + extraFiles)
+
                         loadExtraAppList(extraFiles, omniStoreApi)
                     } else {
                         mNetworkError = true
