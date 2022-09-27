@@ -67,7 +67,7 @@
             android:layout_margin="25dp"
             app:elevation="6dp"
             app:srcCompat="@drawable/ic_refresh"
-            app:backgroundTint="@color/colorAccent"
+            app:backgroundTint="@color/colorPrimary"
             app:tint="@android:color/white" />
     </LinearLayout>
 

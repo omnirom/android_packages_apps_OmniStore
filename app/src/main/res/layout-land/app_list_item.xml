@@ -45,7 +45,7 @@
                 android:layout_gravity="center_vertical"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+                style="@style/BodyTextStyle" />
 
             <ImageView
                 android:id="@+id/app_note"
@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            style="@style/BodyTextStyleSmall"
             android:visibility="gone" />
 
         <LinearLayout
@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+                style="@style/BodyTextStyleSmall" />
         </LinearLayout>
 
         <Space
