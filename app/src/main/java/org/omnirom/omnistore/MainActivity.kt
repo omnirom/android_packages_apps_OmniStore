@@ -388,8 +388,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNetworkError(reponseCode: Int) {
-        val themeContext = ContextThemeWrapper(this, R.style.Theme_AlertDialog)
-        val builder = AlertDialog.Builder(themeContext)
+        val builder = AlertDialog.Builder(this)
         builder.setTitle(getString(R.string.dialog_title_network_error))
         if (reponseCode == HttpsURLConnection.HTTP_NOT_FOUND) {
             builder.setMessage(getString(R.string.dialog_message_network_error_not_found))

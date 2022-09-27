@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="@style/AppThemeBaseLight">
+    <style name="AppTheme" parent="@style/AppThemeBase">
         <item name="android:windowSplashScreenIconBackgroundColor">@color/omni_logo_color</item>
     </style>
 

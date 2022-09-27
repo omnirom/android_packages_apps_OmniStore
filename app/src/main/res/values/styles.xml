@@ -3,36 +3,24 @@
     <!-- Base application theme. -->
     <style name="AppThemeBase" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorPrimary</item>
-        <item name="android:windowBackground">@color/main_background</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="colorSurface">@color/main_background</item>
-        <item name="toolbarStyle">@style/ToolBarStyle</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
     </style>
 
-    <style name="AppThemeBaseLight" parent="@style/AppThemeBase">
-        <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:windowLightStatusBar">true</item>
+    <style name="AppTheme" parent="@style/AppThemeBase">
     </style>
 
-    <style name="AppTheme" parent="@style/AppThemeBaseLight">
+    <style name="BodyTextStyle" parent="@style/TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="Theme.AlertDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="android:background">@color/main_background</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonBarButtonStyle</item>
-        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonBarButtonStyle</item>
-        <item name="buttonBarNeutralButtonStyle">@style/DialogButtonBarButtonStyle</item>
+    <style name="BodyTextStyleSmall" parent="@style/TextAppearance.Material3.BodySmall">
     </style>
 
-    <style name="DialogButtonBarButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@color/colorAccent</item>
-        <item name="android:textAllCaps">true</item>
-    </style>
-
-    <style name="ToolBarStyle" parent="@style/Widget.Material3.Toolbar">
+    <style name="TitleTextStyle" parent="@style/TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>
