@@ -51,11 +51,10 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
 
         fun bind(app: AppItem) {
             itemView.setOnClickListener {
-                val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
-                val builder = AlertDialog.Builder(themeContext)
+                val builder = AlertDialog.Builder(context)
                 builder.setTitle(context.getString(R.string.dialog_app_info_title))
 
-                val dialogBinding = AppInfoDialogBinding.inflate(LayoutInflater.from(themeContext))
+                val dialogBinding = AppInfoDialogBinding.inflate(LayoutInflater.from(context))
                 dialogBinding.appTitle.text = app.title()
                 dialogBinding.appPkg.text = app.packageName
 
@@ -93,8 +92,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
                 builder.create().show()
             }
             note.setOnClickListener {
-                val themeContext = ContextThemeWrapper(context, R.style.Theme_AlertDialog)
-                val builder = AlertDialog.Builder(themeContext)
+                val builder = AlertDialog.Builder(context)
                 builder.setTitle(app.title())
                 builder.setMessage(app.note())
                 builder.setPositiveButton(android.R.string.ok, null)

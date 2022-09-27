@@ -19,10 +19,8 @@ package org.omnirom.omnistore
 
 import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import javax.net.ssl.HttpsURLConnection
 
 class NetworkUtils {
@@ -49,7 +47,7 @@ class NetworkUtils {
 
             val omniStoreApi =
                 RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
-            GlobalScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val appList = omniStoreApi.getApps("apps")
 
@@ -132,7 +130,7 @@ class NetworkUtils {
         fun run() {
             val omniStoreApi =
                 RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
-            GlobalScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val reponse = omniStoreApi.checkApp(mUrl)
                     responseCode = reponse.code()
