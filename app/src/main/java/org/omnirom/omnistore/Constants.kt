@@ -41,33 +41,4 @@ object Constants {
 
     const val TYPE_APP_ITEM = 0
     const val TYPE_SEPARATOR_ITEM = 1
-
-    private fun getAppsBaseUrl(context: Context): String {
-        var s: String? = Settings.System.getString(context.contentResolver, "store_base_url")
-            ?: return "https://dl.omnirom.org/"
-        return s!!
-    }
-
-    fun getAppsRootUri(context: Context): String {
-        var rootUri: String? = Settings.System.getString(context.contentResolver, "store_root_uri")
-            ?: "store/"
-        if (URLUtil.isNetworkUrl(rootUri)) {
-            return rootUri!!;
-        }
-        val base: Uri = Uri.parse(getAppsBaseUrl(context))
-        val u: Uri = Uri.withAppendedPath(base, rootUri)
-        return u.toString()
-    }
-
-    fun getAppsQueryUri(context: Context, postfix: String): String {
-        val fileName = if (postfix.isEmpty()) "store/apps.json" else "store/apps-$postfix.json"
-        var queryUri: String? = Settings.System.getString(context.contentResolver, "store_query_uri")
-            ?: fileName
-        if (URLUtil.isNetworkUrl(queryUri)) {
-            return queryUri!!;
-        }
-        val base: Uri = Uri.parse(getAppsBaseUrl(context))
-        val u: Uri = Uri.withAppendedPath(base, queryUri)
-        return u.toString()
-    }
 }

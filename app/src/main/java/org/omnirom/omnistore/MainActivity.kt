@@ -28,6 +28,7 @@ import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -55,7 +56,6 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "OmniStore:MainActivity"
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val mInstallReceiver: InstallReceiver = InstallReceiver()
-    private val REQUEST_STORAGE_PERMS = 0
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
@@ -88,6 +88,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private val getPermissions =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                pendingApp?.let { doDownloadApp(it) }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -165,16 +172,6 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_STORAGE_PERMS && grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
-            pendingApp?.let { doDownloadApp(it) }
-        }
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (mFetchRunning) {
             return false
@@ -189,16 +186,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun downloadApp(app: AppItem) {
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             pendingApp = null
             doDownloadApp(app)
         } else {
             pendingApp = app
-            requestPermissions(
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ), REQUEST_STORAGE_PERMS
-            )
+            getPermissions.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
     }
 
