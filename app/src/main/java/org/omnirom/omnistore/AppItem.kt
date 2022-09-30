@@ -72,11 +72,11 @@ data class AppItem(
     }
 
     fun fileUrl(context: Context): String {
-        return Constants.getAppsRootUri(context) + file
+        return RetrofitManager.baseUrl + file
     }
 
     fun iconUrl(context: Context): String {
-        return Constants.getAppsRootUri(context) + icon
+        return RetrofitManager.baseUrl + icon
     }
 
     fun installEnabled(): Boolean {

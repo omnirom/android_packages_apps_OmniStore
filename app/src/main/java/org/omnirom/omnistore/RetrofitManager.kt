@@ -12,7 +12,7 @@ import java.io.IOException
 
 
 object RetrofitManager {
-    val baseUrl = "https://dl.omnirom.org/"
+    val baseUrl = "https://dl.omnirom.org/store/"
 
     class NoConnectivityException : IOException() {
     }
