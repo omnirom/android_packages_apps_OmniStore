@@ -36,7 +36,7 @@ import org.omnirom.omnistore.databinding.AppListItemBinding
 import org.omnirom.omnistore.databinding.SeparatorListItemBinding
 
 
-class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
+class AppAdapter(val items: List<ListItem>, val context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     inner class AppItemViewHolder(mBinding: AppListItemBinding) :
@@ -138,7 +138,7 @@ class AppAdapter(val items: ArrayList<ListItem>, val context: Context) :
             val app: AppItem = items[position] as AppItem
             holder.bind(app)
             holder.title.text = app.title()
-            Picasso.with(context).load(app.iconUrl(context))
+            Picasso.with(context).load(app.iconUrl())
                 .error(R.drawable.ic_warning).into(holder.logo)
             holder.pkg.text = app.packageName
             holder.note.visibility = View.GONE

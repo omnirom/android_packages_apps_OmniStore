@@ -22,6 +22,7 @@ import android.app.DownloadManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -31,6 +32,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -50,8 +54,8 @@ import javax.net.ssl.HttpsURLConnection
 
 
 class MainActivity : AppCompatActivity() {
-    private val mDisplayList: ArrayList<ListItem> = ArrayList()
-    private val mAllAppsList: ArrayList<AppItem> = ArrayList()
+    private val mDisplayList = mutableListOf<ListItem>()
+    private val mAllAppsList = mutableListOf<AppItem>()
     private val TAG = "OmniStore:MainActivity"
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val mInstallReceiver: InstallReceiver = InstallReceiver()
@@ -88,7 +92,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val getPermissions =
+    private val getNotificationPermissions =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
+    private val getStoragePermissions =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
                 pendingApp?.let { doDownloadApp(it) }
@@ -127,42 +134,43 @@ class MainActivity : AppCompatActivity() {
             JobUtils().setupWorkManagerJob(this)
         }
 
-        if (!hasInstallPermissions()) {
-            startActivity(Intent(this, IntroActivity::class.java))
+        lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val installFilter = IntentFilter(ACTION_START_INSTALL)
+                registerReceiver(mInstallReceiver, installFilter)
+
+                val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+                packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
+                packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+                packageFilter.addDataScheme("package")
+                registerReceiver(mPackageReceiver, packageFilter)
+
+                if (!installPendingPackage()) {
+                    refresh()
+                }
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                try {
+                    unregisterReceiver(mInstallReceiver)
+                } catch (e: Exception) {
+                }
+                try {
+                    unregisterReceiver(mPackageReceiver)
+                } catch (e: Exception) {
+                }
+            }
+        })
+        lifecycleScope.launchWhenCreated {
+            if (applicationContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                getNotificationPermissions.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            if (!hasInstallPermissions()) {
+                startActivity(Intent(applicationContext, IntroActivity::class.java))
+            }
         }
     }
 
     private fun hasInstallPermissions(): Boolean {
         return packageManager.canRequestPackageInstalls()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        val installFilter = IntentFilter(ACTION_START_INSTALL)
-        registerReceiver(mInstallReceiver, installFilter)
-
-        val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
-        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
-        packageFilter.addDataScheme("package")
-        registerReceiver(mPackageReceiver, packageFilter)
-
-        if (!installPendingPackage()) {
-            refresh()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        try {
-            unregisterReceiver(mInstallReceiver)
-        } catch (e: Exception) {
-        }
-        try {
-            unregisterReceiver(mPackageReceiver)
-        } catch (e: Exception) {
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -185,12 +193,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun downloadApp(app: AppItem) {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                pendingApp = null
+                doDownloadApp(app)
+            } else {
+                pendingApp = app
+                getStoragePermissions.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        } else {
             pendingApp = null
             doDownloadApp(app)
-        } else {
-            pendingApp = app
-            getPermissions.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
     }
 
@@ -205,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         val checkApp =
             NetworkUtils().CheckAppTask(
                 this,
-                app.file!!,
+                app.getFile(),
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
@@ -213,11 +226,11 @@ class MainActivity : AppCompatActivity() {
                             setAppItemDownloadState(app, -1)
                             showNetworkError(reponseCode)
                         } else {
-                            val url = app.fileUrl(this@MainActivity)
+                            val url = app.fileUrl()
 
                             val request: DownloadManager.Request =
                                 DownloadManager.Request(Uri.parse(url))
-                            val fileName = File(app.file).name
+                            val fileName = File(app.getFile()).name
                             request.setDestinationInExternalFilesDir(
                                 this@MainActivity,
                                 null,
@@ -280,15 +293,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun syncRunningDownloads() {
-        val stats: String? = mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-        val downloads = JSONObject(stats!!)
-        Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
-        for (id in downloads.keys()) {
-            val pkg = downloads.get(id).toString()
-            val dl = mAllAppsList.filter { it.packageName == pkg }
-            if (dl.size == 1) {
-                dl.first().mDownloadId = id.toLong()
-                Log.d(TAG, "set downloadId = " + id + " to " + dl.first())
+        mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())?.let {
+            val downloads = JSONObject(it)
+            Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
+            for (id in downloads.keys()) {
+                val pkg = downloads.get(id).toString()
+                val dl = mAllAppsList.filter { it.packageName == pkg }
+                if (dl.size == 1) {
+                    dl.first().mDownloadId = id.toLong()
+                    Log.d(TAG, "set downloadId = " + id + " to " + dl.first())
+                }
             }
         }
     }
@@ -303,7 +317,7 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d(TAG, "refresh")
 
-        val newAppsList: ArrayList<AppItem> = ArrayList()
+        val newAppsList= mutableListOf<AppItem>()
         val fetchApps =
             NetworkUtils().FetchAppsTask(
                 this,
@@ -322,12 +336,13 @@ class MainActivity : AppCompatActivity() {
                             syncRunningDownloads()
 
                             val allPkgList = HashSet<String>()
-                            mAllAppsList.forEach { allPkgList.add(it.packageName!!) }
+                            mAllAppsList.forEach { allPkgList.add(it.getPackageName()) }
                             // to compare on update check if app list has changed
                             mPrefs.edit().putStringSet(PREF_CURRENT_APPS, allPkgList).apply()
 
                             val updatePkgList = HashSet<String>()
-                            mAllAppsList.filter { it.updateAvailable() }.forEach { updatePkgList.add((it.packageName!!))}
+                            mAllAppsList.filter { it.updateAvailable() }
+                                .forEach { updatePkgList.add((it.getPackageName())) }
                             // to compare on update check if update available app list has changed
                             mPrefs.edit().putStringSet(PREF_UPDATE_APPS, updatePkgList).apply()
 
@@ -422,43 +437,45 @@ class MainActivity : AppCompatActivity() {
         if (isDownloadsRunning()) {
             return false
         }
-        val stats: String? =
-            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
-        val installs = JSONObject(stats!!)
-        if (installs.length() != 0) {
-            // we have installs pending so start with the first one - we will come back in
-            // onResume when its done and come back here
-            Log.d(TAG, "CURRENT_INSTALLS = " + installs)
-            val first = installs.names()?.get(0) as String
-            val data = installs[first] as JSONObject
-            val uri = Uri.parse(data.get("uri") as String)
-            // this means when we press back or home we will not asked again for this install
-            // and this is a not really an unintended behaviour - back or home == cancel
-            installs.remove(first)
-            mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
-                .apply()
-            // stop the progress for this
-            handleInstallComplete(first.toLong())
-            installPackage(uri)
-            return true
+        mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())?.let {
+            val installs = JSONObject(it)
+            if (installs.length() != 0) {
+                // we have installs pending so start with the first one - we will come back in
+                // onResume when its done and come back here
+                Log.d(TAG, "CURRENT_INSTALLS = " + installs)
+                val first = installs.names()?.get(0) as String
+                val data = installs[first] as JSONObject
+                val uri = Uri.parse(data.get("uri") as String)
+                // this means when we press back or home we will not asked again for this install
+                // and this is a not really an unintended behaviour - back or home == cancel
+                installs.remove(first)
+                mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+                    .apply()
+                // stop the progress for this
+                handleInstallComplete(first.toLong())
+                installPackage(uri)
+                return true
+            }
         }
         return false
     }
 
     private fun isDownloadsRunning(): Boolean {
-        val stats: String? = mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-        val downloads = JSONObject(stats!!)
-        return downloads.length() != 0
+        mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())?.let {
+            val downloads = JSONObject(it)
+            return downloads.length() != 0
+        }
+        return false
     }
 
     private fun removePendingInstall(downloadId: Long) {
-        val stats: String? =
-            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
-        val installs = JSONObject(stats!!)
-        if (installs.has(downloadId.toString())) {
-            installs.remove(downloadId.toString())
-            mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
-                .apply()
+        mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())?.let {
+            val installs = JSONObject(it)
+            if (installs.has(downloadId.toString())) {
+                installs.remove(downloadId.toString())
+                mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+                    .apply()
+            }
         }
     }
 }

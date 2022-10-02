@@ -44,10 +44,8 @@ data class AppItem(
     val icon: String?,
     val versionCode: String?,
     val versionName: String?,
-    @SerializedName("description")
-    val _description: String?,
-    @SerializedName("note")
-    val _note: String?,
+    val description: String?,
+    val note: String?,
     val devices: List<String>?,
 
     ) : ListItem {
@@ -71,11 +69,11 @@ data class AppItem(
         return true
     }
 
-    fun fileUrl(context: Context): String {
+    fun fileUrl(): String {
         return RetrofitManager.baseUrl + file
     }
 
-    fun iconUrl(context: Context): String {
+    fun iconUrl(): String {
         return RetrofitManager.baseUrl + icon
     }
 
@@ -114,7 +112,7 @@ data class AppItem(
     }
 
     override fun title(): String {
-        return title ?: ""
+        return title!!
     }
 
     override fun sortOrder(): Int {
@@ -127,11 +125,11 @@ data class AppItem(
     }
 
     fun note(): String {
-        return _note ?: ""
+        return note ?: ""
     }
 
     fun description(): String {
-        return _description ?: ""
+        return description ?: ""
     }
 
     fun updateAppStatus(packageManager: PackageManager) {
@@ -182,5 +180,15 @@ data class AppItem(
             return versionNameInstalled
         }
         return ""
+    }
+
+    @JvmName("getFile1")
+    fun getFile() : String {
+        return file!!
+    }
+
+    @JvmName("getPackageName1")
+    fun getPackageName() : String {
+        return packageName!!
     }
 }

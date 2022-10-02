@@ -86,7 +86,7 @@ class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
     }
 
     private fun checkForUpdates() {
-        val appsList: ArrayList<AppItem> = ArrayList()
+        val appsList = mutableListOf<AppItem>()
         val fetchApps =
             NetworkUtils().FetchAppsTask(context, Runnable { }, object :
                 NetworkUtils.NetworkTaskCallback {

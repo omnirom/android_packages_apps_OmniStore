@@ -34,9 +34,9 @@ class NetworkUtils {
         context: Context,
         preAction: Runnable,
         postAction: NetworkTaskCallback,
-        newAppsList: ArrayList<AppItem>
+        newAppsList: MutableList<AppItem>
     ) {
-        private val mNewAppsList: ArrayList<AppItem> = newAppsList
+        private val mNewAppsList = newAppsList
         private val mPreaction: Runnable = preAction
         private val mPostAction: NetworkTaskCallback = postAction
         private val mContext: Context = context

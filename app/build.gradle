@@ -4,14 +4,14 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "org.omnirom.omnistore"
-        minSdkVersion 27
-        targetSdkVersion 31
-        versionCode 36
-        versionName "2.5.3"
+        minSdkVersion 29
+        targetSdkVersion 33
+        versionCode 37
+        versionName "2.5.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

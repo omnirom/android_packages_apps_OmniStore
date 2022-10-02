@@ -17,7 +17,10 @@
  */
 package org.omnirom.omnistore
 
-import android.app.*
+import android.app.DownloadManager
+import android.app.Notification
+import android.app.PendingIntent
+import android.app.Service
 import android.content.*
 import android.net.Uri
 import android.os.IBinder
@@ -41,7 +44,7 @@ class DownloadService : Service() {
     private val NOTIFICATION_PROGRESS_ID = Int.MAX_VALUE;
 
     private var mDownloadReceiver: DownloadReceiver? = null
-    private var mDownloadList: ArrayList<Long> = ArrayList()
+    private var mDownloadList = mutableListOf<Long>()
     private lateinit var mDownloadManager: DownloadManager
     private lateinit var mPrefs: SharedPreferences
 
@@ -63,19 +66,18 @@ class DownloadService : Service() {
 
                     mDownloadList.remove(downloadId)
 
-                    val stats: String? =
-                        mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-                    val downloads = JSONObject(stats!!)
-                    if (downloads.has(downloadId.toString())) {
-                        val pkg = downloads.get(downloadId.toString())
-                        downloads.remove(downloadId.toString())
-                        mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
-                            .commit()
+                    mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())?.let {
+                        val downloads = JSONObject(it)
+                        if (downloads.has(downloadId.toString())) {
+                            val pkg = downloads.get(downloadId.toString())
+                            downloads.remove(downloadId.toString())
+                            mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
+                                .commit()
 
-                        handleDownloadComplete(downloadId as Long, pkg as String)
+                            handleDownloadComplete(downloadId as Long, pkg as String)
+                        }
+                        Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                     }
-
-                    Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
                     if (mDownloadList.isEmpty()) {
                         Log.d(TAG, "downloads done - now kill me and start install if needed")
                         if (isInstallPending()) {
@@ -103,13 +105,14 @@ class DownloadService : Service() {
                         IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
                     registerReceiver(mDownloadReceiver, downloadFilter)
                 }
-                val stats: String? =
-                    mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())
-                val downloads = JSONObject(stats!!)
-                downloads.put(id.toString(), pkg)
-                mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
-                    .commit()
-                Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
+                mPrefs.getString(PREF_CURRENT_DOWNLOADS, JSONObject().toString())?.let {
+                    val downloads = JSONObject(it)
+                    downloads.put(id.toString(), pkg)
+                    mPrefs.edit().putString(PREF_CURRENT_DOWNLOADS, downloads.toString())
+                        .commit()
+
+                    Log.d(TAG, "CURRENT_DOWNLOADS = " + downloads)
+                }
                 mDownloadList.add(id as Long)
             }
         } else if (intent?.action.equals(ACTION_CANCEL_DOWNLOAD)) {
@@ -127,7 +130,7 @@ class DownloadService : Service() {
 
         if (mDownloadReceiver != null) {
             unregisterReceiver(mDownloadReceiver)
-            stopForeground(true)
+            stopForeground(STOP_FOREGROUND_REMOVE)
         }
     }
 
@@ -152,7 +155,9 @@ class DownloadService : Service() {
         cancelIntent.action = ACTION_CANCEL_DOWNLOAD
         val cancelPendingIntent: PendingIntent = PendingIntent.getService(
             this,
-            cancelIntent.hashCode(), cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            cancelIntent.hashCode(),
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         notification.addAction(
             R.drawable.ic_cancel,
@@ -169,16 +174,16 @@ class DownloadService : Service() {
             // includes also cancel
             return
         }
-        val stats: String? =
-            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
-        val installs = JSONObject(stats!!)
-        val data = JSONObject()
-        data.put("pkg", pkg)
-        data.put("uri", uri)
-        installs.put(downloadId.toString(), data)
-        mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
-            .commit()
-        Log.d(TAG, "CURRENT_INSTALLS = " + installs)
+        mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())?.let {
+            val installs = JSONObject(it)
+            val data = JSONObject()
+            data.put("pkg", pkg)
+            data.put("uri", uri)
+            installs.put(downloadId.toString(), data)
+            mPrefs.edit().putString(PREF_CURRENT_INSTALLS, installs.toString())
+                .commit()
+            Log.d(TAG, "CURRENT_INSTALLS = " + installs)
+        }
     }
 
     private fun triggerInstall() {
@@ -195,9 +200,10 @@ class DownloadService : Service() {
     }
 
     private fun isInstallPending(): Boolean {
-        val stats: String? =
-            mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())
-        val installs = JSONObject(stats!!)
-        return installs.length() != 0;
+        mPrefs.getString(PREF_CURRENT_INSTALLS, JSONObject().toString())?.let {
+            val installs = JSONObject(it)
+            return installs.length() != 0;
+        }
+        return false
     }
 }
