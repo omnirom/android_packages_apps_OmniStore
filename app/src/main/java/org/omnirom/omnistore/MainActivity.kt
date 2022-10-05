@@ -160,8 +160,11 @@ class MainActivity : AppCompatActivity() {
             }
         })
         lifecycleScope.launchWhenCreated {
-            if (applicationContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                getNotificationPermissions.launch(Manifest.permission.POST_NOTIFICATIONS)
+            if (!mPrefs.getBoolean(Constants.PREF_POST_NOTIFICATION, false)) {
+                if (applicationContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    mPrefs.edit().putBoolean(Constants.PREF_POST_NOTIFICATION, true).apply()
+                    getNotificationPermissions.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             }
             if (!hasInstallPermissions()) {
                 startActivity(Intent(applicationContext, IntroActivity::class.java))
