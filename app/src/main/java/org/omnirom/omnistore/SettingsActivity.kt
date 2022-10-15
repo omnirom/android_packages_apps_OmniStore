@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreference
+import androidx.preference.TwoStatePreference
 import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_WORKER
 import org.omnirom.omnistore.databinding.SettingsActivityBinding
 
@@ -47,7 +47,7 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             val checkUpdatesPreference =
-                findPreference<SwitchPreference>(PREF_CHECK_UPDATES_WORKER)
+                findPreference<TwoStatePreference>(PREF_CHECK_UPDATES_WORKER)
             checkUpdatesPreference?.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue as Boolean)
                     JobUtils().setupWorkManagerJob(requireActivity())
@@ -68,6 +68,7 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(mBinding.toolbar)
 
         this.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        setTitle(R.string.title_settings)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {

@@ -51,24 +51,14 @@
             android:layout_gravity="center" />
     </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:orientation="vertical"
-        app:layout_anchor="@id/fragment_container"
-        app:layout_anchorGravity="bottom">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="25dp"
-            app:elevation="6dp"
-            app:srcCompat="@drawable/ic_refresh"
-            app:backgroundTint="@color/colorPrimary"
-            app:tint="@android:color/white" />
-    </LinearLayout>
+        android:layout_gravity="bottom|end"
+        android:layout_margin="25dp"
+        app:srcCompat="@drawable/ic_refresh"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
