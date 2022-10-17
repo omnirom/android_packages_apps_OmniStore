@@ -19,6 +19,7 @@ package org.omnirom.omnistore
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 //     {
@@ -35,6 +36,7 @@ import com.google.gson.annotations.SerializedName
 //        "description" : "AOSP calendar application.",
 //        "note" : "Depending on your setup you might also need Google Calendar Sync Adapter"
 //    },
+@Keep
 data class AppItem(
     val title: String?,
     val file: String?,
