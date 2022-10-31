@@ -1,8 +1,9 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.OmniStore" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorPrimary</item>
+        <!-- will only be used if dynamic color of AppTheme.Overlay is no used -->
+        <item name="colorPrimary">#1565C0</item>
+        <item name="colorOnPrimary">@android:color/white</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
@@ -10,6 +11,9 @@
     </style>
 
     <style name="Theme.OmniStore" parent="@style/Base.Theme.OmniStore">
+    </style>
+
+    <style name="AppTheme.Overlay" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
     </style>
 
     <style name="BodyTextStyle" parent="@style/TextAppearance.Material3.BodyMedium">

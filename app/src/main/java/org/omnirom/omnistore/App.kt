@@ -22,8 +22,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
-import androidx.work.*
-
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.DynamicColorsOptions
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
 
@@ -32,6 +34,11 @@ class App : Application() {
     private val TAG = "OmniStore:App"
     override fun onCreate() {
         super.onCreate()
+        DynamicColors.applyToActivitiesIfAvailable(
+            this,
+            DynamicColorsOptions.Builder().setThemeOverlay(R.style.AppTheme_Overlay).build()
+        )
+
         createNotificationChannel()
         setupWorkManager()
     }
