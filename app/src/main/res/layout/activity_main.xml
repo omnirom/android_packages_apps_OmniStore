@@ -58,7 +58,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="25dp"
         app:srcCompat="@drawable/ic_refresh"
-        app:backgroundTint="?android:attr/colorPrimary"
-        app:tint="@android:color/white" />
+        app:backgroundTint="?attr/colorPrimary"
+        app:tint="?attr/colorOnPrimary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
