@@ -18,6 +18,8 @@
 package org.omnirom.omnistore
 
 import android.Manifest
+import android.app.ActivityManager
+import android.app.ActivityManager.TaskDescription
 import android.app.DownloadManager
 import android.content.*
 import android.content.pm.PackageManager
@@ -106,6 +108,12 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val td = TaskDescription.Builder()
+                .setPrimaryColor(getAttrColor(android.R.attr.colorPrimary)).build()
+            setTaskDescription(td)
+        }
 
         Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"))
         mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -320,7 +328,7 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d(TAG, "refresh")
 
-        val newAppsList= mutableListOf<AppItem>()
+        val newAppsList = mutableListOf<AppItem>()
         val fetchApps =
             NetworkUtils().FetchAppsTask(
                 this,
@@ -480,5 +488,12 @@ class MainActivity : AppCompatActivity() {
                     .apply()
             }
         }
+    }
+
+    private fun getAttrColor(attr: Int): Int {
+        val ta = obtainStyledAttributes(intArrayOf(attr))
+        val color = ta.getColor(0, 0)
+        ta.recycle()
+        return color
     }
 }
