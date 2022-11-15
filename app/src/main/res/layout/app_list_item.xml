@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/app_list_item_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
+    android:layout_marginStart="10dp"
     android:layout_marginTop="4dp"
+    android:layout_marginEnd="10dp"
     android:layout_marginBottom="4dp"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@drawable/app_list_item_bg_shape"
+    android:foreground="?android:attr/selectableItemBackground"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+    android:padding="12dp">
 
     <ImageView
         android:id="@+id/app_logo"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/app_icon_size"
+        android:layout_height="@dimen/app_icon_size"
         android:layout_gravity="start|center_vertical"
-        android:scaleType="fitXY"
-        android:contentDescription="@string/app_logo_image_description"/>
+        android:contentDescription="@string/app_logo_image_description"
+        android:scaleType="fitXY" />
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -40,12 +43,13 @@
 
             <TextView
                 android:id="@+id/app_name"
+                style="@style/TitleTextStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                style="@style/BodyTextStyle" />
+                android:maxLines="1" />
 
             <ImageView
                 android:id="@+id/app_note"
@@ -54,27 +58,28 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="10dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_info"
-                android:contentDescription="@string/app_note_image_description"/>
+                android:contentDescription="@string/app_note_image_description"
+                android:src="@drawable/ic_info" />
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/app_pkg"
+            style="@style/BodyTextStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            style="@style/BodyTextStyleSmall"
-            android:visibility="gone" />
+            android:maxLines="1" />
 
         <TextView
             android:id="@+id/app_version"
+            style="@style/BodyTextStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            style="@style/BodyTextStyleSmall" />
+            android:maxLines="1" />
 
         <Space
             android:layout_width="match_parent"
@@ -97,7 +102,7 @@
         android:layout_height="32dp"
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/app_download_image_description"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_download_outline"
-        android:contentDescription="@string/app_download_image_description"/>
+        android:src="@drawable/ic_download_outline" />
 </LinearLayout>

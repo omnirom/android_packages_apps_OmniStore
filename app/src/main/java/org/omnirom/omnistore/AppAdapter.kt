@@ -18,11 +18,10 @@
 package org.omnirom.omnistore
 
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.Settings
-import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +38,13 @@ import org.omnirom.omnistore.databinding.SeparatorListItemBinding
 class AppAdapter(val items: List<ListItem>, val context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    val bgShape: Drawable
+
+    init {
+        bgShape = context.resources.getDrawable(R.drawable.app_list_item_bg_shape, null)
+        bgShape.alpha = 120
+    }
+
     inner class AppItemViewHolder(mBinding: AppListItemBinding) :
         RecyclerView.ViewHolder(mBinding.root) {
         val title = mBinding.appName
@@ -48,6 +54,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
         val progress = mBinding.appProgress
         val note = mBinding.appNote
         val version = mBinding.appVersion
+        val container = mBinding.appListItemContainer
 
         fun bind(app: AppItem) {
             itemView.setOnClickListener {
@@ -128,9 +135,21 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == TYPE_SEPARATOR_ITEM) {
-            return SeparatorItemViewHolder(SeparatorListItemBinding.inflate(LayoutInflater.from(context), parent, false))
+            return SeparatorItemViewHolder(
+                SeparatorListItemBinding.inflate(
+                    LayoutInflater.from(
+                        context
+                    ), parent, false
+                )
+            )
         }
-        return AppItemViewHolder(AppListItemBinding.inflate(LayoutInflater.from(context), parent, false))
+        return AppItemViewHolder(
+            AppListItemBinding.inflate(
+                LayoutInflater.from(context),
+                parent,
+                false
+            )
+        )
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -162,6 +181,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
             if (app.note().isNotEmpty()) {
                 holder.note.visibility = View.VISIBLE
             }
+            holder.container.background = bgShape
         } else if (holder is SeparatorItemViewHolder) {
             val separator: SeparatorItem = items[position] as SeparatorItem
             holder.title.text = separator.title()

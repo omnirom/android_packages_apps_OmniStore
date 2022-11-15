@@ -18,6 +18,6 @@
         android:ellipsize="start"
         android:gravity="center_vertical"
         tools:text="foobar"
-        style="@style/TitleTextStyle" />
+        style="@style/SeparatorTextStyle" />
 
 </LinearLayout>
