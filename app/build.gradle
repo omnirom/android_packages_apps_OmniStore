@@ -43,6 +43,11 @@ android {
 
     namespace 'org.omnirom.omnistore'
 
+    sourceSets {
+        main {
+            res.srcDirs = ['src/main/res', 'src/main/res-private']
+        }
+    }
 }
 
 dependencies {

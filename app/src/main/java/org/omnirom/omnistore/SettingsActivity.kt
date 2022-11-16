@@ -61,8 +61,6 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         mBinding = SettingsActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
         setSupportActionBar(mBinding.toolbar)
