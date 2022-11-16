@@ -3,6 +3,9 @@
     <!-- Base application theme. -->
     <style name="Theme.OmniStore" parent="@style/Base.Theme.OmniStore">
         <item name="android:windowSplashScreenIconBackgroundColor">@color/omni_logo_color</item>
+        <item name="preferenceTheme">@style/Omni.PreferenceTheme</item>
+        <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
+        <item name="android:textAppearanceListItem">@style/Omni.PreferenceTitle</item>
     </style>
 
     <style name="AppTheme.Overlay" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
