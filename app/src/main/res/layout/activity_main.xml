@@ -15,7 +15,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"/>
+            android:layout_height="?attr/actionBarSize" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -48,14 +48,20 @@
             android:layout_gravity="center" />
     </FrameLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="25dp"
-        app:srcCompat="@drawable/ic_refresh"
-        app:backgroundTint="?attr/colorPrimary"
-        app:tint="?attr/colorOnPrimary" />
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="25dp"
+            app:backgroundTint="?attr/colorPrimary"
+            app:srcCompat="@drawable/ic_refresh"
+            app:tint="?attr/colorOnPrimary" />
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
