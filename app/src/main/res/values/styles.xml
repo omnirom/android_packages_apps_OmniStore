@@ -9,6 +9,7 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
         <item name="android:windowLightNavigationBar">?attr/isLightTheme</item>
+        <item name="dialogCornerRadius">8dp</item>
     </style>
 
     <style name="Theme.OmniStore" parent="@style/Base.Theme.OmniStore">
@@ -32,5 +33,4 @@
     <style name="SeparatorTextStyle" parent="@style/TextAppearance.Material3.TitleMedium">
         <item name="android:textSize">18sp</item>
     </style>
-
 </resources>

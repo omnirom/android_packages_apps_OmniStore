@@ -22,7 +22,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.TwoStatePreference
@@ -71,7 +70,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsFragment())
+        supportFragmentManager.beginTransaction().replace(R.id.content, SettingsFragment())
             .commit()
     }
 

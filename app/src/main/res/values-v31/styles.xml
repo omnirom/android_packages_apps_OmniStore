@@ -10,5 +10,6 @@
 
     <style name="AppTheme.Overlay" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
         <item name="colorAccent">?attr/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
     </style>
 </resources>
