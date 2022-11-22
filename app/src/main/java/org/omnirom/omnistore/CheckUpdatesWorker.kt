@@ -30,7 +30,7 @@ import androidx.work.*
 class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
     private val TAG = "OmniStore:CheckUpdatesWorker"
-    private val NOTIFICATION_UPDATES_ID = Int.MAX_VALUE - 1;
+    private val NOTIFICATION_UPDATES_ID = Int.MAX_VALUE - 1
 
     override suspend fun doWork(): Result {
         Log.d(TAG, "doWork")
@@ -51,7 +51,7 @@ class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
     ): Notification {
         val notification = NotificationCompat.Builder(
             context,
-            Constants.NOTIFICATION_CHANNEL_UPDATE
+            App.NOTIFICATION_CHANNEL_UPDATE
         )
             .setContentTitle(title)
             .setSmallIcon(R.drawable.ic_notification)
@@ -88,7 +88,7 @@ class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
     private fun checkForUpdates() {
         val appsList = mutableListOf<AppItem>()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(context, Runnable { }, object :
+            NetworkUtils.FetchAppsTask(context, { }, object :
                 NetworkUtils.NetworkTaskCallback {
                 override fun postAction(networkError: Boolean, reponseCode: Int) {
                     if (!networkError) {
@@ -98,9 +98,9 @@ class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
                         val prefs =
                             PreferenceManager.getDefaultSharedPreferences(context)
                         val oldAllPkgList =
-                            prefs.getStringSet(Constants.PREF_CURRENT_APPS, HashSet<String>())
+                            prefs.getStringSet(SettingsActivity.PREF_CURRENT_APPS, HashSet<String>())
                         val oldUpdatePkgList =
-                            prefs.getStringSet(Constants.PREF_UPDATE_APPS, HashSet<String>())
+                            prefs.getStringSet(SettingsActivity.PREF_UPDATE_APPS, HashSet<String>())
 
                         val newAllAppsList = appsList.filter { !oldAllPkgList!!.contains(it.packageName) }
                         val newUpdateAppsList = appsList.filter { it.updateAvailable() }.filter { !oldUpdatePkgList!!.contains(it.packageName) }

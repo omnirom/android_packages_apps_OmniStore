@@ -28,8 +28,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
-import org.omnirom.omnistore.Constants.TYPE_APP_ITEM
-import org.omnirom.omnistore.Constants.TYPE_SEPARATOR_ITEM
 import org.omnirom.omnistore.databinding.AppInfoDialogBinding
 import org.omnirom.omnistore.databinding.AppListItemBinding
 import org.omnirom.omnistore.databinding.SeparatorListItemBinding
@@ -38,6 +36,8 @@ import org.omnirom.omnistore.databinding.SeparatorListItemBinding
 class AppAdapter(val items: List<ListItem>, val context: Context) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    val TYPE_APP_ITEM = 0
+    val TYPE_SEPARATOR_ITEM = 1
     val bgShape: Drawable
 
     init {
