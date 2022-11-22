@@ -25,10 +25,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.TwoStatePreference
-import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_WORKER
 import org.omnirom.omnistore.databinding.SettingsActivityBinding
 
 class SettingsActivity : AppCompatActivity() {
+
+    companion object {
+        const val PREF_CURRENT_DOWNLOADS = "current_downloads"
+        const val PREF_CHECK_UPDATES_OLD = "check_updates"
+        const val PREF_CURRENT_APPS = "current_apps"
+        const val PREF_CURRENT_INSTALLS = "current_installs"
+        const val PREF_CHECK_UPDATES_WORKER = "check_updates_worker"
+        const val PREF_UPDATE_APPS = "update_apps"
+        const val PREF_POST_NOTIFICATION = "post_notifications"
+    }
 
     private lateinit var mBinding: SettingsActivityBinding
 

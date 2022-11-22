@@ -26,12 +26,17 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
-import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
-import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
+import dagger.hilt.android.HiltAndroidApp
 
-
+@HiltAndroidApp
 class App : Application() {
     private val TAG = "OmniStore:App"
+
+    companion object {
+        const val NOTIFICATION_CHANNEL_UPDATE = "org.omnirom.omnistore.notification.updates"
+        const val NOTIFICATION_CHANNEL_PROGRESS = "org.omnirom.omnistore.notification.progress"
+    }
+
     override fun onCreate() {
         super.onCreate()
         DynamicColors.applyToActivitiesIfAvailable(
