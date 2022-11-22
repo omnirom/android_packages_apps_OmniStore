@@ -18,9 +18,7 @@
 package org.omnirom.omnistore
 
 import android.Manifest
-import android.app.ActivityManager
 import android.app.ActivityManager.TaskDescription
-import android.app.DownloadManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -31,6 +29,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -40,21 +39,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.AndroidEntryPoint
 import org.json.JSONObject
-import org.omnirom.omnistore.Constants.ACTION_ADD_DOWNLOAD
-import org.omnirom.omnistore.Constants.ACTION_START_INSTALL
-import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_OLD
-import org.omnirom.omnistore.Constants.PREF_CHECK_UPDATES_WORKER
-import org.omnirom.omnistore.Constants.PREF_CURRENT_APPS
-import org.omnirom.omnistore.Constants.PREF_CURRENT_DOWNLOADS
-import org.omnirom.omnistore.Constants.PREF_CURRENT_INSTALLS
-import org.omnirom.omnistore.Constants.PREF_UPDATE_APPS
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
+import org.omnirom.omnistore.SettingsActivity.Companion.PREF_CHECK_UPDATES_OLD
+import org.omnirom.omnistore.SettingsActivity.Companion.PREF_CHECK_UPDATES_WORKER
+import org.omnirom.omnistore.SettingsActivity.Companion.PREF_CURRENT_DOWNLOADS
+import org.omnirom.omnistore.SettingsActivity.Companion.PREF_CURRENT_INSTALLS
+import org.omnirom.omnistore.SettingsActivity.Companion.PREF_POST_NOTIFICATION
 import org.omnirom.omnistore.databinding.ActivityMainBinding
 import java.io.File
 import javax.net.ssl.HttpsURLConnection
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val mDisplayList = mutableListOf<ListItem>()
     private val mAllAppsList = mutableListOf<AppItem>()
@@ -62,13 +59,16 @@ class MainActivity : AppCompatActivity() {
     private val mPackageReceiver: PackageReceiver = PackageReceiver()
     private val mInstallReceiver: InstallReceiver = InstallReceiver()
     private val FAKE_DOWNLOAD_ID = Long.MAX_VALUE
-    private lateinit var mDownloadManager: DownloadManager
     private lateinit var mRecyclerView: RecyclerView
     private var mFetchRunning = false
     private var pendingApp: AppItem? = null
     private lateinit var mPrefs: SharedPreferences
     private lateinit var mBinding: ActivityMainBinding
+    private val viewModel: MainViewModel by viewModels()
 
+    companion object {
+        const val ACTION_START_INSTALL = "start_install"
+    }
     inner class PackageReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive " + intent?.action)
@@ -116,8 +116,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         Log.d(TAG, "device = " + DeviceUtils().getProperty(this, "ro.omni.device"))
-        mDownloadManager = this.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
 
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
@@ -159,19 +158,21 @@ class MainActivity : AppCompatActivity() {
             } else if (event == Lifecycle.Event.ON_PAUSE) {
                 try {
                     unregisterReceiver(mInstallReceiver)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                 }
                 try {
                     unregisterReceiver(mPackageReceiver)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                 }
             }
         })
         lifecycleScope.launchWhenCreated {
-            if (!mPrefs.getBoolean(Constants.PREF_POST_NOTIFICATION, false)) {
-                if (applicationContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    mPrefs.edit().putBoolean(Constants.PREF_POST_NOTIFICATION, true).apply()
-                    getNotificationPermissions.launch(Manifest.permission.POST_NOTIFICATIONS)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (!mPrefs.getBoolean(PREF_POST_NOTIFICATION, false)) {
+                    if (applicationContext.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        mPrefs.edit().putBoolean(PREF_POST_NOTIFICATION, true).apply()
+                        getNotificationPermissions.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
                 }
             }
             if (!hasInstallPermissions()) {
@@ -227,7 +228,7 @@ class MainActivity : AppCompatActivity() {
         setAppItemDownloadState(app, FAKE_DOWNLOAD_ID)
 
         val checkApp =
-            NetworkUtils().CheckAppTask(
+            NetworkUtils.CheckAppTask(
                 this,
                 app.getFile(),
                 object : NetworkTaskCallback {
@@ -237,16 +238,7 @@ class MainActivity : AppCompatActivity() {
                             setAppItemDownloadState(app, -1)
                             showNetworkError(reponseCode)
                         } else {
-                            val url = app.fileUrl()
-
-                            val request: DownloadManager.Request =
-                                DownloadManager.Request(Uri.parse(url))
                             val fileName = File(app.getFile()).name
-                            request.setDestinationInExternalFilesDir(
-                                this@MainActivity,
-                                null,
-                                fileName
-                            )
                             val oldDownload =
                                 File(this@MainActivity.getExternalFilesDir(null), fileName)
                             if (oldDownload.exists()) {
@@ -254,14 +246,8 @@ class MainActivity : AppCompatActivity() {
                             }
                             //request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                             // now we have a real id
-                            setAppItemDownloadState(app, mDownloadManager.enqueue(request))
-
-                            val serviceIndent =
-                                Intent(this@MainActivity, DownloadService::class.java)
-                            serviceIndent.action = ACTION_ADD_DOWNLOAD
-                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_ID, app.mDownloadId)
-                            serviceIndent.putExtra(Constants.EXTRA_DOWNLOAD_PKG, app.packageName)
-                            startForegroundService(serviceIndent)
+                            viewModel.enqueDownloadApp(app)
+                            (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
                         }
                     }
                 })
@@ -272,7 +258,7 @@ class MainActivity : AppCompatActivity() {
         if (app.mDownloadId == -1L) {
             return
         }
-        mDownloadManager.remove(app.mDownloadId)
+        viewModel.cancelDownloadApp(app.mDownloadId)
         removePendingInstall(app.mDownloadId)
         setAppItemDownloadState(app, -1)
     }
@@ -330,7 +316,7 @@ class MainActivity : AppCompatActivity() {
 
         val newAppsList = mutableListOf<AppItem>()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(
+            NetworkUtils.FetchAppsTask(
                 this,
                 {
                     mFetchRunning = true
@@ -349,13 +335,13 @@ class MainActivity : AppCompatActivity() {
                             val allPkgList = HashSet<String>()
                             mAllAppsList.forEach { allPkgList.add(it.getPackageName()) }
                             // to compare on update check if app list has changed
-                            mPrefs.edit().putStringSet(PREF_CURRENT_APPS, allPkgList).apply()
+                            mPrefs.edit().putStringSet(SettingsActivity.PREF_CURRENT_APPS, allPkgList).apply()
 
                             val updatePkgList = HashSet<String>()
                             mAllAppsList.filter { it.updateAvailable() }
                                 .forEach { updatePkgList.add((it.getPackageName())) }
                             // to compare on update check if update available app list has changed
-                            mPrefs.edit().putStringSet(PREF_UPDATE_APPS, updatePkgList).apply()
+                            mPrefs.edit().putStringSet(SettingsActivity.PREF_UPDATE_APPS, updatePkgList).apply()
 
                             applySortAndFilter()
                         }
@@ -380,7 +366,7 @@ class MainActivity : AppCompatActivity() {
                 val item = mDisplayList.first { it.sortOrder() == 0 }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(idx, SeparatorItem(getString(R.string.separator_item_updates)))
-            } catch (e: NoSuchElementException) {
+            } catch (_: NoSuchElementException) {
             }
             try {
                 val item = mDisplayList.first { it.sortOrder() == 1 }
@@ -389,7 +375,7 @@ class MainActivity : AppCompatActivity() {
                     idx,
                     SeparatorItem(getString(R.string.separator_item_installed))
                 )
-            } catch (e: NoSuchElementException) {
+            } catch (_: NoSuchElementException) {
             }
             try {
                 val item = mDisplayList.first { it.sortOrder() == 2 }
@@ -398,7 +384,7 @@ class MainActivity : AppCompatActivity() {
                     idx,
                     SeparatorItem(getString(R.string.separator_item_not_installed))
                 )
-            } catch (e: NoSuchElementException) {
+            } catch (_: NoSuchElementException) {
             }
 
             (mRecyclerView.adapter as AppAdapter).notifyDataSetChanged()
@@ -433,13 +419,6 @@ class MainActivity : AppCompatActivity() {
         )
         intent.flags = (Intent.FLAG_ACTIVITY_NEW_TASK
                 or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(intent)
-    }
-
-    private fun uninstallPackage(pkg: String) {
-        val intent = Intent(Intent.ACTION_DELETE)
-        intent.data = Uri.parse("package:" + pkg)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
     }
 

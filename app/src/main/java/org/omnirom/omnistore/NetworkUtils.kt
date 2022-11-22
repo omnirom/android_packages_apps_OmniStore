@@ -23,14 +23,14 @@ import kotlinx.coroutines.*
 import java.lang.Runnable
 import javax.net.ssl.HttpsURLConnection
 
-class NetworkUtils {
+object NetworkUtils {
     private val TAG = "OmniStore:NetworkUtils"
 
     interface NetworkTaskCallback {
         fun postAction(networkError: Boolean, reponseCode: Int)
     }
 
-    inner class FetchAppsTask(
+    class FetchAppsTask(
         context: Context,
         preAction: Runnable,
         postAction: NetworkTaskCallback,
@@ -117,7 +117,7 @@ class NetworkUtils {
         }
     }
 
-    inner class CheckAppTask(
+    class CheckAppTask(
         context: Context,
         url: String,
         postAction: NetworkTaskCallback
