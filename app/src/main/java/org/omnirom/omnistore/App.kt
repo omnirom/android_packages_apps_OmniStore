@@ -26,10 +26,11 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
+import dagger.hilt.android.HiltAndroidApp
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_PROGRESS
 import org.omnirom.omnistore.Constants.NOTIFICATION_CHANNEL_UPDATE
 
-
+@HiltAndroidApp
 class App : Application() {
     private val TAG = "OmniStore:App"
     override fun onCreate() {

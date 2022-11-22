@@ -31,8 +31,8 @@ object Constants {
     const val PREF_UPDATE_APPS = "update_apps"
     const val PREF_POST_NOTIFICATION = "post_notifications"
 
-    const val ACTION_ADD_DOWNLOAD = "add_download"
-    const val ACTION_CANCEL_DOWNLOAD = "cancel_download"
+    //const val ACTION_ADD_DOWNLOAD = "add_download"
+    //const val ACTION_CANCEL_DOWNLOAD = "cancel_download"
     const val ACTION_START_INSTALL = "start_install"
     const val EXTRA_DOWNLOAD_ID = "id"
     const val EXTRA_DOWNLOAD_PKG = "pkg"

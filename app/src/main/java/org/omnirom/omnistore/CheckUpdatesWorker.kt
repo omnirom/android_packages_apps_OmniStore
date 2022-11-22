@@ -88,7 +88,7 @@ class CheckUpdatesWorker(val context: Context, params: WorkerParameters) :
     private fun checkForUpdates() {
         val appsList = mutableListOf<AppItem>()
         val fetchApps =
-            NetworkUtils().FetchAppsTask(context, Runnable { }, object :
+            NetworkUtils.FetchAppsTask(context, Runnable { }, object :
                 NetworkUtils.NetworkTaskCallback {
                 override fun postAction(networkError: Boolean, reponseCode: Int) {
                     if (!networkError) {
