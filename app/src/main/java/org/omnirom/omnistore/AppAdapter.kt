@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.elevation.ElevationOverlayProvider
 import com.squareup.picasso.Picasso
 import org.omnirom.omnistore.databinding.AppInfoDialogBinding
 import org.omnirom.omnistore.databinding.AppListItemBinding
@@ -42,7 +43,8 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
 
     init {
         bgShape = context.resources.getDrawable(R.drawable.app_list_item_bg_shape, null)
-        bgShape.alpha = 120
+        val provider = ElevationOverlayProvider(context)
+        bgShape.setTint(provider.compositeOverlayWithThemeSurfaceColorIfNeeded(3f))
     }
 
     inner class AppItemViewHolder(mBinding: AppListItemBinding) :
