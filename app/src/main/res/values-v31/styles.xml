@@ -2,6 +2,7 @@
 
     <!-- Base application theme. -->
     <style name="Theme.OmniStore" parent="@style/Base.Theme.OmniStore">
+        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/omni_logo_color</item>
         <item name="preferenceTheme">@style/Omni.PreferenceTheme</item>
         <item name="android:switchStyle">@style/Omni.SwitchStyle</item>
@@ -10,8 +11,6 @@
     </style>
 
     <style name="AppTheme.Overlay" parent="ThemeOverlay.Material3.DynamicColors.DayNight">
-        <item name="colorAccent">?attr/colorPrimary</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
     </style>
 
     <style name="AlertDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">

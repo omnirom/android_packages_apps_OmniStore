@@ -22,11 +22,17 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.Settings
+import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_DIP
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.MaterialColors
+import com.google.android.material.elevation.ElevationOverlayProvider
+import com.google.android.material.elevation.SurfaceColors
 import com.squareup.picasso.Picasso
 import org.omnirom.omnistore.databinding.AppInfoDialogBinding
 import org.omnirom.omnistore.databinding.AppListItemBinding
@@ -42,7 +48,23 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
 
     init {
         bgShape = context.resources.getDrawable(R.drawable.app_list_item_bg_shape, null)
-        bgShape.alpha = 120
+        val provider = ElevationOverlayProvider(context)
+        bgShape.setTint(
+            provider.compositeOverlayWithThemeSurfaceColorIfNeeded(
+                TypedValue.applyDimension(
+                    COMPLEX_UNIT_DIP,
+                    1f,
+                    context.resources.displayMetrics
+                )
+            )
+        )
+        // also possible
+        //bgShape.setTint(SurfaceColors.SURFACE_1.getColor(context))
+        /*bgShape.setTint(SurfaceColors.getColorForElevation(context, TypedValue.applyDimension(
+            COMPLEX_UNIT_DIP,
+            1f,
+            context.resources.displayMetrics
+        )))*/
     }
 
     inner class AppItemViewHolder(mBinding: AppListItemBinding) :
