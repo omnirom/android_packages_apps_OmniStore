@@ -8,7 +8,6 @@
     android:layout_marginTop="4dp"
     android:layout_marginEnd="10dp"
     android:layout_marginBottom="4dp"
-    android:background="@drawable/app_list_item_bg_shape"
     android:foreground="?android:attr/selectableItemBackground"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
