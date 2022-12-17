@@ -30,7 +30,6 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
@@ -39,6 +38,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import org.json.JSONObject
 import org.omnirom.omnistore.NetworkUtils.NetworkTaskCallback
@@ -392,15 +392,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNetworkError(reponseCode: Int) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(getString(R.string.dialog_title_network_error))
-        if (reponseCode == HttpsURLConnection.HTTP_NOT_FOUND) {
-            builder.setMessage(getString(R.string.dialog_message_network_error_not_found))
-        } else {
-            builder.setMessage(getString(R.string.dialog_message_network_error))
-        }
-        builder.setPositiveButton(android.R.string.ok, null)
-        builder.create().show()
+        val snackbar = Snackbar.make(
+            this@MainActivity,
+            mBinding.floatingActionButton,
+            getString(R.string.network_error, reponseCode),
+            Snackbar.LENGTH_LONG
+        )
+        snackbar.anchorView = mBinding.floatingActionButton
+        snackbar.show()
     }
 
     private fun applySortAndFilter() {

@@ -73,7 +73,7 @@ object NetworkUtils {
                     withContext(Dispatchers.Main) {
                         mPostAction.postAction(
                             mNetworkError,
-                            HttpsURLConnection.HTTP_INTERNAL_ERROR
+                            appList.code()
                         )
                     }
                 } catch (e: RetrofitManager.NoConnectivityException) {
