@@ -69,6 +69,7 @@ class MainViewModel @Inject constructor(@ApplicationContext val applicationConte
             null,
             fileName
         )
+        Log.d(TAG, "enqueDownloadApp url = " + url)
 
         val id = mDownloadManager.enqueue(request)
         app.mDownloadId = id

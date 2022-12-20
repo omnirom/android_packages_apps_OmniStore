@@ -17,7 +17,6 @@
  */
 package org.omnirom.omnistore
 
-import android.content.Context
 import android.content.pm.PackageManager
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
@@ -59,24 +58,25 @@ data class AppItem(
     var mDownloadId: Long = -1
     var versionCodeInstalled: Int = 0
     var versionNameInstalled: String = ""
+    var mBaseUrl: String = RetrofitManager.baseUrl
 
-    fun isValidApp(): Boolean {
+    fun isValid(): Boolean {
         return packageName != null && file != null && icon != null && title != null && versionCode != null && versionName != null
     }
 
     fun isValidDevice(device: String): Boolean {
-        if (devices != null) {
-            return devices.contains(device)
+        if (devices.isNullOrEmpty()) {
+            return true
         }
-        return true
+        return devices.contains(device)
     }
 
     fun fileUrl(): String {
-        return RetrofitManager.baseUrl + file
+        return mBaseUrl + file
     }
 
     fun iconUrl(): String {
-        return RetrofitManager.baseUrl + icon
+        return mBaseUrl + icon
     }
 
     fun installEnabled(): Boolean {

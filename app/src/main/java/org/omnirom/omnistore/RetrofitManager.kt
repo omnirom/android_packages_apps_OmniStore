@@ -2,10 +2,12 @@ package org.omnirom.omnistore
 
 import android.content.Context
 import android.net.ConnectivityManager
+import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
@@ -43,12 +45,19 @@ object RetrofitManager {
         }
     }
 
-    fun getInstance(context: Context): Retrofit {
+    private fun createGsonConverter(baseUrl: String): Converter.Factory {
+        val gsonBuilder = GsonBuilder()
+        gsonBuilder.registerTypeAdapter(AppItem::class.java, AppItemDeserializer(baseUrl))
+        val gson = gsonBuilder.create()
+        return GsonConverterFactory.create(gson)
+    }
+
+    fun getInstance(context: Context, baseUrl: String): Retrofit {
         val oktHttpClient = OkHttpClient.Builder()
             .addInterceptor(NetworkConnectionInterceptor(context))
 
         return Retrofit.Builder().baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(createGsonConverter(baseUrl))
             .client(oktHttpClient.build())
             .build()
     }

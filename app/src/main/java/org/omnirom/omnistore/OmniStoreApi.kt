@@ -12,4 +12,7 @@ interface OmniStoreApi {
 
     @HEAD("{file_url}")
     suspend fun checkApp(@Path(value = "file_url") fileUrl:String) : Response<Void>
+
+    @GET("apps-extra-config.json")
+    suspend fun getAppsExtra() : Response<List<AppsExtraItem>>
 }

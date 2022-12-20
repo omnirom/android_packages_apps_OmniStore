@@ -19,8 +19,10 @@ package org.omnirom.omnistore
 
 import android.content.Context
 import android.util.Log
-import kotlinx.coroutines.*
-import java.lang.Runnable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.net.ssl.HttpsURLConnection
 
 object NetworkUtils {
@@ -46,29 +48,63 @@ object NetworkUtils {
             mPreaction.run()
 
             val omniStoreApi =
-                RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
+                RetrofitManager.getInstance(mContext, RetrofitManager.baseUrl)
+                    .create(OmniStoreApi::class.java)
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val appList = omniStoreApi.getApps("apps")
+                    if (appList.isSuccessful) {
+                        appList.body()?.let {
+                            loadAppsList(it)
+                            Log.d(TAG, "loadAppList size = " + mNewAppsList.size)
 
-                    if (appList.isSuccessful && appList.body() != null) {
-                        loadAppsList(appList.body()!!)
-                        Log.d(TAG, "loadAppList " + mNewAppsList.size)
-
-                        // add extra if available
-                        val extraFiles = mutableListOf<String>()
-                        extraFiles.add(
-                            "apps-" + DeviceUtils().getProperty(
-                                mContext,
-                                "ro.build.version.release"
+                            // add extra if available
+                            val extraFiles = mutableListOf<String>()
+                            extraFiles.add(
+                                "apps-" + DeviceUtils().getProperty(
+                                    mContext,
+                                    "ro.build.version.release"
+                                )
                             )
-                        )
-                        extraFiles.add("apps-" + DeviceUtils().getProperty(mContext, "ro.omni.device"))
-                        Log.d(TAG, "loadExtraAppList " + extraFiles)
-
-                        loadExtraAppList(extraFiles, omniStoreApi)
+                            extraFiles.add(
+                                "apps-" + DeviceUtils().getProperty(
+                                    mContext,
+                                    "ro.omni.device"
+                                )
+                            )
+                            Log.d(TAG, "loadExtraAppList " + extraFiles)
+                            loadExtraAppList(extraFiles, omniStoreApi)
+                            Log.d(TAG, "loadExtraAppList size = " + mNewAppsList.size)
+                        }
                     } else {
                         mNetworkError = true
+                    }
+                    val appsExtraList = omniStoreApi.getAppsExtra()
+                    if (appsExtraList.isSuccessful) {
+                        appsExtraList.body()?.let {
+                            it.forEach { appsExtraItem ->
+                                if (appsExtraItem.isValid()) {
+                                    val extraBaseUrl = appsExtraItem.baseurl!!
+                                    val extraFile = appsExtraItem.file!!
+                                    val extraStoreApi =
+                                        RetrofitManager.getInstance(mContext, extraBaseUrl)
+                                            .create(OmniStoreApi::class.java)
+                                    val extraAppsList = extraStoreApi.getApps(extraFile)
+                                    if (extraAppsList.isSuccessful) {
+                                        extraAppsList.body()?.let {
+                                            Log.d(
+                                                TAG,
+                                                "loadExtraAppList from " + extraBaseUrl + " " + extraFile
+                                            )
+                                            loadAppsList(it)
+                                            Log.d(TAG, "loadExtraAppList size = " + mNewAppsList.size)
+                                        }
+                                    } else {
+                                        Log.d(TAG, "loadExtraAppList extraBaseUrl  = " + extraBaseUrl + " extraFile = " + " code = " + extraAppsList.code())
+                                    }
+                                }
+                            }
+                        }
                     }
                     withContext(Dispatchers.Main) {
                         mPostAction.postAction(
@@ -91,16 +127,20 @@ object NetworkUtils {
             extraFiles.forEach { file ->
                 val appList = omniStoreApi.getApps(file)
 
-                if (appList.isSuccessful && appList.body() != null) {
-                    Log.d(TAG, "loadExtraAppList " + file)
-                    loadAppsList(appList.body()!!)
+                if (appList.isSuccessful) {
+                    if (appList.body() != null) {
+                        Log.d(TAG, "loadExtraAppList " + file)
+                        loadAppsList(appList.body()!!)
+                    }
+                } else {
+                    Log.d(TAG, "loadExtraAppList file = " + file + " code = " + appList.code())
                 }
             }
         }
 
         private fun loadAppsList(appsList: List<AppItem>) {
             for (app in appsList) {
-                if (app.isValidApp() && app.isValidDevice(
+                if (app.isValid() && app.isValidDevice(
                         DeviceUtils().getProperty(
                             mContext,
                             "ro.omni.device"
@@ -119,20 +159,20 @@ object NetworkUtils {
 
     class CheckAppTask(
         context: Context,
-        url: String,
+        val appItem: AppItem,
         postAction: NetworkTaskCallback
     ) {
         private val mPostAction: NetworkTaskCallback = postAction
-        private val mUrl: String = url
         private var responseCode: Int = HttpsURLConnection.HTTP_OK
         private val mContext = context
 
         fun run() {
             val omniStoreApi =
-                RetrofitManager.getInstance(mContext).create(OmniStoreApi::class.java)
+                RetrofitManager.getInstance(mContext, appItem.mBaseUrl)
+                    .create(OmniStoreApi::class.java)
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val reponse = omniStoreApi.checkApp(mUrl)
+                    val reponse = omniStoreApi.checkApp(appItem.file!!)
                     responseCode = reponse.code()
 
                     withContext(Dispatchers.Main) {
