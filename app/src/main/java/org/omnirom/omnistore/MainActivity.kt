@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         val checkApp =
             NetworkUtils.CheckAppTask(
                 this,
-                app.getFile(),
+                app,
                 object : NetworkTaskCallback {
                     override fun postAction(networkError: Boolean, reponseCode: Int) {
                         if (networkError) {
