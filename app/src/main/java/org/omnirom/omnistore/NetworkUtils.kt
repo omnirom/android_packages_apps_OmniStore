@@ -57,54 +57,60 @@ object NetworkUtils {
                         appList.body()?.let {
                             loadAppsList(it)
                             Log.d(TAG, "loadAppList size = " + mNewAppsList.size)
-
-                            // add extra if available
-                            val extraFiles = mutableListOf<String>()
-                            extraFiles.add(
-                                "apps-" + DeviceUtils().getProperty(
-                                    mContext,
-                                    "ro.build.version.release"
-                                )
-                            )
-                            extraFiles.add(
-                                "apps-" + DeviceUtils().getProperty(
-                                    mContext,
-                                    "ro.omni.device"
-                                )
-                            )
-                            Log.d(TAG, "loadExtraAppList " + extraFiles)
-                            loadExtraAppList(extraFiles, omniStoreApi)
-                            Log.d(TAG, "loadExtraAppList size = " + mNewAppsList.size)
                         }
-                    } else {
-                        mNetworkError = true
-                    }
-                    val appsExtraList = omniStoreApi.getAppsExtra()
-                    if (appsExtraList.isSuccessful) {
-                        appsExtraList.body()?.let {
-                            it.forEach { appsExtraItem ->
-                                if (appsExtraItem.isValid()) {
-                                    val extraBaseUrl = appsExtraItem.baseurl!!
-                                    val extraFile = appsExtraItem.file!!
-                                    val extraStoreApi =
-                                        RetrofitManager.getInstance(mContext, extraBaseUrl)
-                                            .create(OmniStoreApi::class.java)
-                                    val extraAppsList = extraStoreApi.getApps(extraFile)
-                                    if (extraAppsList.isSuccessful) {
-                                        extraAppsList.body()?.let {
+
+                        val appsExtraList = omniStoreApi.getAppsExtra()
+                        if (appsExtraList.isSuccessful) {
+                            appsExtraList.body()?.let {
+                                it.forEach { appsExtraItem ->
+                                    if (appsExtraItem.isValid()) {
+                                        val extraBaseUrl = appsExtraItem.baseurl!!
+                                        val extraFile = appsExtraItem.file!!
+                                        val extraStoreApi =
+                                            RetrofitManager.getInstance(mContext, extraBaseUrl)
+                                                .create(OmniStoreApi::class.java)
+                                        val extraAppsList = extraStoreApi.getApps(extraFile)
+                                        if (extraAppsList.isSuccessful) {
+                                            extraAppsList.body()?.let {
+                                                Log.d(
+                                                    TAG,
+                                                    "loadExtraAppList from " + extraBaseUrl + " " + extraFile
+                                                )
+                                                loadAppsList(it)
+                                                Log.d(
+                                                    TAG,
+                                                    "loadExtraAppList size = " + mNewAppsList.size
+                                                )
+                                            }
+                                        } else {
                                             Log.d(
                                                 TAG,
-                                                "loadExtraAppList from " + extraBaseUrl + " " + extraFile
+                                                "loadExtraAppList extraBaseUrl  = " + extraBaseUrl + " extraFile = " + " code = " + extraAppsList.code()
                                             )
-                                            loadAppsList(it)
-                                            Log.d(TAG, "loadExtraAppList size = " + mNewAppsList.size)
                                         }
-                                    } else {
-                                        Log.d(TAG, "loadExtraAppList extraBaseUrl  = " + extraBaseUrl + " extraFile = " + " code = " + extraAppsList.code())
                                     }
                                 }
                             }
                         }
+                        // add specific extra on top if available
+                        val extraFiles = mutableListOf<String>()
+                        extraFiles.add(
+                            "apps-" + DeviceUtils().getProperty(
+                                mContext,
+                                "ro.build.version.release"
+                            )
+                        )
+                        extraFiles.add(
+                            "apps-" + DeviceUtils().getProperty(
+                                mContext,
+                                "ro.omni.device"
+                            )
+                        )
+                        Log.d(TAG, "loadExtraAppList " + extraFiles)
+                        loadExtraAppList(extraFiles, omniStoreApi)
+                        Log.d(TAG, "loadExtraAppList size = " + mNewAppsList.size)
+                    } else {
+                        mNetworkError = true
                     }
                     withContext(Dispatchers.Main) {
                         mPostAction.postAction(
@@ -148,8 +154,10 @@ object NetworkUtils {
                     )
                 ) {
                     val idx = mNewAppsList.indexOf(app)
-                    if (idx != -1)
+                    if (idx != -1) {
+                        Log.d(TAG, "overlay pkg = " + app.packageName + " version = " + app.versionName)
                         mNewAppsList.removeAt(idx)
+                    }
                     app.initState()
                     mNewAppsList.add(app)
                 }
