@@ -20,6 +20,7 @@ package org.omnirom.omnistore
 import android.app.DownloadManager
 import android.content.*
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
@@ -66,7 +67,7 @@ class MainViewModel @Inject constructor(@ApplicationContext val applicationConte
         val fileName = File(app.getFile()).name
         request.setDestinationInExternalFilesDir(
             applicationContext,
-            null,
+            Environment.DIRECTORY_DOWNLOADS,
             fileName
         )
         Log.d(TAG, "enqueDownloadApp url = " + url)

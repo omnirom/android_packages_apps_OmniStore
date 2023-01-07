@@ -442,7 +442,11 @@ class MainActivity : AppCompatActivity() {
                     .apply()
                 // stop the progress for this
                 handleInstallComplete(first.toLong())
-                installPackage(uri)
+                try {
+                    installPackage(uri)
+                } catch (e: Exception) {
+                    Log.e(TAG, "installPackage failed uri = " + uri, e)
+                }
                 return true
             }
         }
