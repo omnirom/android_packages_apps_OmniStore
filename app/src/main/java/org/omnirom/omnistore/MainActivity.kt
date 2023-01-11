@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val td = TaskDescription.Builder()
-                .setPrimaryColor(getAttrColor(android.R.attr.colorPrimary)).build()
+                .setPrimaryColor(getAttrColor(android.R.attr.colorBackground)).build()
             setTaskDescription(td)
         }
 
