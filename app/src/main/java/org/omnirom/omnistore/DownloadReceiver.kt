@@ -73,7 +73,7 @@ class DownloadReceiver : BroadcastReceiver() {
                     }
 
             }
-        } else if (intent?.action.equals(DownloadManager.ACTION_NOTIFICATION_CLICKED)) {
+        } else if (intent.action.equals(DownloadManager.ACTION_NOTIFICATION_CLICKED)) {
             val downloadIdArry = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS)
             Log.d(
                 TAG,
