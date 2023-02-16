@@ -17,7 +17,9 @@
  */
 package org.omnirom.omnistore
 
+import android.app.ActivityManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.MenuItem
@@ -69,6 +71,12 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val td = ActivityManager.TaskDescription.Builder()
+                .setPrimaryColor(getAttrColor(android.R.attr.colorBackground)).build()
+            setTaskDescription(td)
+        }
+
         mBinding = SettingsActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
         setSupportActionBar(mBinding.toolbar)
@@ -92,4 +100,12 @@ class SettingsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+    private fun getAttrColor(attr: Int): Int {
+        val ta = obtainStyledAttributes(intArrayOf(attr))
+        val color = ta.getColor(0, 0)
+        ta.recycle()
+        return color
+    }
+
 }
