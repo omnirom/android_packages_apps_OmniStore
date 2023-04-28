@@ -6,6 +6,7 @@
     <string name="title_settings">Configurações</string>
     <string name="category_notifications">Notificações</string>
     <string name="notification_settings_title">Gerenciar as notificações</string>
+    <string name="check_updates_summary">Irá verificar se há apps atualizados diariamente</string>
     <string name="check_updates_title">Verificar atualizações</string>
     <string name="status_update_available">Atualização disponível.</string>
     <string name="status_installed">Instalado</string>
@@ -14,6 +15,8 @@
     <string name="menu_item_filter">Filtro</string>
     <string name="dialog_title_network_error">Erro de Rede</string>
     <string name="dialog_message_network_error">Conexão de rede não disponível. \nVerifique se você está conectado a uma rede.</string>
+    <string name="dialog_message_network_error_not_found">Arquivo não existe</string>
+    <string name="network_error">Erro de rede - código = %1$d</string>
     <string name="separator_item_updates">Atualizações</string>
     <string name="separator_item_installed">Instalado</string>
     <string name="separator_item_not_installed">Não Instalado</string>
@@ -27,7 +30,14 @@
     <string name="dialog_app_info_version">Versão:</string>
     <string name="dialog_app_info_update">Atualização:</string>
     <string name="notification_updates_title">Novas atualizações estão disponíveis</string>
+    <string name="notification_updates_line_one">Atualizado</string>
     <string name="notification_updates_line_two">Novo\"</string>
     <string name="app_item_version">Versão:</string>
     <string name="dialog_app_info_status">Status:</string>
+    <string name="store_intro_title">Bem-vindo ao OmniStore!</string>
+    <string name="store_intro">As aplicações de loja são fornecidas em uma base \"como são\" sem garantias de qualquer tipo.</string>
+    <string name="permission_text">Permitir a instalação de aplicativos do OmniStore?</string>
+    <string name="app_logo_image_description">Logotipo da aplicação</string>
+    <string name="app_download_image_description">Baixar aplicativo</string>
+    <string name="app_note_image_description">Nota</string>
 </resources>
