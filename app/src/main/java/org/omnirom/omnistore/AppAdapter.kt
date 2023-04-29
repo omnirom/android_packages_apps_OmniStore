@@ -179,7 +179,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
             val app: AppItem = items[position] as AppItem
             holder.bind(app)
             holder.title.text = app.title()
-            Picasso.with(context).load(app.iconUrl())
+            Picasso.get().load(app.iconUrl())
                 .error(R.drawable.ic_warning).into(holder.logo)
             holder.pkg.text = app.packageName
             holder.note.visibility = View.GONE
