@@ -8,7 +8,7 @@ License
 -------
 
 **OmniStore** is licensed under the terms of the *GNU General Public License,
-version 3.0*. See the *COPYING* file for the full license text.
+version 2.0*. See the *COPYING* file for the full license text.
 
 
 -EOF-
