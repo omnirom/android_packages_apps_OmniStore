@@ -31,6 +31,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -144,13 +145,13 @@ class MainActivity : AppCompatActivity() {
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 val installFilter = IntentFilter(ACTION_START_INSTALL)
-                registerReceiver(mInstallReceiver, installFilter)
+                ContextCompat.registerReceiver(this, mInstallReceiver, installFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
                 val packageFilter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
                 packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED)
                 packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED)
                 packageFilter.addDataScheme("package")
-                registerReceiver(mPackageReceiver, packageFilter)
+                ContextCompat.registerReceiver(this, mPackageReceiver, packageFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
                 if (!installPendingPackage()) {
                     refresh()

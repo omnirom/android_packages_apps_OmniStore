@@ -18,4 +18,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="dialogCornerRadius">8dp</item>
     </style>
+
+    <style name="SecondaryFloatingActionButtonStyle" parent="Widget.Material3.FloatingActionButton.Secondary">
+    </style>
+
 </resources>

@@ -107,6 +107,7 @@ class DownloadReceiver : BroadcastReceiver() {
 
     private fun triggerInstall(context: Context) {
         val intent = Intent(ACTION_START_INSTALL)
+        intent.setPackage(context.packageName)
         context.sendBroadcast(intent)
     }
 
