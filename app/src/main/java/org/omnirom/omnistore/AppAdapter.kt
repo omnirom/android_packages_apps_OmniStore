@@ -19,24 +19,36 @@ package org.omnirom.omnistore
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Outline
+import android.graphics.Path
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.InsetDrawable
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.TypedValue
 import android.util.TypedValue.COMPLEX_UNIT_DIP
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.color.DynamicColors
-import com.google.android.material.color.MaterialColors
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.elevation.ElevationOverlayProvider
-import com.google.android.material.elevation.SurfaceColors
-import com.squareup.picasso.Picasso
 import org.omnirom.omnistore.databinding.AppInfoDialogBinding
 import org.omnirom.omnistore.databinding.AppListItemBinding
 import org.omnirom.omnistore.databinding.SeparatorListItemBinding
+import java.lang.Exception
 
 
 class AppAdapter(val items: List<ListItem>, val context: Context) :
@@ -66,6 +78,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
             context.resources.displayMetrics
         )))*/
     }
+
 
     inner class AppItemViewHolder(mBinding: AppListItemBinding) :
         RecyclerView.ViewHolder(mBinding.root) {
@@ -179,8 +192,26 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
             val app: AppItem = items[position] as AppItem
             holder.bind(app)
             holder.title.text = app.title()
-            Picasso.get().load(app.iconUrl())
-                .error(R.drawable.ic_warning).into(holder.logo)
+            Glide.with(context)
+                .asBitmap()
+                .load(app.iconUrl())
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        bitmap: Bitmap,
+                        transition: Transition<in Bitmap>?
+                    ) {
+                        val appIcon = AdaptiveIconDrawable(
+                            ColorDrawable(Color.WHITE),
+                            BitmapDrawable(context.resources, bitmap)
+                        )
+                        holder.logo.setImageDrawable(appIcon)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                    }
+
+                })
             holder.pkg.text = app.packageName
             holder.note.visibility = View.GONE
 
@@ -215,15 +246,19 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
             app.updateAvailable() -> {
                 context.getString(R.string.status_update_available)
             }
+
             app.appInstalled() -> {
                 context.getString(R.string.status_installed)
             }
+
             app.appNotInstaled() -> {
                 context.getString(R.string.status_not_installed)
             }
+
             app.appDisabled() -> {
                 context.getString(R.string.status_disabled)
             }
+
             else -> ""
         }
     }

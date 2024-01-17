@@ -19,7 +19,7 @@
         android:layout_height="@dimen/app_icon_size"
         android:layout_gravity="start|center_vertical"
         android:contentDescription="@string/app_logo_image_description"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"/>
 
     <LinearLayout
         android:layout_width="0dp"
