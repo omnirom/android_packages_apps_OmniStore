@@ -192,6 +192,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
             val app: AppItem = items[position] as AppItem
             holder.bind(app)
             holder.title.text = app.title()
+            holder.logo.visibility = View.INVISIBLE
             Glide.with(context)
                 .asBitmap()
                 .load(app.iconUrl())
@@ -206,6 +207,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
                             BitmapDrawable(context.resources, bitmap)
                         )
                         holder.logo.setImageDrawable(appIcon)
+                        holder.logo.visibility = View.VISIBLE
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {

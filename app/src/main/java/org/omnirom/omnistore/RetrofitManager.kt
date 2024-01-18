@@ -14,7 +14,8 @@ import java.io.IOException
 
 
 object RetrofitManager {
-    val baseUrl = "https://dl.omnirom.org/store/"
+    const val baseUrl = "https://dl.omnirom.org/store/"
+    const val baseImageUrl = baseUrl + "images/"
 
     class NoConnectivityException : IOException() {
     }

@@ -76,7 +76,7 @@ data class AppItem(
     }
 
     fun iconUrl(): String {
-        return RetrofitManager.baseUrl + "images/" + icon
+        return RetrofitManager.baseImageUrl + icon
     }
 
     fun installEnabled(): Boolean {
