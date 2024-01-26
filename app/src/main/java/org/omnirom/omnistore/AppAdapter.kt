@@ -59,7 +59,7 @@ class AppAdapter(val items: List<ListItem>, val context: Context) :
     val bgShape: Drawable
 
     init {
-        bgShape = context.resources.getDrawable(R.drawable.app_list_item_bg_shape, null)
+        bgShape = context.getDrawable(R.drawable.app_list_item_bg_shape)!!
         val provider = ElevationOverlayProvider(context)
         bgShape.setTint(
             provider.compositeOverlayWithThemeSurfaceColorIfNeeded(

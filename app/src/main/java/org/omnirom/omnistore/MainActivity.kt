@@ -50,7 +50,6 @@ import org.omnirom.omnistore.SettingsActivity.Companion.PREF_CURRENT_INSTALLS
 import org.omnirom.omnistore.SettingsActivity.Companion.PREF_POST_NOTIFICATION
 import org.omnirom.omnistore.databinding.ActivityMainBinding
 import java.io.File
-import javax.net.ssl.HttpsURLConnection
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -364,13 +363,13 @@ class MainActivity : AppCompatActivity() {
             mDisplayList.sortBy { it.sortOrder() }
 
             try {
-                val item = mDisplayList.first { it.sortOrder() == 0 }
+                val item = mDisplayList.first { it.sortOrder() == SortOrderEnum.UPDATE }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(idx, SeparatorItem(getString(R.string.separator_item_updates)))
             } catch (_: NoSuchElementException) {
             }
             try {
-                val item = mDisplayList.first { it.sortOrder() == 1 }
+                val item = mDisplayList.first { it.sortOrder() == SortOrderEnum.INSTALLED }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(
                     idx,
@@ -379,7 +378,7 @@ class MainActivity : AppCompatActivity() {
             } catch (_: NoSuchElementException) {
             }
             try {
-                val item = mDisplayList.first { it.sortOrder() == 2 }
+                val item = mDisplayList.first { it.sortOrder() == SortOrderEnum.UNINSTALLED }
                 val idx = mDisplayList.indexOf(item)
                 mDisplayList.add(
                     idx,

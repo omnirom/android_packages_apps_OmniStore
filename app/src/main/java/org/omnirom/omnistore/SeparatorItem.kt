@@ -24,7 +24,7 @@ class SeparatorItem(val separatorTitle: String) : ListItem {
         return separatorTitle
     }
 
-    override fun sortOrder(): Int {
-        return -1
+    override fun sortOrder(): SortOrderEnum {
+        return SortOrderEnum.DISABLED
     }
 }

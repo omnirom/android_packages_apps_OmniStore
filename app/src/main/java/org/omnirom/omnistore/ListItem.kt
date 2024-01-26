@@ -17,7 +17,11 @@
  */
 package org.omnirom.omnistore
 
+enum class SortOrderEnum {
+    UPDATE, UNINSTALLED, INSTALLED, DISABLED
+}
+
 interface ListItem {
     fun title(): String
-    fun sortOrder(): Int
+    fun sortOrder(): SortOrderEnum
 }

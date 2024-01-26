@@ -35,6 +35,7 @@ import com.google.gson.annotations.SerializedName
 //        "description" : "AOSP calendar application.",
 //        "note" : "Depending on your setup you might also need Google Calendar Sync Adapter"
 //    },
+
 @Keep
 data class AppItem(
     val title: String?,
@@ -109,7 +110,7 @@ data class AppItem(
         return mInstalled == InstallState.UNINSTALLED
     }
 
-    fun setInstalledStatus(status: InstallState) {
+    private fun setInstalledStatus(status: InstallState) {
         mInstalled = status
     }
 
@@ -117,12 +118,12 @@ data class AppItem(
         return title!!
     }
 
-    override fun sortOrder(): Int {
-        if (updateAvailable()) return 0
+    override fun sortOrder(): SortOrderEnum {
+        if (updateAvailable()) return SortOrderEnum.UPDATE
         return when (mInstalled) {
-            InstallState.INSTALLED -> 1
-            InstallState.UNINSTALLED -> 2
-            InstallState.DISABLED -> 3
+            InstallState.INSTALLED -> SortOrderEnum.INSTALLED
+            InstallState.UNINSTALLED -> SortOrderEnum.UNINSTALLED
+            InstallState.DISABLED -> SortOrderEnum.DISABLED
         }
     }
 
@@ -175,9 +176,9 @@ data class AppItem(
         return packageName.hashCode()
     }
 
-    fun versionNameCurrent() : String {
+    fun versionNameCurrent(): String {
         if (updateAvailable() || appNotInstaled()) {
-            return versionName?:""
+            return versionName ?: ""
         } else if (appInstalled() || appDisabled()) {
             return versionNameInstalled
         }
@@ -185,12 +186,12 @@ data class AppItem(
     }
 
     @JvmName("getFile1")
-    fun getFile() : String {
+    fun getFile(): String {
         return file!!
     }
 
     @JvmName("getPackageName1")
-    fun getPackageName() : String {
+    fun getPackageName(): String {
         return packageName!!
     }
 }
